@@ -35,6 +35,7 @@ const FILES = [
   'basics.js',
   'rank.js',
   'quiz.js',
+  'deaths.js',
   'playbook.html',
   'README.md',
   'docs/DESIGN.md',
@@ -49,13 +50,15 @@ const FILES = [
   'miniprogram-uni/common/basics.js',
   'miniprogram-uni/common/rank.js',
   'miniprogram-uni/common/quiz.js',
+  'miniprogram-uni/common/deaths.js',
   'miniprogram-uni/pages/learn/learn.vue',
   'miniprogram-uni/pages/train/train.vue',
   'miniprogram-uni/pages/map/map.vue',
   'miniprogram-uni/pages/teacher/teacher.vue',
   'miniprogram-uni/pages/me/me.vue',
   'tools/upload.js',
-  'tools/check.js'
+  'tools/check.js',
+  'tools/gen-uni.js'
 ];
 
 const H = {
