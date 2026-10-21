@@ -45,7 +45,7 @@ const FILES = [
   'miniprogram-uni/pages.json',
   'miniprogram-uni/uni.scss',
   'miniprogram-uni/common/courses.js',
-  'miniprogram-uni/common/kline.js',
+  'miniprogram-uni/common/cases.js',
   'miniprogram-uni/common/teachers.js',
   'miniprogram-uni/common/basics.js',
   'miniprogram-uni/common/rank.js',
@@ -58,7 +58,8 @@ const FILES = [
   'miniprogram-uni/pages/me/me.vue',
   'tools/upload.js',
   'tools/check.js',
-  'tools/gen-uni.js'
+  'tools/gen-uni.js',
+  'tools/gen-cases.js'
 ];
 
 const H = {
