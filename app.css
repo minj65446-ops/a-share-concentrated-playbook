@@ -244,6 +244,114 @@ main{padding:16px 16px 96px}
 .badge.on .b{filter:none;opacity:1}
 
 /* ============================================================
+   段位 / 启蒙 / 自测
+   ============================================================ */
+
+/* ---------- 当前段位卡 ---------- */
+.rankcard{
+  margin-top:14px;padding:16px;border-radius:var(--r-lg);
+  background:linear-gradient(150deg,var(--brand) 0%,#1c3f66 60%,#255a86 100%);
+  color:#fff;box-shadow:0 12px 28px rgba(22,40,63,.22);
+}
+.rankcard .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rankcard .lv{
+  font:800 11px/1 var(--mono);letter-spacing:.14em;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+  padding:5px 9px;border-radius:6px;
+}
+.rankcard .nm{font-size:19px;font-weight:800;letter-spacing:-.3px;margin-top:9px}
+.rankcard .en{font:600 9.5px/1 var(--mono);letter-spacing:.16em;opacity:.6;margin-top:5px}
+.rankcard .sub{font-size:12px;opacity:.78;margin-top:7px;line-height:1.6}
+.rankcard .goal{font-size:11.5px;opacity:.7;line-height:1.7;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.14)}
+.rankcard .pct{font:800 26px/1 var(--mono);text-align:right}
+.rankcard .pct span{font-size:11px;font-weight:600;opacity:.7;display:block;margin-top:3px;letter-spacing:.04em}
+.rankbar{height:6px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:14px}
+.rankbar i{display:block;height:100%;border-radius:99px;background:#fff;transition:width .5s}
+.rankcard .after{
+  font-size:11px;line-height:1.7;margin-top:12px;padding:9px 11px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);
+}
+
+/* ---------- 五段列表 ---------- */
+.ranklist{display:flex;flex-direction:column;gap:8px}
+.rk{
+  display:flex;gap:11px;align-items:flex-start;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px;box-shadow:var(--shadow-s);cursor:pointer;
+  transition:border-color .14s,transform .14s;
+}
+.rk:active{transform:scale(.985)}
+.rk.passed{border-color:#cfeadf;background:linear-gradient(180deg,#fff,var(--down-soft))}
+.rk.active{border-color:var(--brand-2);box-shadow:0 0 0 2.5px rgba(32,69,110,.10)}
+.rk .badge{
+  width:40px;height:40px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
+  font:800 11px/1 var(--mono);background:var(--bg-2);color:var(--muted);
+}
+.rk.passed .badge{background:var(--down);color:#fff}
+.rk.active .badge{background:var(--brand);color:#fff}
+.rk .body{flex:1;min-width:0}
+.rk .t{font-size:13.5px;font-weight:750;letter-spacing:-.2px}
+.rk .s{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+.rk .st{font-size:10.5px;margin-top:6px;display:flex;align-items:center;gap:5px}
+.rk .st.ok{color:var(--down);font-weight:700}
+.rk .st.no{color:var(--muted)}
+.rk .mini{width:34px;height:4px;border-radius:99px;background:var(--line-2);overflow:hidden;margin-top:6px}
+.rk .mini i{display:block;height:100%;background:var(--brand-2);border-radius:99px}
+.rk .chev{font-size:13px;color:var(--muted);flex:0 0 auto;align-self:center}
+
+/* ---------- 启蒙条目 ---------- */
+.basic{
+  display:grid;grid-template-columns:38px 1fr 34px;gap:11px;align-items:center;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px;margin-bottom:8px;box-shadow:var(--shadow-s);cursor:pointer;
+  transition:transform .14s,border-color .14s;
+}
+.basic:active{transform:scale(.985)}
+.basic.read{border-color:#cfeadf;background:linear-gradient(180deg,#fff,#f4fbf8)}
+.basic .no{
+  width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  font:800 11px/1 var(--mono);background:var(--gold-soft);color:var(--gold);
+}
+.basic.read .no{background:var(--down);color:#fff}
+.basic h3{font-size:13.5px;font-weight:750;letter-spacing:-.2px;line-height:1.4}
+.basic .one{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.basic .tick{
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  font:700 11px/1 var(--mono);border:1px dashed var(--line);color:var(--muted);
+}
+.basic.read .tick{background:var(--down);border:1px solid var(--down);color:#fff}
+.grp-label{
+  font:700 10px/1 var(--mono);letter-spacing:.12em;color:var(--muted);
+  margin:14px 2px 8px;text-transform:uppercase;
+}
+
+/* ---------- 自测卡 ---------- */
+.quiz-q{padding:2px 0}
+.quiz-q .qt{font-size:13.5px;font-weight:750;line-height:1.5;margin-bottom:10px}
+.quiz-opt{
+  display:block;width:100%;text-align:left;border:1px solid var(--line);
+  background:var(--card);border-radius:var(--r-sm);padding:10px 12px;
+  font-size:12.5px;margin-bottom:7px;transition:.14s;
+}
+.quiz-opt:active{transform:scale(.99)}
+.quiz-opt.on{border-color:var(--brand-2);background:var(--brand-soft)}
+.quiz-opt .nt{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6;display:none}
+.quiz-opt.on .nt{display:block}
+.quiz-opt.warn{border-color:var(--up);background:var(--up-soft)}
+.quiz-opt.warn .nt{display:block;color:#8f312c}
+.qbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.qbar .track{flex:1;height:5px;border-radius:99px;background:var(--line-2);overflow:hidden}
+.qbar .track i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .3s}
+.qbar .txt{font:700 10.5px/1 var(--mono);color:var(--muted)}
+
+.quiz-res{text-align:center;padding:6px 0}
+.quiz-res .kick{font:700 9.5px/1 var(--mono);letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.quiz-res .nm{font-size:21px;font-weight:800;letter-spacing:-.4px;margin-top:9px;color:var(--brand-2)}
+.quiz-res .sh{font:800 13px/1 var(--mono);color:var(--up);margin-top:7px}
+.quiz-res .ds{font-size:12px;color:var(--ink-2);line-height:1.75;margin-top:12px;text-align:left}
+
+/* ============================================================
    老师模块
    ============================================================ */
 
