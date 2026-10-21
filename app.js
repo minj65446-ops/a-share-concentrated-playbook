@@ -77,7 +77,7 @@
   ];
 
   /* ================= 路由 ================= */
-  const VIEWS = ['learn', 'train', 'map', 'me'];
+  const VIEWS = ['learn', 'train', 'map', 'teacher', 'me'];
   function go(v){
     if(VIEWS.indexOf(v) < 0) v = 'learn';
     $$('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
@@ -86,6 +86,7 @@
     store.set('ta_tab', v);
     if(v === 'train') setTimeout(drawK, 30);
     if(v === 'me') renderMe();
+    if(v === 'teacher') renderTeachers();
   }
   $('#tabbar').addEventListener('click', e => {
     const b = e.target.closest('button'); if(!b) return;
@@ -485,6 +486,180 @@
       ${m.items.slice(1).map(x => `<div class="item"><span>${x[0]}</span><span>${x[1]}</span></div>`).join('')}
     </div>`).join('');
 
+  /* ============================================================
+     老师模块
+     设计要点：不列人名，只列流派；每个流派都强制配「反例」和「谁不该用」。
+     ============================================================ */
+  const T = window.TEACHERS || { SCHOOLS:[], FAKES:[], ALL:[], LINEAGE:[], RULES:{} };
+  let tchTab = null;   // 幻方高亮（null 表示未选中）
+
+  const FIT_LABEL = { style:'看周期', method:'可复核', inst:'需资质', fake:'话术' };
+  const QUADS = [
+    { qz:'攻 · 主动', nm:'择时派', ct:'靠买卖时点赚钱', keys:['longtou','event'] },
+    { qz:'攻 · 被动', nm:'跟随派', ct:'靠趋势延续赚钱', keys:['trend','rotation'] },
+    { qz:'守 · 被动', nm:'配置派', ct:'靠持有结构赚钱', keys:['dividend','quant'] },
+    { qz:'守 · 主动', nm:'逆向派', ct:'靠别人犯错赚钱', keys:['value','contrarian'] }
+  ];
+
+  function renderPantheon(){
+    const box = $('#pantheon'); if(!box) return;
+    box.innerHTML = '<i class="center-axis"></i><i class="center-axis h"></i><div class="core-chip">按「你怎么赚钱」分</div>' +
+      QUADS.map((q, i) => {
+        const on = tchTab !== null && q.keys.indexOf(tchTab) >= 0;
+        return `<button class="pan${on ? ' on' : ''}" data-q="${i}">
+          <i class="dot"></i>
+          <div class="qz">${q.qz}</div>
+          <div class="nm">${q.nm}</div>
+          <div class="ct">${q.ct} · ${q.keys.length} 派</div>
+        </button>`;
+      }).join('');
+  }
+
+  function renderTeachers(){
+    if(!T.SCHOOLS || !T.SCHOOLS.length) return;
+    renderPantheon();
+    const fit = t => {
+      if(t.tier === 'fake') return '话术';
+      if(t.tier === 'inst') return '需资质';
+      if(t.tier === 'method') return '可复核';
+      return '看周期';
+    };
+    const card = (t, idx) => `
+      <div class="tch ${t.tier === 'fake' ? 'fake' : ''}" data-t="${t.k}" role="button" tabindex="0">
+        <div class="head">
+          <div class="av ${t.tier === 'fake' ? 'fake' : 'st-' + (idx % 4 + 1)}">${t.no}</div>
+          <div style="min-width:0">
+            <div class="nm">${t.name}</div>
+            <div class="hd">
+              <span class="badge-v ${t.verified === '无' || t.verified === '无公开业绩披露' ? 'none' : ''}">${t.verified === '无' ? '无凭证' : (t.verified.indexOf('无') === 0 ? '无业绩' : '可核查')}</span>
+              <i class="dotsep"></i>
+              <span>${t.tag}</span>
+            </div>
+          </div>
+        </div>
+        <div class="promise">${t.promise}</div>
+        <div class="tags">
+          ${(t.match.length ? t.match : ['—']).map(m => `<span class="tg">${{'趋势':'趋势市','震荡':'震荡市','发酵':'发酵期','启动':'启动期','底部':'底部区'}[m] || m}</span>`).join('')}
+        </div>
+        <div class="foot">
+          <span class="fit">识别难度 <b>${t.tier === 'fake' ? '低' : (t.tier === 'inst' ? '高' : '中')}</b> · ${fit(t)}</span>
+          <span class="arrow">看约束 ›</span>
+        </div>
+      </div>`;
+
+    $('#teacherGrid').innerHTML = T.SCHOOLS.map(card).join('');
+    $('#fakeGrid').innerHTML = T.FAKES.map(card).join('');
+    $('#tchCount').textContent = T.SCHOOLS.length + ' 个流派';
+    $('#fakeCount').textContent = T.FAKES.length + ' 类';
+  }
+
+  function openTeacher(k){
+    const t = T.ALL.find(x => x.k === k); if(!t) return;
+    const r = T.RULES[t.k] || null;
+    const isFake = t.tier === 'fake';
+
+    let html = `
+      <div class="tch-hero">
+        <div class="av" ${isFake ? 'style="background:linear-gradient(145deg,#8a8f96,#b0b5bb)"' : ''}>${t.no}</div>
+        <div style="min-width:0">
+          <h2>${t.name}</h2>
+          <div class="meta">
+            <span class="pill ${isFake ? 'up' : 'brand'}">${isFake ? '反面样本' : '真实流派'}</span>
+            <span class="pill">${t.tag}</span>
+          </div>
+          <div class="meta" style="margin-top:6px">
+            <span class="badge-v ${t.verified.indexOf('无') === 0 ? 'none' : ''}" style="font-size:9.5px">${t.verified}</span>
+          </div>
+        </div>
+      </div>
+      <div class="lead" style="margin-top:12px">${t.promise}</div>`;
+
+    if(!isFake){
+      html += `
+      <div class="two-col">
+        <div class="c ok"><span class="lb">教对了什么</span>${t.right}</div>
+        <div class="c no"><span class="lb">教漏了什么</span>${t.wrong}</div>
+      </div>
+      <div class="c warn2" style="margin-top:9px;border-radius:var(--r-sm);padding:11px 12px;font-size:11.5px;line-height:1.65;border:1px solid #f0e2c0;background:var(--gold-soft);color:#6b521a">
+        <span style="font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;display:block;margin-bottom:5px">识别陷阱</span>${t.trap}
+      </div>
+      <div class="block"><h4>可执行的核心规则</h4><ul>${t.core.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+      if(r){
+        html += `
+        <div class="rulebox">
+          <div class="rh">跟这一派的约束条件</div>
+          <div class="ri"><span>最低资金</span><span>${r.minCap}</span></div>
+          <div class="ri"><span>最大仓位</span><span>${r.maxPos}</span></div>
+          <div class="ri"><span>止损方式</span><span>${r.stop}</span></div>
+          <div class="ri"><span>交易频率</span><span>${r.freq}</span></div>
+          <div class="ri"><span>持仓数量</span><span>${r.size}</span></div>
+          <div class="forbid"><b>明确不适合的人：</b>${r.forbid.join('、')}</div>
+        </div>`;
+      }
+      if(t.base) html += `<div class="warnbox">${t.base}</div>`;
+      html += `
+      <div class="block"><h4>师承</h4>
+        <div style="font-size:11.5px;color:var(--ink-2);line-height:1.75">
+          <b>${t.st.name}</b> · ${t.st.from} · ${t.st.era}<br>
+          <span style="color:var(--muted)">${t.st.line}</span>
+        </div>
+      </div>`;
+    } else {
+      html += `
+      <div class="two-col">
+        <div class="c no"><span class="lb">它的破绽在哪</span>${t.wrong}</div>
+        <div class="c warn2"><span class="lb">识别信号</span>${t.trap}</div>
+      </div>
+      <div class="warnbox"><b>处理方式：</b>不辩论、不投诉、不试单。直接离开。你花在它身上的每一分钟，都是从真正该练习的时间里偷出来的。</div>`;
+    }
+
+    $('#sheetBody').innerHTML = html;
+    openSheet();
+  }
+
+  $('#teacherGrid').addEventListener('click', e => {
+    const b = e.target.closest('.tch'); if(!b) return;
+    openTeacher(b.dataset.t);
+  });
+  $('#fakeGrid').addEventListener('click', e => {
+    const b = e.target.closest('.tch'); if(!b) return;
+    openTeacher(b.dataset.t);
+  });
+  $('#pantheon').addEventListener('click', e => {
+    const b = e.target.closest('.pan'); if(!b) return;
+    const keys = (QUADS[+b.dataset.q] || {}).keys || [];
+    const wasOn = tchTab !== null && keys.indexOf(tchTab) >= 0;
+    tchTab = wasOn ? null : (keys[0] || null);
+    renderTeachers();
+    if(tchTab){
+      const el = $('#teacherGrid').querySelector('[data-t="' + tchTab + '"]');
+      if(el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+  });
+
+  /* 三问识人 */
+  const IDTEST = [
+    ['近三年的年化收益和最大回撤分别是多少？', '答不出具体数字，或只说"翻倍"不说回撤 → 没有可验证的业绩'],
+    ['这套方法在什么行情下会连续亏钱？', '答"不会亏"或"我很少错" → 不懂策略成本，也没经过完整周期'],
+    ['你靠什么赚钱：管理费、课程费、还是自己交易？', '主要靠课程/社群/软件 → 他的收入来源和你的盈利方向不一致']
+  ];
+  if($('#idtest')){
+    $('#idtest').innerHTML = IDTEST.map((it, i) =>
+      `<div class="q"><span class="n">${i+1}</span><div>${it[0]}<span class="r">${it[1]}</span></div></div>`
+    ).join('');
+  }
+
+  if($('#lineage')){
+    $('#lineage').innerHTML = T.LINEAGE.map(l => `
+      <div class="ln">
+        <div class="yr">${l.year} · ${l.id}</div>
+        <div class="src">${l.from}</div>
+        <div class="to">→ ${l.to.join(' · ')}</div>
+        <div class="cn">${l.cn}</div>
+        <div class="note">${l.note}</div>
+      </div>`).join('');
+  }
+
   /* ================= 我的 ================= */
   const BADGES = [
     { id:'b1', icon:'M5 12l4 4 10-10', label:'首课', on:() => done().length >= 1 },
@@ -580,6 +755,7 @@
   updateAcc();
   renderMe();
   renderQ();
+  renderTeachers();
   const lastTab = store.get('ta_tab', 'learn');
   go(location.hash === '#train' ? 'train' : lastTab);
   window.addEventListener('resize', () => { if($('#v-train').classList.contains('on')) drawK(); });
