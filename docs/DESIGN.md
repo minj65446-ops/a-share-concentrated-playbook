@@ -414,3 +414,20 @@ node tools/gen-cases.js    # 从 Web 端 cases.js 生成小程序端 common/case
 
 `journey.js` 的随机性检查用 40 轮采样而不是 DOM 走 12 题——3 个样本撞同一个字母有
 1/9 概率，会误报。
+
+### 13.7 第二轮体检（`_test/journey2.js`）
+
+第一轮只走了「学院 → 训练场 → 我的」主链路。补一轮覆盖剩下的入口：
+仓位计算器 / 模拟盘跳转 / 情绪周期 / 我的（成就 · 复盘 · 判题统计）/ 答对计分链路。
+
+发现并修掉：
+
+1. **仓位计算器金额栏显示 NaN**：原式 `cap*risk/100/(stop/100)/cap*100` 里 `cap` 会被约掉，
+   总资金填 0 时变成 `0/0`。`cOut` 用 `isNaN(pct)?0` 兜住了，但 `cAmt` 用的是未兜底的 `pct`，
+   于是出现「约 NaN 万元」。改成 `pct = Math.min(risk/stop*100, mx)`，并在 `cap/risk/stop <= 0` 时直接给 0。
+2. **`trade-academy/playbook.html` 一直不存在**：模拟盘按钮跳 `playbook.html#sandbox`，
+   但这个文件只在发布目录里，Web 源目录缺失——本地跑起来点模拟盘是 404。
+   已补进 `_test/sync.js` 的同步清单和 `upload.js` 的预检清单（之前两组都没覆盖它，所以漂移没被发现）。
+
+确认没问题的：情绪周期 4 阶段切换与高亮、策略矩阵 4 张、复盘勾选落盘 `ta_review_YYYY-M-D`、
+4 个成就徽章、「先看解析」不计分（等于放弃本题，点了就不能再选）。
