@@ -102,8 +102,28 @@ python -m http.server 8000
 │   ├── common/           # 课程数据、K线题、老师数据（与 Web 同源）
 │   └── pages/{learn,train,map,teacher,me}
 ├── docs/DESIGN.md        # 多端设计规范
+├── tools/                # 同步工具（见下节）
 └── LICENSE
 ```
+
+## 同步到 GitHub
+
+正常情况是 `git push`，但某些网络环境下 git 的 HTTPS 传输会持续失败（`schannel: server closed abruptly` / `CONNECT tunnel failed 502`），而 REST API 正常。`tools/` 下两个脚本用于这种情况：
+
+```bash
+# 先看本地和远端差了多少（不上传，只读）
+TOKEN=<token> node tools/check.js .
+
+# 再上传
+TOKEN=<token> node tools/upload.js . "commit message"
+```
+
+| 脚本 | 作用 |
+|---|---|
+| `tools/check.js` | 用 git blob sha1 算法比对本地文件与远端 tree，列出新增 / 变更 / 远端多出 |
+| `tools/upload.js` | 用 contents API 逐文件提交（带 sha 更新，无 sha 新建） |
+
+Token 需要 repo 写权限（fine-grained PAT 勾 `Contents: Read and write`）。只在 `upload.js` 的 `FILES` 列表内的文件会被同步。
 
 ## 数据说明
 
