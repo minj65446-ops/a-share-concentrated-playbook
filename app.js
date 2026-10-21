@@ -87,6 +87,7 @@
     if(v === 'train') setTimeout(drawK, 30);
     if(v === 'me') renderMe();
     if(v === 'teacher') renderTeachers();
+    if(v === 'learn'){ renderRank(); renderBasics(); renderQuizCard(); }
   }
   $('#tabbar').addEventListener('click', e => {
     const b = e.target.closest('button'); if(!b) return;
@@ -153,7 +154,7 @@
     $('#markDone').addEventListener('click', () => {
       const d = done();
       if(!d.includes(id)){ d.push(id); store.set('ta_done', d); }
-      renderCourses(); renderMe(); closeSheet();
+      renderCourses(); renderMe(); renderRank(); closeSheet();
       setTimeout(() => go('train'), 220);
     });
     $('#goDoc').addEventListener('click', () => { location.href = c.link; });
@@ -487,6 +488,256 @@
     </div>`).join('');
 
   /* ============================================================
+     段位体系
+     ============================================================ */
+  const R = window.RANKS || null;
+  const B = window.BASICS || { list:[], groups:[] };
+  const Q = window.QUIZ || null;
+
+  const basicsDone = () => store.get('ta_basics', []);
+
+  function renderRank(){
+    if(!R || !$('#rankCard')) return;
+    const c = R.current(store);
+
+    $('#rankCard').innerHTML = `
+      <div class="top">
+        <div style="min-width:0">
+          <span class="lv">${c.allDone ? '已满级' : ('LV ' + (c.idx + 1) + ' / 5')}</span>
+          <div class="nm">${c.rank.name}${c.allDone ? ' · 通关' : ''}</div>
+          <div class="en">${c.rank.en}</div>
+          <div class="sub">${c.rank.sub}</div>
+        </div>
+        <div class="pct">${c.allDone ? '100%' : c.pct + '%'}<span>本段进度</span></div>
+      </div>
+      <div class="rankbar"><i style="width:${c.allDone ? 100 : c.pct}%"></i></div>
+      <div class="goal">${c.rank.goal}</div>
+      <div class="after"><b>毕业后：</b>${c.rank.after}</div>`;
+
+    $('#rankList').innerHTML = c.list.map((x, i) => {
+      const g = x.g;
+      const pct = g.total ? Math.round(g.cur / g.total * 100) : 0;
+      return `<div class="rk ${x.passed ? 'passed' : ''} ${x.active ? 'active' : ''}" data-r="${i}">
+        <div class="badge">${x.passed ? '✓' : x.r.id}</div>
+        <div class="body">
+          <div class="t">${x.r.name}<span style="font-size:10.5px;color:var(--muted);font-weight:600;margin-left:6px">${x.r.en}</span></div>
+          <div class="s">${x.r.need}</div>
+          <div class="mini"><i style="width:${pct}%"></i></div>
+        </div>
+        <div class="chev">›</div>
+      </div>`;
+    }).join('');
+  }
+
+  $('#rankList').addEventListener('click', e => {
+    const b = e.target.closest('.rk'); if(!b || !R) return;
+    const r = R.list[+b.dataset.r];
+    const g = r.check(R.readState(store));
+    let det = '';
+    if (g.detail) {
+      det = '<div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">' +
+        g.detail.map(d =>
+          `<div style="display:flex;gap:8px;font-size:12px;align-items:flex-start;color:${d.on ? 'var(--down)' : 'var(--ink-2)'}">
+            <span style="font-family:var(--mono);font-weight:700">${d.on ? '✓' : '○'}</span><span>${d.t}</span>
+          </div>`).join('') + '</div>';
+    } else {
+      det = `<div style="margin-top:12px;font-size:12px;color:var(--ink-2)">
+        当前 ${g.cur} / ${g.total} ${g.unit}</div>`;
+    }
+    $('#sheetBody').innerHTML = `
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
+        <span class="pill brand">${r.id}</span><span class="pill">${r.en}</span>
+      </div>
+      <h2>${r.name}</h2>
+      <div class="lead" style="margin-top:6px">${r.sub}</div>
+      <div class="block"><h4>这一阶段解决什么</h4>
+        <div style="font-size:12.5px;line-height:1.75;color:var(--ink-2)">${r.goal}</div></div>
+      <div class="block"><h4>毕业标准 · ${g.cur}/${g.total}</h4>${det}</div>
+      <div class="warnbox"><b>毕业后：</b>${r.after}</div>`;
+    openSheet();
+  });
+
+  /* ============================================================
+     Lv1 启蒙
+     ============================================================ */
+  function renderBasics(){
+    const box = $('#basicsList'); if(!box) return;
+    const d = basicsDone();
+    let html = '';
+    B.groups.forEach(g => {
+      const items = B.list.filter(x => x.grp === g);
+      if(!items.length) return;
+      html += `<div class="grp-label">${g}</div>`;
+      html += items.map(b => {
+        const read = d.indexOf(b.no) >= 0;
+        return `<div class="basic ${read ? 'read' : ''}" data-b="${b.no}" role="button" tabindex="0">
+          <div class="no">${read ? '✓' : b.no}</div>
+          <div style="min-width:0">
+            <h3>${b.title}</h3>
+            <div class="one">${b.one}</div>
+          </div>
+          <div class="tick">${read ? '✓' : ''}</div>
+        </div>`;
+      }).join('');
+    });
+    box.innerHTML = html;
+    $('#basicsProgress').textContent = d.length + ' / ' + B.list.length;
+  }
+
+  $('#basicsList').addEventListener('click', e => {
+    const b = e.target.closest('.basic'); if(!b) return;
+    openBasic(b.dataset.b);
+  });
+
+  function openBasic(no){
+    const b = B.list.find(x => x.no === no); if(!b) return;
+    const isRead = basicsDone().indexOf(no) >= 0;
+    $('#sheetBody').innerHTML = `
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <span class="pill gold">Lv1 启蒙</span><span class="pill">${b.grp}</span>
+      </div>
+      <h2>${b.title}</h2>
+      <div class="lead" style="margin-top:8px;font-size:13.5px;color:var(--brand-2);font-weight:700;line-height:1.6">${b.one}</div>
+      <div class="block"><h4>为什么重要</h4>
+        <div style="font-size:12.5px;line-height:1.8;color:var(--ink-2)">${b.why}</div></div>
+      <div class="block"><h4>常见误解</h4>
+        <div style="font-size:12.5px;line-height:1.8;color:var(--ink-2)">${b.mis}</div></div>
+      <div class="card" style="margin-top:14px;padding:13px;background:var(--brand-soft);border-color:#dbe6f2">
+        <div style="font:700 9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px">举个例子</div>
+        <div style="font-size:12px;line-height:1.75;color:var(--ink-2)">${b.eg}</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-primary btn-block" id="markBasic" style="background:var(--brand);color:#fff;border-color:var(--brand)">
+          ${isRead ? '已读 · 再看一遍' : '标记已读'}
+        </button>
+        ${b.link ? '<button class="btn btn-block" id="toCourse">学相关课程</button>' : ''}
+      </div>`;
+    $('#markBasic').addEventListener('click', () => {
+      const d = basicsDone();
+      if(d.indexOf(no) < 0){ d.push(no); store.set('ta_basics', d); }
+      renderBasics(); renderRank(); closeSheet();
+    });
+    const tc = $('#toCourse');
+    if(tc) tc.addEventListener('click', () => {
+      closeSheet();
+      setTimeout(() => openCourse(b.link), 200);
+    });
+    openSheet();
+  }
+
+  /* ============================================================
+     流派自测
+     ============================================================ */
+  let quizAns = {}, quizIdx = 0;
+
+  function renderQuizCard(){
+    const box = $('#quizCard'); if(!box || !Q) return;
+    const saved = store.get('ta_quiz', null);
+    if(saved){
+      const t = T.ALL.find(x => x.k === saved.top);
+      $('#quizState').textContent = '已测 · ' + (t ? t.name : '');
+      box.innerHTML = `
+        <div class="quiz-res">
+          <div class="kick">你的倾向流派</div>
+          <div class="nm">${t ? t.name : '—'}</div>
+          <div class="sh">匹配度 ${saved.share}%</div>
+          <div class="ds">${t ? t.promise : ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button class="btn btn-sm btn-block" id="seeFit" style="background:var(--brand);color:#fff;border-color:var(--brand)">看这一派的约束</button>
+          <button class="btn btn-sm btn-block" id="redoQuiz">重测</button>
+        </div>`;
+      $('#seeFit').addEventListener('click', () => { go('teacher'); setTimeout(() => openTeacher(saved.top), 120); });
+      $('#redoQuiz').addEventListener('click', () => { store.set('ta_quiz', null); quizAns = {}; quizIdx = 0; renderQuizCard(); renderRank(); });
+      return;
+    }
+    $('#quizState').textContent = '8 题 · 约 2 分钟';
+    box.innerHTML = `
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px">
+        8 道题，围绕三个硬约束：你能投入多少时间、能承受多大回撤、本金规模。
+        测完直接跳到那一派的约束条件。
+      </div>
+      <button class="btn btn-primary btn-block" id="startQuiz" style="background:var(--brand);color:#fff;border-color:var(--brand)">开始自测</button>`;
+    $('#startQuiz').addEventListener('click', () => openQuiz());
+  }
+
+  function openQuiz(){
+    quizIdx = 0; quizAns = {};
+    renderQuizQ();
+    openSheet();
+  }
+
+  function renderQuizQ(){
+    if(!Q) return;
+    const total = Q.list.length;
+    if(quizIdx >= total){ renderQuizResult(); return; }
+    const q = Q.list[quizIdx];
+    $('#sheetBody').innerHTML = `
+      <div class="qbar">
+        <span class="txt">${quizIdx + 1} / ${total}</span>
+        <span class="track"><i style="width:${(quizIdx) / total * 100}%"></i></span>
+      </div>
+      <div class="quiz-q">
+        <div class="qt">${q.q}</div>
+        ${q.opts.map((o, i) => {
+          const bad = Object.keys(o.w || {}).length === 0;
+          return `<button class="quiz-opt ${bad ? 'warn' : ''}" data-o="${i}">
+            <div>${o.t}</div><div class="nt">${o.note}</div>
+          </button>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        ${quizIdx > 0 ? '<button class="btn btn-sm" id="qPrev">上一题</button>' : ''}
+        <button class="btn btn-sm btn-block" id="qNext" style="background:var(--brand);color:#fff;border-color:var(--brand)">
+          ${quizIdx === total - 1 ? '看结果' : '下一题'}
+        </button>
+      </div>`;
+    let picked = -1;
+    $$('#sheetBody .quiz-opt').forEach(b => b.addEventListener('click', () => {
+      $$('#sheetBody .quiz-opt').forEach(x => x.classList.remove('on'));
+      b.classList.add('on'); picked = +b.dataset.o;
+    }));
+    const pv = $('#qPrev');
+    if(pv) pv.addEventListener('click', () => { quizIdx--; renderQuizQ(); });
+    $('#qNext').addEventListener('click', () => {
+      if(picked < 0){ $('#sheetBody').scrollTop = 0; return; }
+      quizAns[quizIdx] = picked;
+      quizIdx++;
+      renderQuizQ();
+    });
+  }
+
+  function renderQuizResult(){
+    const res = Q.result(quizAns);
+    if(!res){ closeSheet(); return; }
+    const t = T.ALL.find(x => x.k === res.top);
+    const r = T.RULES[res.top];
+    store.set('ta_quiz', res);
+    $('#sheetBody').innerHTML = `
+      <div class="quiz-res">
+        <div class="kick">你倾向的流派</div>
+        <div class="nm">${t ? t.name : res.top}</div>
+        <div class="sh">匹配度 ${res.share}%</div>
+        <div class="ds">${t ? t.promise : ''}</div>
+      </div>
+      ${r ? `<div class="rulebox">
+        <div class="rh">这一派对你的约束</div>
+        <div class="ri"><span>最低资金</span><span>${r.minCap}</span></div>
+        <div class="ri"><span>最大仓位</span><span>${r.maxPos}</span></div>
+        <div class="ri"><span>止损方式</span><span>${r.stop}</span></div>
+        <div class="ri"><span>交易频率</span><span>${r.freq}</span></div>
+        <div class="forbid"><b>明确不适合的人：</b>${r.forbid.join('、')}</div>
+      </div>` : ''}
+      <div class="warnbox">自测结果只反映你<b>现在</b>的条件。资金量、可投入时间、承受力变了，答案也会变——建议资金或时间发生重大变化时重测一次。</div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-sm btn-block" id="qDone" style="background:var(--brand);color:#fff;border-color:var(--brand)">知道了</button>
+        <button class="btn btn-sm btn-block" id="qRedo">重测</button>
+      </div>`;
+    $('#qDone').addEventListener('click', () => { closeSheet(); renderQuizCard(); renderRank(); });
+    $('#qRedo').addEventListener('click', () => { quizAns = {}; quizIdx = 0; renderQuizQ(); });
+  }
+
+  /* ============================================================
      老师模块
      设计要点：不列人名，只列流派；每个流派都强制配「反例」和「谁不该用」。
      ============================================================ */
@@ -756,6 +1007,9 @@
   renderMe();
   renderQ();
   renderTeachers();
+  renderBasics();
+  renderRank();
+  renderQuizCard();
   const lastTab = store.get('ta_tab', 'learn');
   go(location.hash === '#train' ? 'train' : lastTab);
   window.addEventListener('resize', () => { if($('#v-train').classList.contains('on')) drawK(); });
