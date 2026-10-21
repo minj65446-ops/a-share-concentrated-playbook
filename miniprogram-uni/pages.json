@@ -26,6 +26,14 @@
       }
     },
     {
+      "path": "pages/teacher/teacher",
+      "style": {
+        "navigationBarTitleText": "找老师",
+        "navigationBarBackgroundColor": "#16283f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
       "path": "pages/me/me",
       "style": {
         "navigationBarTitleText": "我的",
@@ -49,6 +57,7 @@
       { "pagePath": "pages/learn/learn", "text": "学院" },
       { "pagePath": "pages/train/train", "text": "训练" },
       { "pagePath": "pages/map/map", "text": "图谱" },
+      { "pagePath": "pages/teacher/teacher", "text": "老师" },
       { "pagePath": "pages/me/me", "text": "我的" }
     ]
   }
