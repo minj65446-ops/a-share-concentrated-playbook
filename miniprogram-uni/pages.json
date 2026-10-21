@@ -1,0 +1,55 @@
+{
+  "pages": [
+    {
+      "path": "pages/learn/learn",
+      "style": {
+        "navigationBarTitleText": "交易学院",
+        "navigationBarBackgroundColor": "#16283f",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/train/train",
+      "style": {
+        "navigationBarTitleText": "训练场",
+        "navigationBarBackgroundColor": "#16283f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/map/map",
+      "style": {
+        "navigationBarTitleText": "市场图谱",
+        "navigationBarBackgroundColor": "#16283f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/me/me",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#16283f",
+        "navigationBarTextStyle": "white"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "A股交易学院",
+    "navigationBarBackgroundColor": "#16283f",
+    "backgroundColor": "#f4f5f7"
+  },
+  "tabBar": {
+    "color": "#7b8794",
+    "selectedColor": "#16283f",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/learn/learn", "text": "学院" },
+      { "pagePath": "pages/train/train", "text": "训练" },
+      { "pagePath": "pages/map/map", "text": "图谱" },
+      { "pagePath": "pages/me/me", "text": "我的" }
+    ]
+  }
+}
