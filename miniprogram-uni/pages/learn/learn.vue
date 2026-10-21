@@ -88,6 +88,24 @@
     </view>
 
     <view class="sec-title">
+      <view class="h">常见死法 · {{ DEATHS.length }} 个场景</view>
+      <view class="s">见过就不用自己买一次</view>
+    </view>
+    <view class="intro">从小白到「大佬」之间，拉开差距的不是学了多少种方法，是见过多少种死法。没见过的人每种都要用自己的钱买一次；见过的人第一次遇到就能认出来。</view>
+    <view class="path">
+      <block v-for="g in DGROUPS" :key="g">
+        <view class="grp-label">{{ g }}</view>
+        <view class="death" v-for="d in deathOf(g)" :key="d.id" @click="openDeath(d.id)">
+          <view class="no">{{ d.id.slice(1) }}</view>
+          <view class="bd">
+            <view class="dt">{{ d.title }}</view>
+            <view class="dh"><text class="b">你以为：</text>{{ d.think }}</view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <view class="sec-title">
       <view class="h">流派自测</view>
       <view class="s">{{ quizText }}</view>
     </view>
@@ -195,6 +213,26 @@
           <view class="warn"><text class="b">毕业后：</text>{{ r2.r.after }}</view>
         </block>
 
+        <!-- 亏损案例 -->
+        <block v-if="mode === 'death' && d2">
+          <view class="chips">
+            <text class="pill up">常见死法</text>
+            <text class="pill">{{ d2.grp }}</text>
+          </view>
+          <view class="sh-title">{{ d2.title }}</view>
+          <view class="dt-scene"><text class="b">场景：</text>{{ d2.scene }}</view>
+          <view class="dt-k">你以为</view>
+          <view class="txt">{{ d2.think }}</view>
+          <view class="dt-k">实际发生了什么</view>
+          <view class="txt">{{ d2.real }}</view>
+          <view class="dt-bad"><text class="b">代价：</text>这笔亏损只是开始——真正的代价是它会重复发生，直到你认出这个模式。</view>
+          <view class="dt-fix"><text class="b">正确做法：</text>{{ d2.fix }}</view>
+          <view class="row2">
+            <view class="btn" v-if="d2.link" @click="toBasicFromDeath">看相关启蒙条目</view>
+            <view class="btn primary" @click="close">知道了</view>
+          </view>
+        </block>
+
         <!-- 自测答题 -->
         <block v-if="mode === 'quiz' && q2">
           <view class="qbar">
@@ -243,6 +281,7 @@
 <script>
 import { COURSES } from '../../common/courses.js'
 import { BASICS, GROUPS } from '../../common/basics.js'
+import { DEATHS, DGROUPS } from '../../common/deaths.js'
 import { RANKS, current, readState } from '../../common/rank.js'
 import { QUIZ, result as quizResult } from '../../common/quiz.js'
 import { SCHOOLS, RULES } from '../../common/teachers.js'
@@ -251,13 +290,13 @@ export default {
   data() {
     return {
       courses: COURSES,
-      BASICS, GROUPS, QUIZ, RANKS,
+      BASICS, GROUPS, DEATHS, DGROUPS, QUIZ, RANKS,
       cur: current(),
       basics: [],
       done: [],
       saved: null,
-      mode: null,          // course | basic | rank | quiz | qres
-      c2: null, b2: null, r2: null,
+      mode: null,          // course | basic | rank | death | quiz | qres
+      c2: null, b2: null, r2: null, d2: null,
       qi: 0, picked: -1, ans: {}, res: null
     }
   },
@@ -287,6 +326,16 @@ export default {
       uni.switchTab({ url: '/pages/' + tab + '/' + tab })
     },
     groupOf(g) { return BASICS.filter(x => x.grp === g) },
+    deathOf(g) { return DEATHS.filter(x => x.grp === g) },
+    openDeath(id) {
+      this.d2 = DEATHS.find(x => x.id === id) || null
+      this.mode = 'death'
+    },
+    toBasicFromDeath() {
+      const no = this.d2.link
+      this.close()
+      if (no) setTimeout(() => this.openBasic(no), 200)
+    },
     miniPct(x) { return x.g.total ? Math.round(x.g.cur / x.g.total * 100) : 0 },
     schoolName(k) {
       const s = SCHOOLS.find(x => x.k === k)
@@ -385,7 +434,7 @@ export default {
       uni.switchTab({ url: '/pages/teacher/teacher' })
     },
 
-    close() { this.mode = null; this.c2 = null; this.b2 = null; this.r2 = null }
+    close() { this.mode = null; this.c2 = null; this.b2 = null; this.r2 = null; this.d2 = null }
   }
 }
 </script>
@@ -481,6 +530,44 @@ export default {
 .bt { font-size: 27rpx; font-weight: 750; letter-spacing: -.4rpx; }
 .one { font-size: 22rpx; color: $muted; line-height: 1.6; margin-top: 5rpx; }
 .tick { font-size: 24rpx; color: $down; font-weight: 800; flex: 0 0 auto; width: 28rpx; text-align: center; }
+
+/* 亏损案例 */
+.death {
+  display: flex; align-items: flex-start; gap: 20rpx;
+  background: #fff; border: 1rpx solid $line; border-radius: $r;
+  padding: 24rpx; margin-bottom: 14rpx;
+}
+.death .no {
+  width: 66rpx; height: 66rpx; border-radius: 20rpx; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24rpx; font-weight: 800; color: $up; background: $up-soft;
+}
+.death .bd { flex: 1; min-width: 0; }
+.dt { font-size: 27rpx; font-weight: 750; letter-spacing: -.4rpx; }
+.dh { font-size: 22rpx; color: $muted; line-height: 1.6; margin-top: 5rpx; }
+.dh .b { color: $up; font-weight: 700; }
+
+.dt-scene {
+  margin-top: 18rpx; background: $bg-2; border-radius: $r-sm;
+  padding: 20rpx 22rpx; font-size: 23rpx; line-height: 1.7; color: $ink-2;
+}
+.dt-scene .b { font-weight: 700; }
+.dt-k {
+  font-size: 20rpx; letter-spacing: 3rpx; color: $muted;
+  font-weight: 700; margin: 26rpx 0 10rpx;
+}
+.dt-fix {
+  margin-top: 22rpx; background: $down-soft; border: 1rpx solid #cfeadf;
+  border-radius: $r-sm; padding: 22rpx;
+  font-size: 24rpx; line-height: 1.75; color: #0f5138;
+}
+.dt-fix .b { font-weight: 700; }
+.dt-bad {
+  margin-top: 20rpx; background: $up-soft; border: 1rpx solid #f5cfca;
+  border-radius: $r-sm; padding: 22rpx;
+  font-size: 23rpx; line-height: 1.75; color: #8a2b26;
+}
+.dt-bad .b { font-weight: 700; }
 
 /* 课程 */
 .course {
