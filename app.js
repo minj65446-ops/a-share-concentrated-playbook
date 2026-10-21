@@ -925,8 +925,11 @@
       <div class="warnbox">止损越宽，仓位必须越小。两者是替代关系，不是叠加关系——放宽止损同时保持仓位，等于放大风险。</div>`;
     const upd = () => {
       const cap = +$('#cCap').value || 0, risk = +$('#cRisk').value || 0, stop = +$('#cStop').value || 1, mx = +$('#cMax').value || 100;
-      const pct = Math.min(cap * risk / 100 / (stop / 100) / cap * 100, mx);
-      $('#cOut').textContent = (isNaN(pct) ? 0 : pct).toFixed(1) + '%';
+      /* 仓位 = 风险% ÷ 止损幅度%，再压一次单票硬顶。
+         原来写成 cap*risk/100/(stop/100)/cap*100，cap 会被约掉；
+         cap 填 0 时变成 0/0，金额那一栏直接显示 NaN。 */
+      const pct = (cap > 0 && risk > 0 && stop > 0) ? Math.min(risk / stop * 100, mx) : 0;
+      $('#cOut').textContent = pct.toFixed(1) + '%';
       $('#cAmt').textContent = '约 ' + (cap * pct / 100).toFixed(1) + ' 万元 · 最大亏损 ' + (cap * pct / 100 * stop / 100).toFixed(2) + ' 万元';
     };
     ['cCap','cRisk','cStop','cMax'].forEach(id => $('#' + id).addEventListener('input', upd));
