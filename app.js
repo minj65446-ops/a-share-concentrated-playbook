@@ -78,6 +78,7 @@
 
   /* ================= 路由 ================= */
   const VIEWS = ['learn', 'train', 'map', 'teacher', 'me'];
+
   function go(v){
     if(VIEWS.indexOf(v) < 0) v = 'learn';
     $$('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
@@ -87,7 +88,7 @@
     if(v === 'train') setTimeout(drawK, 30);
     if(v === 'me') renderMe();
     if(v === 'teacher') renderTeachers();
-    if(v === 'learn'){ renderRank(); renderBasics(); renderQuizCard(); }
+    if(v === 'learn'){ renderRank(); renderBasics(); renderDeaths(); renderQuizCard(); }
   }
   $('#tabbar').addEventListener('click', e => {
     const b = e.target.closest('button'); if(!b) return;
@@ -493,6 +494,7 @@
   const R = window.RANKS || null;
   const B = window.BASICS || { list:[], groups:[] };
   const Q = window.QUIZ || null;
+  const D = window.DEATHS || { list:[], groups:[] };
 
   const basicsDone = () => store.get('ta_basics', []);
 
@@ -622,6 +624,58 @@
       closeSheet();
       setTimeout(() => openCourse(b.link), 200);
     });
+    openSheet();
+  }
+
+  /* ============================================================
+     亏损案例库（常见死法）
+     ============================================================ */
+  function renderDeaths(){
+    const box = $('#deathList'); if(!box) return;
+    let html = '';
+    D.groups.forEach(g => {
+      const items = D.list.filter(x => x.grp === g);
+      if(!items.length) return;
+      html += `<div class="grp-label">${g}</div>`;
+      html += items.map(d => `
+        <div class="death" data-d="${d.id}" role="button" tabindex="0">
+          <div class="no">${d.id.slice(1)}</div>
+          <div style="min-width:0">
+            <div class="tt">${d.title}</div>
+            <div class="th"><b>你以为：</b>${d.think}</div>
+          </div>
+        </div>`).join('');
+    });
+    box.innerHTML = html;
+  }
+
+  $('#deathList').addEventListener('click', e => {
+    const el = e.target.closest('.death'); if(!el) return;
+    openDeath(el.dataset.d);
+  });
+
+  function openDeath(id){
+    const d = D.list.find(x => x.id === id); if(!d) return;
+    const b = d.link ? B.list.find(x => x.no === d.link) : null;
+    $('#sheetBody').innerHTML = `
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <span class="pill up">常见死法</span><span class="pill">${d.grp}</span>
+      </div>
+      <h2>${d.title}</h2>
+      <div class="dt-scene"><b>场景：</b>${d.scene}</div>
+      <div class="dt-k">你以为</div>
+      <div class="dt-real">${d.think}</div>
+      <div class="dt-k">实际发生了什么</div>
+      <div class="dt-real">${d.real}</div>
+      <div class="dt-bad"><b>代价：</b>${d.real.indexOf('退市') >= 0 ? '可能归零，且没有止损机会。' : '这笔亏损只是开始——真正的代价是它会重复发生，直到你认出这个模式。'}</div>
+      <div class="dt-fix"><b>正确做法：</b>${d.fix}</div>
+      ${b ? `<button class="btn btn-sm btn-block" id="toBasic" style="margin-top:14px">看相关启蒙条目：${b.title}</button>` : ''}
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-sm btn-block" id="dDone" style="background:var(--brand);color:#fff;border-color:var(--brand)">知道了</button>
+      </div>`;
+    const tb = $('#toBasic');
+    if(tb) tb.addEventListener('click', () => { closeSheet(); setTimeout(() => openBasic(d.link), 200); });
+    $('#dDone').addEventListener('click', closeSheet);
     openSheet();
   }
 
@@ -1009,6 +1063,7 @@
   renderTeachers();
   renderBasics();
   renderRank();
+  renderDeaths();
   renderQuizCard();
   const lastTab = store.get('ta_tab', 'learn');
   go(location.hash === '#train' ? 'train' : lastTab);
