@@ -1,0 +1,27 @@
+/* ============================================================
+   与 app.css :root 变量一一对应
+   小程序端：1px ≈ 2rpx（按 750rpx 设计稿）
+   ============================================================ */
+$bg: #f4f5f7;
+$bg-2: #eceef2;
+$card: #ffffff;
+$card-2: #fafbfc;
+$ink: #0f1a26;
+$ink-2: #35414f;
+$muted: #7b8794;
+$line: #e5e8ed;
+$line-2: #eff1f4;
+
+$brand: #16283f;
+$brand-2: #20456e;
+$brand-soft: #eef3f9;
+$up: #d94a45;
+$up-soft: #fdecea;
+$down: #17855f;
+$down-soft: #e8f6f0;
+$gold: #b07c17;
+$gold-soft: #fdf5e3;
+
+$r-lg: 40rpx;
+$r: 28rpx;
+$r-sm: 20rpx;
