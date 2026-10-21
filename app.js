@@ -15,7 +15,6 @@
     const d = new Date();
     return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
   };
-  const rng = seed => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 
   /* ================= 课程数据 ================= */
   const COURSES = [
@@ -167,115 +166,6 @@
   function closeSheet(){ $('#mask').classList.remove('on'); $('#sheet').classList.remove('on'); }
   $('#mask').addEventListener('click', closeSheet);
 
-  /* ================= K线生成 ================= */
-  function seg(n, start, drift, vol, seed, vb){
-    const r = rng(seed); let p = start; const out = [];
-    for(let i=0;i<n;i++){
-      const o = p;
-      const c = Math.max(0.5, p * (1 + drift + (r()*2-1)*vol));
-      const h = Math.max(o, c) * (1 + r()*0.004);
-      const l = Math.min(o, c) * (1 - r()*0.004);
-      out.push({o:o, h:h, l:l, c:c, v:(0.5 + r()) * (vb || 1)});
-      p = c;
-    }
-    return out;
-  }
-
-  const CASES = [
-    { title:'放量突破前高', q:'图上标了三个位置，哪个才是符合系统的买点？',
-      build(){
-        let a = seg(30, 20, 0.0035, 0.012, 101);
-        const high = Math.max.apply(null, a.map(b => b.h));
-        let b2 = seg(12, a[a.length-1].c, -0.002, 0.010, 202);
-        let c3 = seg(5, b2[b2.length-1].c, 0.014, 0.009, 303, 2.6);
-        let d4 = seg(9, c3[c3.length-1].c, -0.003, 0.008, 404);
-        const bars = a.concat(b2, c3, d4);
-        return { bars, marks:[{i:41, label:'A'}, {i:50, label:'B'}, {i:54, label:'C'}],
-          opts:[
-            {k:'A', t:'A：突破前一天潜伏，成本最低'},
-            {k:'B', t:'B：突破后回踩不破，确认再加仓'},
-            {k:'C', t:'C：突破后第四天，趋势已经确立'}
-          ], ans:'B',
-          why:'突破当天买，最大的风险是假突破——放量冲高再砸回来，你连反应时间都没有。等回踩确认不破，成本高 2%–3%，但把「假突破」这个最大亏损来源过滤掉了。C 的问题是已经在加速段，止损位离得太远，风险收益比变差。' };
-      } },
-
-    { title:'高位放量长上影', q:'这根长上影出现后，系统的动作是什么？',
-      build(){
-        let a = seg(32, 15, 0.005, 0.011, 505);
-        const last = a[a.length-1].c;
-        const spike = { o:last, c:last*1.004, h:last*1.062, l:last*0.996, v:3.4 };
-        a.push(spike);
-        let b2 = seg(12, spike.c, -0.004, 0.010, 606);
-        const bars = a.concat(b2);
-        return { bars, marks:[{i:24, label:'A'}, {i:32, label:'B'}, {i:40, label:'C'}],
-          opts:[
-            {k:'A', t:'A：上涨途中，趋势完好，继续持有'},
-            {k:'B', t:'B：长上影当天，放量滞涨，减仓一半'},
-            {k:'C', t:'C：后面跌了再说，等跌破均线'}
-          ], ans:'B',
-          why:'连续上涨后出现放量长上影，说明当天有大量资金在更高价位出货——买盘接不住。这是趋势可能转折的第一个信号，不是确认。所以动作是「减仓」而不是「清仓」：留着底仓看后续，但先把大部分利润锁住。等跌破均线才走，等于把浮盈全部还回去。' };
-      } },
-
-    { title:'跌破颈线', q:'形态已经走坏，图上哪个位置是必须离场的点？',
-      build(){
-        let a = seg(18, 12, 0.006, 0.010, 707);
-        let b2 = seg(10, a[a.length-1].c, -0.005, 0.009, 808);
-        let c3 = seg(12, b2[b2.length-1].c, 0.005, 0.009, 909);
-        const neck = Math.min.apply(null, b2.map(x => x.l));
-        let d4 = seg(12, c3[c3.length-1].c, -0.012, 0.010, 111);
-        const bars = a.concat(b2, c3, d4);
-        return { bars, marks:[{i:39, label:'A'}, {i:48, label:'B'}, {i:53, label:'C'}], neck:neck,
-          opts:[
-            {k:'A', t:'A：第二个头，还没跌破，先观察'},
-            {k:'B', t:'B：跌破颈线放量，清仓'},
-            {k:'C', t:'C：跌了这么多，等反弹再说'}
-          ], ans:'B',
-          why:'双头形态的颈线是这套形态的「逻辑边界」。跌破颈线且放量，说明前一个头部的买盘全部被套，抛压会自我强化。C 是最典型的错误——「等反弹再走」，结果反弹永远不来，或者来了也不到你的成本。' };
-      } },
-
-    { title:'缩量阴跌', q:'这段走势里，系统应该做什么？',
-      build(){
-        let a = seg(40, 26, -0.0035, 0.007, 121, 0.55);
-        const bars = a;
-        return { bars, marks:[{i:12, label:'A'}, {i:26, label:'B'}, {i:36, label:'C'}],
-          opts:[
-            {k:'A', t:'A：跌了很多，抄底'},
-            {k:'B', t:'B：缩量了，说明抛压减弱，埋伏'},
-            {k:'C', t:'C：不参与，没有买点'}
-          ], ans:'C',
-          why:'缩量阴跌不是「抛压减弱」，是「没人接盘」。没有放量的下跌，说明卖的人还没卖完，买的人还在观望——这种走势可以持续很久。系统的买点需要「放量 + 结构确认」，两个条件一个都没满足，正确动作是空仓等待。' };
-      } },
-
-    { title:'回踩均线不破', q:'上升趋势中的这次回踩，哪个位置可以加仓？',
-      build(){
-        let a = seg(34, 18, 0.0045, 0.011, 131);
-        let b2 = seg(8, a[a.length-1].c, -0.006, 0.008, 141);
-        let c3 = seg(14, b2[b2.length-1].c, 0.006, 0.010, 151);
-        const bars = a.concat(b2, c3);
-        return { bars, marks:[{i:38, label:'A'}, {i:42, label:'B'}, {i:50, label:'C'}],
-          opts:[
-            {k:'A', t:'A：刚开始跌，先减仓避险'},
-            {k:'B', t:'B：回踩均线缩量止跌，加仓'},
-            {k:'C', t:'C：等它创新高再追'}
-          ], ans:'B',
-          why:'上升趋势里的回踩是机会，前提是「缩量 + 不破关键均线」。这两个条件同时满足，说明只是获利盘兑现，趋势结构没坏。A 是过度反应，C 是把最好的成本让给了别人。加仓后立刻把止损上移到回踩低点下方——这才是完整动作。' };
-      } },
-
-    { title:'无量反弹到前高', q:'反弹到前高附近但没有量，该怎么做？',
-      build(){
-        let a = seg(24, 30, 0.004, 0.010, 161);
-        let b2 = seg(14, a[a.length-1].c, -0.010, 0.009, 171);
-        let c3 = seg(14, b2[b2.length-1].c, 0.008, 0.006, 181, 0.5);
-        const bars = a.concat(b2, c3);
-        return { bars, marks:[{i:30, label:'A'}, {i:50, label:'B'}, {i:54, label:'C'}],
-          opts:[
-            {k:'A', t:'A：前高附近，压力位，减仓或观望'},
-            {k:'B', t:'B：反弹有力，趋势反转，买入'},
-            {k:'C', t:'C：等突破前高再说'}
-          ], ans:'A',
-          why:'反弹到前高但成交量明显萎缩，说明推动这波反弹的资金量远小于上一波——这是「反抽」而不是「反转」。前高是套牢盘最密集的位置，无量上攻基本等于送人头。正确的做法是在压力位减仓，而不是等突破：真突破了再买回来也只贵几个点。' };
-      } }
-  ];
 
   /* ================= K线绘制 ================= */
   let curCase = null, curIdx = 0, answered = false;
@@ -368,19 +258,19 @@
   }
 
   function renderQ(){
-    const meta = CASES[curIdx % CASES.length];
-    curCase = meta.build();
-    curCase.title = meta.title;
-    curCase.q = meta.q;
+    /* 题库在 cases.js：每次出题换一套随机路径 + 选项洗牌，同题型不会重复出现同一张图 */
+    const QB = window.CASES;
+    curCase = QB ? QB.build(curIdx) : null;
+    if(!curCase) return;
     answered = false;
 
-    $('#qTitle').textContent = meta.title;
-    $('#qText').textContent = meta.q;
+    $('#qTitle').textContent = curCase.title;
+    $('#qText').textContent = curCase.q;
     const s = kb();
-    $('#qStreak').textContent = '连对 ' + s.streak;
+    $('#qStreak').textContent = '连对 ' + s.streak + ' · 题库 ' + curCase.total + ' 题';
 
     $('#opts').innerHTML = curCase.opts.map(o =>
-      `<button class="opt" data-k="${o.k}"><span class="k">${o.k}</span><span>${o.t.replace(/^[A-C]：/, '')}</span></button>`
+      `<button class="opt" data-k="${o.k}"><span class="k">${o.k}</span><span>${o.t.replace(/^[A-G]：/, '')}</span></button>`
     ).join('');
     $('#explain').classList.remove('show');
     $('#explain').innerHTML = '';
@@ -593,7 +483,11 @@
 
   function openBasic(no){
     const b = B.list.find(x => x.no === no); if(!b) return;
-    const isRead = basicsDone().indexOf(no) >= 0;
+    /* 打开就算读过：原来要点两次（点开 + 标记已读），25 条要 50 次点击。
+       点开了就是在读，没必要再让用户确认一次；想回退就点「标记未读」。 */
+    const d0 = basicsDone();
+    if(d0.indexOf(no) < 0){ d0.push(no); store.set('ta_basics', d0); renderBasics(); renderRank(); }
+    const isRead = true;
     $('#sheetBody').innerHTML = `
       <div style="display:flex;gap:6px;margin-bottom:8px">
         <span class="pill gold">Lv1 启蒙</span><span class="pill">${b.grp}</span>
@@ -610,13 +504,15 @@
       </div>
       <div style="display:flex;gap:8px;margin-top:16px">
         <button class="btn btn-primary btn-block" id="markBasic" style="background:var(--brand);color:#fff;border-color:var(--brand)">
-          ${isRead ? '已读 · 再看一遍' : '标记已读'}
+          ${isRead ? '✓ 已读 · 标记未读' : '标记已读'}
         </button>
         ${b.link ? '<button class="btn btn-block" id="toCourse">学相关课程</button>' : ''}
       </div>`;
     $('#markBasic').addEventListener('click', () => {
       const d = basicsDone();
-      if(d.indexOf(no) < 0){ d.push(no); store.set('ta_basics', d); }
+      const i = d.indexOf(no);
+      if(i < 0) d.push(no); else d.splice(i, 1);
+      store.set('ta_basics', d);
       renderBasics(); renderRank(); closeSheet();
     });
     const tc = $('#toCourse');
