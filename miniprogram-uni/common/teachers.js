@@ -109,6 +109,7 @@ export const FAKES = [
     promise: '跟我买，一个月翻倍',
     sell: '每天都有涨停，但从不公布总账户',
     verified: '无', tier: 'fake',
+    right: '—',
     wrong: '用"局部正确"替代"整体正确"：10 次里挑 1 次晒出来，你只看到那 1 次',
     trap: '核心识别信号：问他"近三年年化多少、最大回撤多少"，答不出来的都是这一类',
     st: { name: '幸存者切片', from: '流量', era: '—', line: '—' }
@@ -118,6 +119,7 @@ export const FAKES = [
     promise: '免费带你，盈利了再分',
     sell: '先让小赚，再让你加大仓位',
     verified: '无', tier: 'fake',
+    right: '—',
     wrong: '盈利分成、亏损不担的模式，本质是把你的账户当成他的期权——他有无限上行，你有无限下行',
     trap: '凡是"亏损不担、盈利分成"，无论在哪个平台，都按诈骗处理',
     st: { name: '不对称分成', from: '流量', era: '—', line: '—' }
@@ -127,6 +129,7 @@ export const FAKES = [
     promise: '这个票下周有动作',
     sell: '让你保密，制造稀缺感',
     verified: '无', tier: 'fake',
+    right: '—',
     wrong: '真正的内幕交易是刑事犯罪。愿意讲给你听的，一定是想让你接盘',
     trap: '"保密"是控制手段，不是信息来源的特征。真消息不会免费流通到散户手里',
     st: { name: '信息差伪装', from: '流量', era: '—', line: '—' }
@@ -136,6 +139,7 @@ export const FAKES = [
     promise: '我的指标从不失手',
     sell: '卖软件、卖课程、卖会员',
     verified: '无', tier: 'fake',
+    right: '—',
     wrong: '任何指标都是价格的函数——它只能描述已经发生的事，不能预测还没发生的事',
     trap: '如果指标真有效，最赚钱的用法是自己交易，不是卖 99 元的课',
     st: { name: '技术指标拜物教', from: '流量', era: '—', line: '—' }
