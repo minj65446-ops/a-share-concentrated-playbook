@@ -19,15 +19,18 @@
   'use strict';
 
   /* ============ 段位定义 ============ */
+  /* L1 的总条数取自 BASICS，避免内容扩充后两边不同步 */
+  const L1_TOTAL = (window.BASICS && window.BASICS.list.length) || 25;
+
   const RANKS = [
     {
       id:'L1', name:'启蒙', en:'AWAKEN', sub:'知道你买的到底是什么',
       goal:'这一阶段不碰任何策略。你的任务只有一个：把「股票」从一个模糊的词，变成一件具体的事。',
-      need:'读完 13 条启蒙概念',
+      need:'读完 ' + L1_TOTAL + ' 条启蒙概念',
       after:'毕业后你能：解释什么是市盈率、读懂一根 K 线的四个价格、说清 T+1 和跌停对一笔交易意味着什么。',
       check: st => ({
-        ok: st.basics >= 13,
-        cur: Math.min(st.basics, 13), total: 13,
+        ok: st.basics >= L1_TOTAL,
+        cur: Math.min(st.basics, L1_TOTAL), total: L1_TOTAL,
         unit: '条', label: '启蒙概念'
       })
     },
