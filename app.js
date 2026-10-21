@@ -365,9 +365,10 @@
   }
 
   function renderQ(){
-    curCase = CASES[curIdx % CASES.length].build();
     const meta = CASES[curIdx % CASES.length];
-    curCase.title = meta.title; curCase.q = meta.q; curCase.ans = meta.ans; curCase.why = meta.why;
+    curCase = meta.build();
+    curCase.title = meta.title;
+    curCase.q = meta.q;
     answered = false;
 
     $('#qTitle').textContent = meta.title;
