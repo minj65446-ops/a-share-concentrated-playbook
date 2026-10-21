@@ -1,0 +1,127 @@
+# 多端设计规范 · Design System
+
+一套设计语言，三个端：**Web（H5）· 微信小程序 · App**。
+
+- Web 端：`/index.html` + `app.css` + `app.js`，单页应用，移动优先，桌面居中显示为设备容器
+- 小程序 / App：`/miniprogram-uni`，uni-app（Vue3）工程，一套代码编译到小程序、App、H5
+- 文档版：`/playbook.html`（八套策略完整手册，作为「规则」参考页被引用）
+
+---
+
+## 1. 设计原则
+
+| 原则 | 落地方式 |
+|---|---|
+| **训练场，不是读物** | 每门课配一道图判题；每个概念有可操作的控件，而不是一段说明 |
+| **图先于字** | K 线、仓位条、阶段条、进度环——能用图形表达的不用段落 |
+| **红涨绿跌** | 严格遵循 A 股习惯：涨 `#d94a45`，跌 `#17855f`；不用欧美配色 |
+| **一屏一个决策** | 每个卡片只回答一个问题；详情收进底部抽屉，不铺开 |
+| **风险可见** | 违规、回撤、风险等级始终出现在界面上，不做隐藏 |
+
+## 2. 设计令牌（Tokens）
+
+Web 用 CSS 变量，uni-app 用 SCSS 变量，小程序按 750rpx 设计稿换算。
+
+| 语义 | CSS 变量 | SCSS 变量 | 值 | 用途 |
+|---|---|---|---|---|
+| 页面底色 | `--bg` | `$bg` | `#f4f5f7` | 全局背景 |
+| 卡片 | `--card` | `$card` | `#ffffff` | 内容容器 |
+| 主文字 | `--ink` | `$ink` | `#0f1a26` | 标题、数值 |
+| 次文字 | `--ink-2` | `$ink-2` | `#35414f` | 正文 |
+| 弱文字 | `--muted` | `$muted` | `#7b8794` | 标签、说明 |
+| 分割线 | `--line` | `$line` | `#e5e8ed` | 边框 |
+| 品牌色 | `--brand` | `$brand` | `#16283f` | 顶栏、主按钮、Hero |
+| 品牌浅色 | `--brand-soft` | `$brand-soft` | `#eef3f9` | 浅底标签 |
+| 涨 / 红 | `--up` | `$up` | `#d94a45` | 阳线、买入语义、高风险 |
+| 跌 / 绿 | `--down` | `$down` | `#17855f` | 阴线、正确、低风险 |
+| 强调 / 金 | `--gold` | `$gold` | `#b07c17` | 成就、提示框 |
+| 大圆角 | `--r-lg` | `$r-lg` | 20px / 40rpx | 卡片、抽屉 |
+| 中圆角 | `--r` | `$r` | 14px / 28rpx | 列表项 |
+| 小圆角 | `--r-sm` | `$r-sm` | 10px / 20rpx | 按钮、输入框 |
+
+**换算规则**：`px × 2 = rpx`（750 设计稿）。字号 14px → 28rpx，圆角 14px → 28rpx。
+
+## 3. 排版
+
+| 层级 | 大小 | 字重 | 用途 |
+|---|---|---|---|
+| H1（Hero） | 21px / 42rpx | 800 | 页面主标题 |
+| H2（区块） | 16px / 32rpx | 800 | 卡片区标题 |
+| 卡片标题 | 14.5px / 29rpx | 750 | 课程名、题目标题 |
+| 正文 | 14px / 28rpx | 400 | 通用 |
+| 辅助 | 12px / 24rpx | 400 | 说明、解析 |
+| 标签 | 10.5px / 21rpx | 700 | Pill |
+| 数字 | `--mono` | 700–800 | 价格、仓位、收益率 |
+
+数字一律用等宽字体，避免跳动。
+
+## 4. 组件映射
+
+| 组件 | Web 实现 | uni-app / 小程序 | 备注 |
+|---|---|---|---|
+| 设备容器 | `.device`（max-width 520px） | `page` 全屏 | 小程序无外壳 |
+| 顶栏 | `.topbar`（sticky） | `navigationBar` 原生 | 原生导航栏替代自绘 |
+| 底部导航 | `.tabbar`（fixed） | `tabBar` 原生 | 小程序必须原生 |
+| 卡片 | `.card` | `view.card` | 样式同源 |
+| 课程行 | `.course` | `view.course` | 网格 → flex |
+| 进度环 | `.ring`（conic-gradient） | 需 canvas 或 SVG | **小程序不支持 conic-gradient**，用 `canvas` 绘制 |
+| 标签 | `.pill` | `text.pill` | 同源 |
+| 按钮 | `.btn` | `view.btn` | 小程序 button 有默认样式，用 view 更可控 |
+| 底部抽屉 | `.sheet` + `.mask` | 自绘 `view` + 动画 | 或 uni-popup |
+| 分段控件 | `.seg` | `view.seg` | 同源 |
+| 水平滑动 | `overflow-x:auto` | `scroll-view scroll-x` | 必须换组件 |
+| K 线图 | `<canvas>` + `getContext('2d')` | `<canvas canvas-id>` + `uni.createCanvasContext` | **API 不同，需分别实现**，见 `common/kline.js` |
+| 本地存储 | `localStorage` | `uni.setStorageSync` | 键名保持一致 |
+
+## 5. 页面与路由
+
+| Tab | Web | 小程序/App | 核心内容 |
+|---|---|---|---|
+| 学院 | `#v-learn` | `pages/learn/learn` | Hero、8 门课程、今日任务、课程抽屉 |
+| 训练 | `#v-train` | `pages/train/train` | 四个训练入口、K 线判题、解析 |
+| 图谱 | `#v-map` | `pages/map/map` | 情绪四阶段、策略×市况矩阵 |
+| 我的 | `#v-me` | `pages/me/me` | 三项统计、成就、盘后三问、风险提示 |
+
+**本地数据键**（三端统一）：
+
+| Key | 类型 | 含义 |
+|---|---|---|
+| `ta_done` | `string[]` | 已完成课程 id |
+| `ta_kline` | `{total,right,streak}` | 判题统计 |
+| `ta_best_streak` | `number` | 历史最高连对 |
+| `ta_review_YYYY-M-D` | `number[]` | 当日复盘勾选 |
+| `ta_tab` | `string` | 上次停留 Tab（仅 Web） |
+
+## 6. 交互规范
+
+- **触控目标** ≥ 44×44px（88rpx），卡片整块可点，不要求点小图标
+- **抽屉**：从底部升起，带遮罩，点遮罩关闭；高度不超过 86vh，内部可滚动
+- **反馈**：所有可点元素 `:active` 缩放到 0.97–0.99，时长 120ms
+- **安全区**：底部导航使用 `env(safe-area-inset-bottom)`，小程序由原生 tabBar 处理
+- **状态保持**：Tab 切换不销毁状态；Web 端切换后回到顶部
+- **空态**：训练未作答时不给解析；答完才显示，避免剧透
+
+## 7. 三端差异清单（改造要点）
+
+| 项 | Web | 小程序 | App |
+|---|---|---|---|
+| 导航 | 自绘 tabbar | 原生 tabBar（4 项，纯文字） | 原生 tabBar 或自绘 |
+| Canvas | `ctx.setLineDash` 可用 | 旧版画布不支持虚线，已改为实线 | 同小程序 |
+| `conic-gradient` | 支持 | 不支持，进度环需 canvas | 支持度取决于 WebView |
+| 外部链接 | `location.href` | 需 webview 组件或内嵌页 | 同小程序 |
+| 分享 | 无 | `onShareAppMessage` 可加 | 原生分享 |
+| 深色模式 | 未实现 | 未实现 | 未实现 |
+
+## 8. 未验证项
+
+- `miniprogram-uni` 为工程骨架，**未在 HBuilderX / 微信开发者工具中实际编译运行**，`appid` 留空需自行填写
+- 小程序端 canvas 绘制为示例实现，坐标与配色与 Web 端对齐，但未做真机像素校准
+- 小程序的 `tabBar` 未配置图标（纯文字模式），如需图标请在 `pages.json` 补 `iconPath` / `selectedIconPath`
+- `playbook.html` 在小程序端未提供入口，需自行加 webview 页
+
+## 9. 扩展建议
+
+1. 把 `COURSES` 抽成共享 JSON，Web 与小程序构建期读取同一份，避免双份维护
+2. K 线判题题库改为服务端下发，支持按用户薄弱点推题
+3. 增加「错题本」：记录答错题目的 case id + 用户选择 + 时间
+4. 模拟盘（`playbook.html#sandbox`）迁移为独立小程序页，用 `wx.setStorageSync` 存账户快照
