@@ -2,1432 +2,189 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A股集中式交易系统合集 · Concentrated Playbook</title>
-<style>
-:root{
-  --bg:#f6f7f5;
-  --surface:#ffffff;
-  --surface-2:#fbfbf9;
-  --ink:#16202b;
-  --ink-2:#33404e;
-  --muted:#6b7885;
-  --line:#e2e6e9;
-  --line-2:#eef1f2;
-  --accent:#14503c;
-  --accent-2:#1d6f52;
-  --accent-soft:#e8f1ec;
-  --up:#c0392b;
-  --down:#1a7f5a;
-  --warn:#a9741a;
-  --warn-soft:#fdf6e6;
-  --danger:#a83228;
-  --danger-soft:#fbeceb;
-  --radius:14px;
-  --shadow:0 1px 2px rgba(22,32,43,.04), 0 6px 20px rgba(22,32,43,.05);
-  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  background:var(--bg);
-  color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  font-size:15px;
-  line-height:1.75;
-  -webkit-font-smoothing:antialiased;
-}
-.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-a{color:var(--accent-2);text-decoration:none;border-bottom:1px solid rgba(29,111,82,.25)}
-a:hover{border-bottom-color:var(--accent-2)}
-
-/* ---------- HERO ---------- */
-.hero{padding:64px 0 40px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#ffffff 0%,var(--bg) 100%)}
-.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent-2);margin-bottom:18px}
-h1{font-size:clamp(28px,4.2vw,44px);line-height:1.2;letter-spacing:-.02em;font-weight:700;margin-bottom:14px}
-h1 em{font-style:normal;color:var(--accent-2)}
-.lede{font-size:17px;color:var(--ink-2);max-width:720px;margin-bottom:30px}
-.hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:32px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
-.stat .k{font:600 11px/1.4 var(--mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
-.stat .v{font-size:22px;font-weight:700;letter-spacing:-.01em;margin-top:6px;color:var(--accent)}
-.stat .s{font-size:12.5px;color:var(--muted);margin-top:2px}
-
-/* ---------- NAV ---------- */
-.nav{position:sticky;top:0;z-index:50;background:rgba(246,247,245,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.nav .wrap{display:flex;gap:6px;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
-.nav .wrap::-webkit-scrollbar{display:none}
-.nav a{flex:0 0 auto;font-size:13px;color:var(--ink-2);padding:6px 12px;border-radius:99px;border:1px solid transparent;white-space:nowrap}
-.nav a:hover{background:var(--surface);border-color:var(--line);border-bottom-color:var(--line)}
-
-/* ---------- SECTION ---------- */
-section{padding:56px 0;border-bottom:1px solid var(--line)}
-.sec-head{margin-bottom:28px}
-.sec-num{font:600 11px/1 var(--mono);letter-spacing:.14em;color:var(--accent-2);margin-bottom:10px}
-h2{font-size:clamp(21px,2.6vw,27px);letter-spacing:-.01em;font-weight:700;margin-bottom:8px}
-.sec-sub{color:var(--muted);font-size:14.5px;max-width:760px}
-h3{font-size:16.5px;font-weight:700;margin-bottom:10px}
-
-/* ---------- CARDS / TABLES ---------- */
-.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
-.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
-.card.tight{padding:16px 18px}
-.card p{color:var(--ink-2);font-size:14px}
-.card p + p{margin-top:8px}
-.card .tag{display:inline-block;font:600 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-2);background:var(--accent-soft);padding:4px 7px;border-radius:4px;margin-bottom:10px}
-
-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;font-size:13.5px}
-th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-2);vertical-align:top}
-th{background:var(--surface-2);font-weight:600;font-size:12px;letter-spacing:.04em;color:var(--ink-2);text-transform:uppercase}
-tr:last-child td{border-bottom:none}
-td.mono,th.mono{font-family:var(--mono);font-size:12.5px}
-
-/* ---------- PRINCIPLES ---------- */
-.principle{display:flex;gap:14px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent-2);border-radius:10px;padding:16px 18px;margin-bottom:12px}
-.principle .n{font:700 13px/1.5 var(--mono);color:var(--accent-2);flex:0 0 auto}
-.principle h4{font-size:14.5px;margin-bottom:3px}
-.principle p{font-size:13.5px;color:var(--ink-2)}
-
-/* ---------- MATRIX ---------- */
-.matrix{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-.quad{background:var(--surface);padding:20px}
-.quad h4{font-size:13px;font-family:var(--mono);letter-spacing:.06em;color:var(--accent-2);text-transform:uppercase;margin-bottom:4px}
-.quad .qq{font-size:12px;color:var(--muted);margin-bottom:12px}
-.chip{display:inline-block;font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:4px 9px;margin:0 6px 6px 0}
-
-/* ---------- STRATEGY CARDS ---------- */
-.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
-.filters button{
-  font:inherit;font-size:13px;cursor:pointer;background:var(--surface);color:var(--ink-2);
-  border:1px solid var(--line);border-radius:99px;padding:6px 14px;transition:.15s;
-}
-.filters button:hover{border-color:var(--accent-2);color:var(--accent-2)}
-.filters button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-
-.slist{display:flex;flex-direction:column;gap:12px}
-.sitem{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-.sitem summary{list-style:none;cursor:pointer;padding:18px 20px;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center}
-.sitem summary::-webkit-details-marker{display:none}
-.sitem .idx{font:700 13px/1 var(--mono);color:var(--accent-2);background:var(--accent-soft);border-radius:7px;height:34px;display:flex;align-items:center;justify-content:center}
-.sitem .nm{font-size:16px;font-weight:700;letter-spacing:-.01em}
-.sitem .ds{font-size:13px;color:var(--muted);margin-top:2px}
-.sitem .chev{font-size:12px;color:var(--muted);font-family:var(--mono);transition:transform .2s}
-.sitem[open] .chev{transform:rotate(90deg)}
-.sitem[open] summary{border-bottom:1px solid var(--line-2);background:var(--surface-2)}
-.sbody{padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
-.block h5{font:600 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.block ul{list-style:none}
-.block li{position:relative;padding-left:14px;font-size:13.5px;color:var(--ink-2);margin-bottom:5px;line-height:1.65}
-.block li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--accent-2);opacity:.55}
-.kv{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line-2)}
-.kv:last-child{border-bottom:none}
-.kv span:first-child{color:var(--muted)}
-.kv span:last-child{font-family:var(--mono);font-size:12.5px;color:var(--ink);text-align:right}
-.warnrow{grid-column:1/-1;background:var(--warn-soft);border:1px solid #f0e2c2;border-radius:9px;padding:12px 14px;font-size:13px;color:#6b521a}
-.warnrow b{color:var(--warn)}
-.srcline{grid-column:1/-1;font-size:12px;color:var(--muted);border-top:1px solid var(--line-2);padding-top:10px}
-
-/* ---------- CALC ---------- */
-.calc{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
-.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:18px}
-.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600}
-.field input{
-  width:100%;font:inherit;font-family:var(--mono);font-size:14px;padding:9px 11px;
-  border:1px solid var(--line);border-radius:9px;background:var(--surface-2);color:var(--ink);
-}
-.field input:focus{outline:none;border-color:var(--accent-2);background:#fff;box-shadow:0 0 0 3px var(--accent-soft)}
-.calc-out{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;border-top:1px solid var(--line-2);padding-top:18px}
-.out{background:var(--surface-2);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px}
-.out .k{font-size:11.5px;color:var(--muted);letter-spacing:.04em}
-.out .v{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:3px;color:var(--accent)}
-.out .v.bad{color:var(--danger)}
-.note{font-size:12px;color:var(--muted);margin-top:12px}
-
-/* ---------- CHECKLIST ---------- */
-.check{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line-2);font-size:13.5px;color:var(--ink-2)}
-.check:last-child{border-bottom:none}
-.check input{margin-top:5px;accent-color:var(--accent);width:15px;height:15px;flex:0 0 auto;cursor:pointer}
-.check input:checked + span{color:var(--muted);text-decoration:line-through}
-.progress{height:6px;background:var(--line-2);border-radius:99px;overflow:hidden;margin-bottom:14px}
-.progress i{display:block;height:100%;width:0;background:var(--accent-2);transition:width .3s}
-
-/* ---------- DEATH LIST ---------- */
-.death{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
-.death .d{background:var(--danger-soft);border:1px solid #f2d9d6;border-radius:10px;padding:14px 16px}
-.death .d h4{font-size:13.5px;color:var(--danger);margin-bottom:4px}
-.death .d p{font-size:13px;color:#6b3b36}
-
-/* ---------- SOURCES ---------- */
-.src{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
-.src .s{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:12px 14px;font-size:13px}
-.src .s b{display:block;font-size:13px;margin-bottom:2px}
-.src .s span{color:var(--muted);font-size:12px}
-
-footer{padding:36px 0 64px;background:var(--surface-2)}
-.disclaimer{font-size:12.5px;color:var(--muted);line-height:1.8;max-width:820px}
-.disclaimer b{color:var(--ink-2)}
-/* ---------- SANDBOX ---------- */
-.sb-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
-.scene-tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:4px}
-.scene-tabs button{font:inherit;font-size:12.5px;padding:6px 14px;border-radius:99px;border:none;background:transparent;color:var(--ink-2);cursor:pointer}
-.scene-tabs button.on{background:var(--accent);color:#fff}
-.scene-desc{font-size:12.5px;color:var(--muted);flex:1;min-width:260px}
-.sb-grid{display:grid;grid-template-columns:1.05fr .92fr 1.08fr;gap:14px}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
-.panel-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--line-2);background:var(--surface-2);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
-.panel-h .day{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted)}
-.qitem{display:grid;grid-template-columns:1fr 62px auto;gap:10px;align-items:center;padding:11px 15px;border-bottom:1px solid var(--line-2);cursor:pointer;transition:background .12s}
-.qitem:hover{background:var(--surface-2)}
-.qitem.on{background:var(--accent-soft)}
-.qitem .nm{font-size:13.5px;font-weight:700}
-.qitem .mt{font-size:11px;color:var(--muted);font-family:var(--mono)}
-.qitem .posline{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
-.qitem .px{font-family:var(--mono);font-size:14.5px;font-weight:700;text-align:right}
-.qitem .chg{font-family:var(--mono);font-size:11px;text-align:right}
-.qitem .r{text-align:right}
-.up{color:var(--up)}.down{color:var(--down)}
-.spark{width:62px;height:26px}
-.ctrls{display:flex;gap:8px;padding:12px 15px;border-top:1px solid var(--line-2);flex-wrap:wrap}
-.btn{font:inherit;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:.12s}
-.btn:hover{border-color:var(--accent-2);color:var(--accent-2)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2);color:#fff}
-.btn.ghost{color:var(--muted)}
-.panel .field{margin:0 15px 10px}
-.panel .field label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:5px;font-weight:600}
-.panel .field input,.panel .field select{width:100%;font:inherit;font-family:var(--mono);font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink)}
-.panel .field select{font-family:inherit}
-.panel .field input:focus,.panel .field select:focus{outline:none;border-color:var(--accent-2);background:#fff;box-shadow:0 0 0 3px var(--accent-soft)}
-.quickpos{display:flex;gap:6px;padding:0 15px 10px}
-.quickpos button{flex:1;font:inherit;font-size:11.5px;padding:6px 0;border-radius:7px;border:1px dashed var(--line);background:transparent;color:var(--ink-2);cursor:pointer}
-.quickpos button:hover{border-color:var(--accent-2);color:var(--accent-2);border-style:solid}
-.preview{margin:0 15px 12px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--ink-2);font-family:var(--mono);line-height:1.6}
-.preview b{color:var(--accent);font-weight:700}
-.hintline{padding:10px 15px 13px;font-size:11px;color:var(--muted);line-height:1.6;border-top:1px solid var(--line-2)}
-/* teacher */
-.goalbox{padding:10px 15px;background:var(--accent-soft);border-bottom:1px solid #dbe9e2;font-size:12px;color:#2b5b48;line-height:1.6}
-.goalbox b{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#4a7a66;margin-bottom:3px;font-family:var(--mono)}
-.chat{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:9px;min-height:280px;max-height:360px;background:linear-gradient(180deg,#fbfbf9,#fff)}
-.chat::-webkit-scrollbar{width:6px}
-.chat::-webkit-scrollbar-thumb{background:#d8dee2;border-radius:9px}
-.msg{display:flex;gap:7px;align-items:flex-start;font-size:12.5px;line-height:1.68}
-.msg .av{width:24px;height:24px;border-radius:50%;flex:0 0 auto;background:linear-gradient(135deg,#14503c,#2f8f6b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700}
-.msg .bub{background:var(--accent-soft);border:1px solid #d9e8e1;border-radius:10px;padding:8px 11px;color:var(--ink-2);max-width:90%}
-.msg.me{flex-direction:row-reverse}
-.msg.me .av{background:#e4e8eb;color:var(--ink-2)}
-.msg.me .bub{background:var(--surface-2);border-color:var(--line)}
-.askrow{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--line-2);flex-wrap:wrap;background:var(--surface)}
-.askrow button{font:inherit;font-size:11.5px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);background:#fff;color:var(--ink-2);cursor:pointer}
-.askrow button:hover{border-color:var(--accent-2);color:var(--accent-2)}
-/* stats + chart */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px 15px}
-.stats .out{background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:10px 12px}
-.stats .k{font-size:11px;color:var(--muted)}
-.stats .v{font-family:var(--mono);font-size:16.5px;font-weight:700;color:var(--accent);margin-top:2px}
-.stats .v.bad{color:var(--danger)}
-.chartwrap{padding:4px 10px 14px}
-#equityChart{width:100%;height:170px;display:block}
-.tablewrap{max-height:250px;overflow:auto}
-.tablewrap table{border:none;border-radius:0;font-size:12.5px}
-.tablewrap th{position:sticky;top:0;z-index:2}
-@media(max-width:980px){.sb-grid{grid-template-columns:1fr}}
-@media(max-width:720px){
-  .matrix{grid-template-columns:1fr}
-  .sitem summary{grid-template-columns:34px 1fr auto;gap:10px}
-  .hero{padding:44px 0 30px}
-  section{padding:40px 0}
-  .qitem{grid-template-columns:1fr auto}
-  .spark{display:none}
-}
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16283f">
+<title>A股交易学院 · 学 · 练 · 战</title>
+<link rel="stylesheet" href="app.css">
 </head>
 <body>
+<div class="device">
 
-<header class="hero">
-  <div class="wrap">
-    <div class="eyebrow">Trade System Playbook / 2026</div>
-    <h1>A股集中式交易系统<em>合集</em></h1>
-    <p class="lede">把「重仓少数标的」做成一套可执行、可复盘的规则，而不是一次押注。八套集中式策略、一套风控引擎、一份执行清单。</p>
-    <div class="hero-stats">
-      <div class="stat"><div class="k">策略数</div><div class="v">8</div><div class="s">覆盖短线到长线四个象限</div></div>
-      <div class="stat"><div class="k">持仓上限</div><div class="v">1–8 只</div><div class="s">按策略类型分层，不是统一值</div></div>
-      <div class="stat"><div class="k">单票硬顶</div><div class="v">≤30%</div><div class="s">无论多确信，不做单票梭哈</div></div>
-      <div class="stat"><div class="k">止损纪律</div><div class="v">5–8%</div><div class="s">建仓前先写死，不临场商量</div></div>
-    </div>
-  </div>
-</header>
-
-<nav class="nav">
-  <div class="wrap">
-    <a href="#principle">集中三前提</a>
-    <a href="#compare">集中 vs 分散</a>
-    <a href="#matrix">选型矩阵</a>
-    <a href="#playbook">八套策略</a>
-    <a href="#sandbox">模拟交易</a>
-    <a href="#risk">风控引擎</a>
-    <a href="#calc">仓位计算</a>
-    <a href="#exec">买卖执行</a>
-    <a href="#review">复盘清单</a>
-    <a href="#death">八种死法</a>
-    <a href="#plan">30天启动</a>
-    <a href="#src">参考来源</a>
-  </div>
-</nav>
-
-<!-- 01 -->
-<section id="principle">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">01 / FOUNDATION</div>
-      <h2>集中不是「买得少」，是「看得比别人深」</h2>
-      <p class="sec-sub">集中式策略放大的不是收益，是<b>判断的正确率</b>。判断对，收益放大；判断错，亏损也放大。所以它必须在三个前提同时成立时才可用。</p>
-    </div>
-
-    <div class="principle">
-      <div class="n">01</div>
-      <div><h4>能力圈：只在自己能解释清楚的地方重仓</h4>
-      <p>能说清「它靠什么赚钱、对手为什么打不过它、三年后利润大概什么水平」，才叫懂。说不清就不碰，涨得再猛也不碰。芒格的做法不是找更多机会，而是提高「什么算好机会」的门槛——标准够高，候选自然只剩几个。</p></div>
-    </div>
-
-    <div class="principle">
-      <div class="n">02</div>
-      <div><h4>安全边际：买价决定你能承受多少波动</h4>
-      <p>集中持仓的波动天然大于分散组合。买贵了，波动会逼你在最差的位置卖出。买之前做压力测试：<b>「如果大盘再跌 20%，它最多跌多少？」</b>答案超过 20% 就等更好的价格，或降低仓位。集中 + 安全边际 = 投资；集中 + 杠杆 = 赌。</p></div>
-    </div>
-
-    <div class="principle">
-      <div class="n">03</div>
-      <div><h4>闲钱无杠杆：容错空间是策略的一部分</h4>
-      <p>持仓集中会让净值出现 30%–50% 级别的回撤，这是正常的、可预期的。如果钱是借的、或半年内要用，回撤会直接变成被迫卖出。只用 3 年不用的钱，才拿得住。</p></div>
-    </div>
-
-    <div class="card tight" style="margin-top:20px;border-left:3px solid var(--warn);background:var(--warn-soft);border-color:#f0e2c2">
-      <p style="color:#6b521a"><b>一句话结论：</b>集中式的收益来源是「认知差变现」，不是「仓位大胆」。认知不够时，集中只是把亏损做得更快。先确认自己有真实的认知优势（信息、理解深度、持股耐心），再谈集中度。</p>
-    </div>
-  </div>
-</section>
-
-<!-- 02 -->
-<section id="compare">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">02 / TRADE-OFF</div>
-      <h2>集中 vs 分散：不是优劣，是取舍</h2>
-      <p class="sec-sub">两者都能赚钱，也都能亏钱。区别在于你用什么换什么。</p>
-    </div>
-    <table>
-      <thead><tr><th style="width:16%">维度</th><th style="width:42%">集中式（1–8 只）</th><th style="width:42%">分散式（20 只以上 / 指数）</th></tr></thead>
-      <tbody>
-        <tr><td>收益来源</td><td>少数标的的深度认知差</td><td>市场平均 + 因子暴露</td></tr>
-        <tr><td>波动特征</td><td>净值曲线陡，单日 ±3% 常见</td><td>平滑，跟随指数</td></tr>
-        <tr><td>最大回撤</td><td>30%–50% 属正常区间</td><td>通常接近指数回撤</td></tr>
-        <tr><td>研究强度</td><td>1 个标的 20 小时</td><td>20 个标的各 1 小时</td></tr>
-        <tr><td>对判断错误的惩罚</td><td>重（可能永久性损失）</td><td>轻（被摊薄）</td></tr>
-        <tr><td>换手率</td><td>低（长线 0.2–1 倍/年）</td><td>低（指数）到高（轮动）</td></tr>
-        <tr><td>最适合的人</td><td>有主业收入、能忍受波动、研究时间集中</td><td>没时间研究、追求稳定、资金量大</td></tr>
-        <tr><td>最容易死于</td><td>单一逻辑崩塌 + 不止损</td><td>平庸化，长期跑不赢通胀</td></tr>
-      </tbody>
-    </table>
-    <div class="card tight" style="margin-top:16px">
-      <p><b>可落地的折中方案：</b>核心 60%–70% 用宽基或高股息做底仓（不折腾），卫星 30%–40% 集中在 2–4 只高确定性标的。这是绝大多数非职业投资者能长期坚持的集中式结构。</p>
-    </div>
-  </div>
-</section>
-
-<!-- 03 -->
-<section id="matrix">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">03 / SELECTION</div>
-      <h2>选型矩阵：先定持有周期，再定收益来源</h2>
-      <p class="sec-sub">八套策略按「持有周期 × 收益来源」落位。同一时间只运行一套，最多两套，且两套的持仓不能重叠。</p>
-    </div>
-    <div class="matrix">
-      <div class="quad">
-        <h4>短周期 · 情绪驱动</h4>
-        <div class="qq">持有 2 天–2 周 / 需盯盘</div>
-        <span class="chip">S3 主线龙头集中</span>
-        <span class="chip">S6 事件驱动集中</span>
-        <p style="font-size:12.5px;color:var(--muted);margin-top:10px">特征：胜率靠节奏，靠空仓控回撤。对执行力要求最高，对普通人最不友好。</p>
-      </div>
-      <div class="quad">
-        <h4>短中周期 · 价格趋势</h4>
-        <div class="qq">持有 2 周–3 个月 / 半盯盘</div>
-        <span class="chip">S5 趋势动量集中</span>
-        <span class="chip">S2 高景气行业集中</span>
-        <p style="font-size:12.5px;color:var(--muted);margin-top:10px">特征：规则可量化、可回测，不依赖主观判断。适合把交易当「流程」而非「灵感」的人。</p>
-      </div>
-      <div class="quad">
-        <h4>长周期 · 基本面</h4>
-        <div class="qq">持有 1–5 年 / 不盯盘</div>
-        <span class="chip">S1 核心+卫星</span>
-        <span class="chip">S4 高质量成长集中</span>
-        <p style="font-size:12.5px;color:var(--muted);margin-top:10px">特征：赚企业盈利的钱。最难的是「什么都不做」，最大的敌人是手痒。</p>
-      </div>
-      <div class="quad">
-        <h4>长周期 · 价值回归</h4>
-        <div class="qq">持有 1–3 年 / 不盯盘</div>
-        <span class="chip">S7 红利低波集中</span>
-        <span class="chip">S8 困境反转集中</span>
-        <p style="font-size:12.5px;color:var(--muted);margin-top:10px">特征：赚估值修复 + 分红的钱。需要忍受长时间不涨，靠股息率和现金流熬过去。</p>
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark">A</div>
+      <div>
+        <div class="nm">交易学院</div>
+        <div class="sub">A-Share Academy</div>
       </div>
     </div>
-  </div>
-</section>
+    <div class="chip-streak">连续 <b id="streakTop">1</b> 天</div>
+  </header>
 
-<!-- 04 -->
-<section id="playbook">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">04 / PLAYBOOK</div>
-      <h2>八套集中式策略</h2>
-      <p class="sec-sub">点击任意一条展开完整规则：选股条件、买点、卖点、仓位、失效信号。每条都给出可量化的判断标准，避免「感觉不错就买」。</p>
-    </div>
-    <div class="filters" id="filters">
-      <button class="on" data-f="all">全部</button>
-      <button data-f="long">长线基本面</button>
-      <button data-f="value">价值回归</button>
-      <button data-f="trend">趋势动量</button>
-      <button data-f="short">短线情绪</button>
-      <button data-f="quant">可量化</button>
-    </div>
-    <div class="slist" id="slist"></div>
-  </div>
-</section>
-
-<!-- 05 -->
-<section id="sandbox">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">05 / SANDBOX</div>
-      <h2>模拟交易实验室：跟着赛博老师跑一遍</h2>
-      <p class="sec-sub">虚拟账户 100 万，行情为<b>程序合成的教学数据</b>（非真实历史行情）。这里不考你选股，只考一件事：动作是否合规——有没有设止损、仓位算没算、该空仓时能不能空仓。</p>
-    </div>
-
-    <div class="sb-top">
-      <div class="scene-tabs" id="sceneTabs">
-        <button data-s="trend" class="on">趋势场</button>
-        <button data-s="range">震荡场</button>
-        <button data-s="bear">退潮场</button>
-      </div>
-      <div class="scene-desc" id="sceneDesc"></div>
-    </div>
-
-    <div class="sb-grid">
-      <!-- 行情 -->
-      <div class="panel">
-        <div class="panel-h"><span>行情 · 合成</span><span class="day" id="dayLabel">第 1 日</span></div>
-        <div id="quotes" style="flex:1"></div>
-        <div class="ctrls">
-          <button id="btnDay" class="btn primary">下一日 ›</button>
-          <button id="btnWeek" class="btn">下一周 »</button>
-          <button id="btnReset" class="btn ghost">重置</button>
+  <main>
+    <!-- ================= 学院 ================= -->
+    <section class="view on" id="v-learn">
+      <div class="hero">
+        <div class="kicker">Concentrated System</div>
+        <h1>集中不是买得少<br>是看得比别人深</h1>
+        <p>8 门课，从「先活下来」到「只做最强的一只」。每门课配一道图判题，别只是读。</p>
+        <div class="row">
+          <button class="btn btn-primary" data-go="train">开始训练</button>
+          <button class="btn btn-ghost" id="btnContinue">继续上次</button>
         </div>
       </div>
 
-      <!-- 下单 -->
-      <div class="panel">
-        <div class="panel-h"><span>下单</span><span class="day">T+1</span></div>
-        <div style="padding-top:12px">
-          <div class="field"><label>标的</label><select id="selCode"></select></div>
-          <div class="field"><label>数量（股，100 的整数倍）</label><input id="inShares" type="number" value="1000" step="100" min="100"></div>
-          <div class="field"><label>止损价（必填）</label><input id="inStop" type="number" step="0.01"></div>
+      <div class="sec-title">
+        <h2>学习路径</h2>
+        <span id="progressText">0 / 8 完成</span>
+      </div>
+      <div class="path" id="courseList"></div>
+
+      <div class="sec-title"><h2>今日任务</h2><span>约 5 分钟</span></div>
+      <div class="card" style="padding:14px">
+        <div id="dailyTask"></div>
+      </div>
+    </section>
+
+    <!-- ================= 训练 ================= -->
+    <section class="view" id="v-train">
+      <div class="sec-title" style="margin-top:4px">
+        <h2>训练场</h2>
+        <span id="accText">正确率 —</span>
+      </div>
+
+      <div class="train-grid">
+        <button class="tcard" data-scroll="trainer">
+          <div class="ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#20456e" stroke-width="1.8" stroke-linecap="round"><path d="M7 4v16M17 6v12"/><rect x="4.5" y="8" width="5" height="7" rx="1"/><rect x="14.5" y="10" width="5" height="5" rx="1"/></svg>
+          </div>
+          <h4>K线读图</h4>
+          <p>在图上找买点与卖点</p>
+        </button>
+        <button class="tcard" id="btnCalcOpen">
+          <div class="ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#20456e" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h2M12 12h2M16 12h.01M8 16h2M12 16h2M16 16h.01"/></svg>
+          </div>
+          <h4>仓位计算</h4>
+          <p>先算能亏多少</p>
+        </button>
+        <button class="tcard" id="btnSim">
+          <div class="ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#20456e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-7 5 5"/><path d="M3 21h18"/></svg>
+          </div>
+          <h4>模拟盘</h4>
+          <p>用虚拟账户试错</p>
+        </button>
+        <button class="tcard" data-go="map">
+          <div class="ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#20456e" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v4.5l3 2"/></svg>
+          </div>
+          <h4>情绪周期</h4>
+          <p>几成仓，看阶段</p>
+        </button>
+      </div>
+
+      <div class="card trainer" id="trainerCard">
+        <div class="head">
+          <div>
+            <h3 id="qTitle">放量突破前高</h3>
+            <div class="q" id="qText">图上标了三个位置，哪个才是符合系统的买点？</div>
+          </div>
+          <div class="pill brand" id="qStreak">连对 0</div>
         </div>
-        <div class="quickpos" id="quickPos">
-          <button data-p="0.15">按 15% 仓位</button>
-          <button data-p="0.25">按 25% 仓位</button>
-          <button data-p="0.5">按 50% 仓位</button>
-        </div>
-        <div class="preview" id="preview">—</div>
-        <div class="ctrls">
-          <button id="btnBuy" class="btn primary">买入</button>
-          <button id="btnSell" class="btn">卖出全部</button>
-        </div>
-        <div class="hintline">费用：佣金万 2.5（最低 5 元），卖出加印花税 0.05%。买入当日不可卖（T+1）。合成行情仅用于教学，不映射任何真实股票。</div>
-      </div>
 
-      <!-- 老师 -->
-      <div class="panel">
-        <div class="panel-h"><span>赛博老师</span><span class="day" id="chLabel">课程 1/5</span></div>
-        <div class="goalbox"><b>当前任务</b><span id="goalText">—</span></div>
-        <div class="chat" id="chat"></div>
-        <div class="askrow">
-          <button data-q="next">我现在该做什么</button>
-          <button data-q="stop">止损怎么设</button>
-          <button data-q="check">体检报告</button>
+        <div class="kbox"><canvas id="kcanvas"></canvas></div>
+
+        <div class="opts" id="opts"></div>
+        <div class="explain" id="explain"></div>
+
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button class="btn btn-sm btn-block" id="btnNextQ">下一题</button>
+          <button class="btn btn-sm btn-block" id="btnShowWhy">先看解析</button>
         </div>
       </div>
-    </div>
 
-    <!-- 账户 -->
-    <div class="panel" style="margin-top:14px">
-      <div class="panel-h"><span>账户与净值曲线</span><span class="day" id="pnlLabel">—</span></div>
-      <div class="stats" id="stats"></div>
-      <div class="chartwrap"><canvas id="equityChart"></canvas></div>
-    </div>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.7">
+        图中走势为合成教学数据，不对应任何真实股票。
+      </p>
+    </section>
 
-    <!-- 记录 -->
-    <div class="panel" style="margin-top:14px">
-      <div class="panel-h"><span>交易记录</span><span class="day">最近 12 笔</span></div>
-      <div class="tablewrap">
-        <table>
-          <thead><tr><th style="width:12%">日</th><th style="width:10%">方向</th><th style="width:24%">标的</th><th style="width:14%">价格</th><th style="width:16%">盈亏</th><th>备注</th></tr></thead>
-          <tbody id="tradeBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</section>
+    <!-- ================= 图谱 ================= -->
+    <section class="view" id="v-map">
+      <div class="sec-title" style="margin-top:4px"><h2>市场阶段</h2><span>仓位由阶段决定</span></div>
 
-<!-- 06 -->
-<section id="risk">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">06 / RISK ENGINE</div>
-      <h2>风控引擎：集中式唯一不能省的部分</h2>
-      <p class="sec-sub">集中式策略的生死不在选股，在「错了以后亏多少」。以下五条是硬约束，任何一条被突破，策略即失效。</p>
-    </div>
-
-    <div class="grid-2">
-      <div class="card">
-        <div class="tag">Rule 01</div>
-        <h3>单票上限随资金规模递减</h3>
-        <table style="margin-top:8px;font-size:13px">
-          <tr><td>资金 &lt; 50 万</td><td class="mono">单票 ≤ 30%</td></tr>
-          <tr><td>50 万 – 300 万</td><td class="mono">单票 ≤ 25%</td></tr>
-          <tr><td>300 万 – 1000 万</td><td class="mono">单票 ≤ 20%</td></tr>
-          <tr><td>&gt; 1000 万</td><td class="mono">单票 ≤ 15%</td></tr>
-        </table>
-        <p style="margin-top:10px;font-size:12.5px;color:var(--muted)">逻辑：仓位越大，流动性冲击成本越高，且单票黑天鹅的绝对损失越不可承受。芒格本人最确信的标的通常也只占 20%–35%。</p>
+      <div class="seg" id="stageSeg">
+        <button data-s="0" class="on">冰点</button>
+        <button data-s="1">启动</button>
+        <button data-s="2">发酵</button>
+        <button data-s="3">退潮</button>
       </div>
 
-      <div class="card">
-        <div class="tag">Rule 02</div>
-        <h3>行业集中度上限 50%</h3>
-        <p>持有多只股票但同属一个行业，等于一只股票。行业相关性 &gt; 0.7 的标的合并计算仓位。周期股与同产业链上下游也按同一行业计。</p>
-        <p><b>硬约束：</b>单一行业 ≤ 50%，单一主题（如 AI 算力、创新药）≤ 40%。</p>
-      </div>
+      <div class="card cycle" id="cycleCard"></div>
 
-      <div class="card">
-        <div class="tag">Rule 03</div>
-        <h3>账户回撤熔断（分级降仓）</h3>
-        <table style="margin-top:8px;font-size:13px">
-          <tr><td>账户回撤 −8%</td><td class="mono">总仓位降至 60%</td></tr>
-          <tr><td>账户回撤 −12%</td><td class="mono">总仓位降至 40%</td></tr>
-          <tr><td>账户回撤 −18%</td><td class="mono">停止新开仓</td></tr>
-          <tr><td>账户回撤 −25%</td><td class="mono">清仓 + 停手 2 周</td></tr>
-        </table>
-        <p style="margin-top:10px;font-size:12.5px;color:var(--muted)">熔断按「账户峰值回撤」计算，不是按单笔。触发后不加仓摊平，只减仓。</p>
-      </div>
+      <div class="sec-title"><h2>策略 × 市况</h2><span>左右滑动</span></div>
+      <div class="matrixrow" id="matrixRow"></div>
 
-      <div class="card">
-        <div class="tag">Rule 04</div>
-        <h3>单笔风险预算 1%–2%</h3>
-        <p>任何一笔交易，最大可接受亏损 = 总资金 × 1%–2%。仓位由这个预算和止损幅度反推，而不是先决定买多少再看止损在哪。</p>
-        <p style="font-family:var(--mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:10px;margin-top:8px">仓位 = (总资金 × 风险%) ÷ 止损幅度%</p>
-        <p style="font-size:12.5px;color:var(--muted);margin-top:8px">10 万本金、风险 2%、止损 8% → 仓位上限 25%。若算出超过单票硬顶，取硬顶。</p>
-      </div>
-
-      <div class="card">
-        <div class="tag">Rule 05</div>
-        <h3>流动性门槛</h3>
-        <p>持仓市值不超过该股日均成交额的 1%（大资金 0.5%）。否则卖出时你才是那个砸盘的人。</p>
-        <p><b>短线策略另加：</b>标的日成交额不低于 3 亿，避免买了出不来。</p>
-      </div>
-
-      <div class="card" style="background:var(--danger-soft);border-color:#f2d9d6">
-        <div class="tag" style="background:#f7dedb;color:var(--danger)">Hard No</div>
-        <h3 style="color:var(--danger)">四条绝对禁令</h3>
-        <ul style="list-style:none;font-size:13.5px;color:#6b3b36">
-          <li style="padding:5px 0">× 不用杠杆、不融资、不借钱加仓</li>
-          <li style="padding:5px 0">× 不向下补仓摊低成本（长线定投除外，且需事前计划）</li>
-          <li style="padding:5px 0">× 不因「已经跌很多」而抄底加仓</li>
-          <li style="padding:5px 0">× 不在一只股票上超过总资金的 1/3</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 07 -->
-<section id="calc">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">07 / CALCULATOR</div>
-      <h2>仓位计算器：先算能亏多少，再算买多少</h2>
-      <p class="sec-sub">输入资金与止损幅度，输出单票可买金额。结果已自动取「风险预算」与「单票硬顶」的较小值。</p>
-    </div>
-    <div class="calc">
-      <div class="calc-grid">
-        <div class="field"><label>总资金（万元）</label><input id="cap" type="number" value="100" min="1" step="1"></div>
-        <div class="field"><label>单笔风险预算（%）</label><input id="risk" type="number" value="2" min="0.2" max="5" step="0.1"></div>
-        <div class="field"><label>止损幅度（%）</label><input id="stop" type="number" value="8" min="2" max="30" step="0.5"></div>
-        <div class="field"><label>单票硬顶（%）</label><input id="capmax" type="number" value="25" min="5" max="60" step="1"></div>
-      </div>
-      <div class="calc-out">
-        <div class="out"><div class="k">风险预算金额</div><div class="v" id="o-risk">—</div></div>
-        <div class="out"><div class="k">风险法仓位</div><div class="v" id="o-pos">—</div></div>
-        <div class="out"><div class="k">最终建议仓位</div><div class="v" id="o-final">—</div></div>
-        <div class="out"><div class="k">对应金额</div><div class="v" id="o-amt">—</div></div>
-        <div class="out"><div class="k">最大亏损</div><div class="v bad" id="o-loss">—</div></div>
-      </div>
-      <p class="note">说明：止损幅度建议取标的波动率（ATR 的 2 倍）与关键技术位（前低、箱体下沿）中较近者。止损越宽，仓位必须越小，两者是替代关系。</p>
-    </div>
-  </div>
-</section>
-
-<!-- 08 -->
-<section id="exec">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">08 / EXECUTION</div>
-      <h2>买卖执行：把决策变成动作</h2>
-      <p class="sec-sub">集中式的执行只有三个动作：建仓、持有、离场。每个动作都必须在盘前定好，盘中只执行。</p>
-    </div>
-
-    <div class="grid-2">
-      <div class="card">
-        <div class="tag">Entry</div>
-        <h3>建仓：分三笔，不一次打满</h3>
-        <ul class="block" style="padding:0">
-          <li style="position:relative;padding-left:14px;margin-bottom:6px">第 1 笔 40%：信号出现，试仓。错了亏得少。</li>
-          <li style="position:relative;padding-left:14px;margin-bottom:6px">第 2 笔 30%：走势验证（创新高 / 回踩不破），加仓。</li>
-          <li style="position:relative;padding-left:14px;margin-bottom:6px">第 3 笔 30%：趋势确立或业绩兑现，补足目标仓位。</li>
-        </ul>
-        <p style="margin-top:10px"><b>规则：</b>只在盈利头寸上加仓，永不在亏损头寸上加仓。加仓后立刻上移整体止损位到成本线上方。</p>
-      </div>
-
-      <div class="card">
-        <div class="tag">Exit</div>
-        <h3>离场：四类信号，先到先执行</h3>
-        <ul class="block" style="padding:0">
-          <li style="position:relative;padding-left:14px;margin-bottom:6px"><b>逻辑止损：</b>买入理由消失（业绩不达预期、行业景气反转、竞争格局恶化）——不看价格，直接走。</li>
-          <li style="position:relative;padding-left:14px;margin-bottom:6px"><b>技术止损：</b>跌破建仓时设定的价位（−5% 至 −8%，或破关键均线 / 前低）——无条件执行。</li>
-          <li style="position:relative;padding-left:14px;margin-bottom:6px"><b>止盈：</b>达到目标价先减半，剩余用移动止盈（最高点回撤 8%–10% 离场）。</li>
-          <li style="position:relative;padding-left:14px;margin-bottom:6px"><b>时间止损：</b>3 个月内逻辑未兑现且走势横盘，换标的。资金占用也是成本。</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="tag">Position</div>
-        <h3>持有：少看盘，多看逻辑</h3>
-        <p>集中持仓的最大损耗来自「盯盘导致的过度交易」。设定固定检查频率：长线策略每季度看一次财报，波段策略每周看一次周线，不看分时。</p>
-        <p><b>唯一需要即时反应的事：</b>触及止损位，或逻辑出现实质性恶化。其余波动不是信号，是噪音。</p>
-      </div>
-
-      <div class="card">
-        <div class="tag">Discipline</div>
-        <h3>不做事清单</h3>
-        <p>这些行为在集中式体系里全部禁止，因为它们会系统性破坏风险结构：</p>
-        <p style="margin-top:8px">补仓摊平 · 追涨加仓 · 频繁换股 · 因为「跌了很多」买入 · 因为「涨了很多」卖出 · 同时持有 8 只以上却说不出每只的买入理由 · 盘中临时改止损位。</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 09 -->
-<section id="review">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">09 / REVIEW</div>
-      <h2>复盘清单：每天 10 分钟，每周 30 分钟</h2>
-      <p class="sec-sub">复盘的对象是「系统」，不是「股价」。勾选完成情况，进度会保存在本地。</p>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <h3 style="margin-bottom:12px">每日盘后（10 分钟）</h3>
-        <div class="progress"><i id="pd"></i></div>
-        <div id="daily"></div>
-      </div>
-      <div class="card">
-        <h3 style="margin-bottom:12px">每周 / 每月（30 分钟）</h3>
-        <div class="progress"><i id="pw"></i></div>
-        <div id="weekly"></div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:16px">
-      <h3>五个必答问题（每笔交易平仓后填写）</h3>
-      <table style="margin-top:10px">
-        <thead><tr><th style="width:24%">问题</th><th>要检查的东西</th></tr></thead>
-        <tbody>
-          <tr><td>买入理由写下来了吗？</td><td>如果当时没写，那这笔交易的收益无法归因，无论赚亏都不算「系统内交易」。</td></tr>
-          <tr><td>止损位在建仓前设定了吗？</td><td>没有预设止损 = 没有仓位上限 = 这笔交易的风险不可计算。</td></tr>
-          <tr><td>亏损是逻辑错了还是执行错了？</td><td>逻辑错 → 改选股标准；执行错（该止损没止损、提前卖）→ 改纪律，不改策略。</td></tr>
-          <tr><td>这笔仓位符合风险预算吗？</td><td>超配的盈利会强化坏习惯，超配的亏损会摧毁账户。</td></tr>
-          <tr><td>如果重来一次，哪个环节会改？</td><td>答案必须具体到动作（「跌破 20 日线减半」），不能是「更谨慎一点」。</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- 10 -->
-<section id="death">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">10 / FAILURE MODES</div>
-      <h2>集中式的八种典型死法</h2>
-      <p class="sec-sub">这些不是理论风险，是集中持仓最常见的实际亏损路径。逐条对照自己的持仓。</p>
-    </div>
-    <div class="death">
-      <div class="d"><h4>01 把「看好」当「看懂」</h4><p>看了几篇研报就重仓，实质认知并不高于市场平均。集中放大的只是运气。</p></div>
-      <div class="d"><h4>02 单票变成 60% 仓位</h4><p>「越跌越买」把 25% 的仓位补成 60%，风险结构在下跌中悄然失控。</p></div>
-      <div class="d"><h4>03 集中在一只股票的多个影子</h4><p>买 5 只同产业链股票，以为分散了，实际是同一个 beta 押了 5 次。</p></div>
-      <div class="d"><h4>04 逻辑崩了还守着价格</h4><p>业绩已经证伪，却因为「亏 15% 了不甘心」继续持有，把可恢复的亏损变成永久性损失。</p></div>
-      <div class="d"><h4>05 用杠杆放大集中</h4><p>集中已放大波动，杠杆再放大一次。回撤触及平仓线时，判断对也没用。</p></div>
-      <div class="d"><h4>06 短线集中但不空仓</h4><p>龙头战法只学了「重仓买」，没学「退潮空仓」，在下跌周期里反复止损。</p></div>
-      <div class="d"><h4>07 没有时间止损</h4><p>资金锁在长期不涨的标的上，错过其他机会，机会成本被完全忽略。</p></div>
-      <div class="d"><h4>08 高频切换策略</h4><p>这套策略亏两周就换下一套，每套都只经历最差阶段，永远在成本区震荡。</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- 11 -->
-<section id="plan">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">11 / ROLLOUT</div>
-      <h2>30 天启动计划</h2>
-      <p class="sec-sub">不要一上来就实盘重仓。用一个月把系统跑通，用最小资金验证自己的执行能力。</p>
-    </div>
-    <table>
-      <thead><tr><th style="width:14%">阶段</th><th style="width:26%">动作</th><th>判定标准（做不到就不要进下一阶段）</th></tr></thead>
-      <tbody>
-        <tr><td class="mono">第 1 周</td><td>定策略 + 写规则书</td><td>写出一页纸：选股条件 ≥ 3 条、买点 ≥ 2 种、卖点 ≥ 3 种、单票上限、止损线、最大持仓数。所有条款必须可量化。</td></tr>
-        <tr><td class="mono">第 2 周</td><td>建股票池（不超过 10 只）</td><td>每只写 100 字买入逻辑 + 估值锚 + 失效条件。写不出来的直接删掉。</td></tr>
-        <tr><td class="mono">第 3 周</td><td>模拟 / 极小仓位执行</td><td>用 10% 资金真实下单，记录每笔的买入理由、止损位、结果。目的是测执行力，不是测收益。</td></tr>
-        <tr><td class="mono">第 4 周</td><td>复盘 + 校准参数</td><td>统计：胜率、平均盈亏比、平均持仓天数、最大单笔亏损、违规次数。违规次数 &gt; 0 就先修纪律，不加仓。</td></tr>
-        <tr><td class="mono">第 2 月起</td><td>逐步提升至目标仓位</td><td>连续 4 周零违规，且最大回撤未触发熔断，才允许把仓位提到设计值。</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- 12 -->
-<section id="src">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-num">12 / SOURCES</div>
-      <h2>网络教学参考</h2>
-      <p class="sec-sub">以下为本次整理时参考的公开内容，仅作方法论来源，不代表其结论正确或适合你。引用不等于推荐。</p>
-    </div>
-    <div class="src">
-      <div class="s"><b>个人交易体系执行手册（雪球）</b><span>牛熊定攻守 → 五维定节奏 → 产业链挖景气 → 主线选龙头 → 金字塔建仓 → 破位止损 → 每日复盘的九层闭环。</span></div>
-      <div class="s"><b>告别凭感觉下单（雪球）</b><span>交易系统五大支柱：选股、择时、头寸、风控、纪律。含风险百分比法仓位公式。</span></div>
-      <div class="s"><b>个人交易系统（雪球）</b><span>持仓不过 3 只、单笔亏损 ≤ 总资金 2%、大盘空头市强制休息。</span></div>
-      <div class="s"><b>集中投资策略（百科条目）</b><span>5–10 只标的、长持股周期、低换手、能力圈原则，以及对应的回撤暴露风险。</span></div>
-      <div class="s"><b>芒格模型 · 集中持仓</b><span>单标的不超过 20%–35%；集中 + 安全边际，而非集中 + 杠杆；20 个打孔位思维。</span></div>
-      <div class="s"><b>滨利投资访谈（行业自律组织）</b><span>「深度研究获得确定性，集中持仓放大收益」；买入前的压力测试：大盘再跌 20% 时个股最多跌多少。</span></div>
-      <div class="s"><b>平安基金周思聪访谈（中证报）</b><span>持股不超 20 只、前十大占比 60% 以上；景气度决定是否买，确定性决定买多重。</span></div>
-      <div class="s"><b>龙头战法 / 龙空龙（多篇自媒体）</b><span>情绪周期四阶段对应仓位、只做主线总龙、退潮空仓。高执行力要求，风险极高，仅作结构参考。</span></div>
-      <div class="s"><b>广发金工 · 行业轮动（卖方研究）</b><span>六维度打分选前 5 行业，月均换手约 40%；说明行业集中轮动的可量化路径。</span></div>
-      <div class="s"><b>sector-rotation（GitHub 开源）</b><span>申万 31 个一级行业，动量 + 风险调整动量 + 成交额趋势三因子打分，取前 5 等权，月末调仓。</span></div>
-      <div class="s"><b>ETF 动量择势策略（券商金工周报）</b><span>集中持有 5 只 ETF、单只权重可超 30% 的动量轮动实盘跟踪。</span></div>
-      <div class="s"><b>动量轮动回测要点（技术博客）</b><span>前复权、月末决策次月开盘成交、扣费、防幸存者偏差与未来函数。</span></div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <p class="disclaimer">
-      <b>风险提示与免责声明：</b>本文档是对公开交易方法论的整理与结构化，用于个人研究与执行纪律参考，<b>不构成任何投资建议、要约或收益承诺</b>。文中所有参数（止损幅度、仓位上限、回撤阈值）均为通用参考值，未针对任何具体市场环境、标的或个人风险承受能力进行校准，使用者需自行验证与调整。集中持仓会显著放大单一判断错误的后果，历史表现不代表未来收益，A 股市场存在涨跌停、停牌、流动性枯竭等执行约束，实际结果可能与规则设计存在大幅偏离。投资决策及后果由决策者自行承担。
-    </p>
-  </div>
-</footer>
-
-<script>
-/* ============ 策略数据 ============ */
-const STRATS = [
-  {
-    id:"S1", name:"核心 + 卫星集中", en:"Core–Satellite",
-    tagline:"60%–70% 宽基或高股息打底，30%–40% 集中在 2–4 只进攻标的",
-    cats:["long"],
-    logic:"用底仓控制整体波动，用卫星仓位集中表达认知。核心解决「不亏大钱」，卫星解决「跑赢指数」。这是非职业投资者最容易长期坚持的集中式结构，因为它把「择时」和「选股」的压力都限制在 30% 的仓位上。",
-    market:"任何市况可用；牛市卫星权重上调，熊市卫星降至 10% 以下或清空。",
-    pick:[
-      "核心：宽基 ETF 或连续 5 年分红、股息率 > 3% 的蓝筹（1–2 只）",
-      "卫星：自己真正懂的行业，且该行业景气度处于上行或底部反转",
-      "卫星标的必须能写出「三年后利润大致多少」的估算",
-      "卫星数量 2–4 只，单一不超过总资金 20%"
-    ],
-    buy:["核心仓：一次性或分 3 个月定投建满", "卫星仓：等回调至关键均线（20/60 日）企稳、或突破箱体后分两笔进"],
-    sell:["卫星：逻辑破坏立即走，不等价格", "卫星：涨幅超 50% 或估值分位 > 80% 减半", "核心：仅在极端高估（全市场估值分位 > 90%）时减仓"],
-    params:[["核心仓位","60%–70%"],["卫星仓位","30%–40%"],["最大持仓","4–6 只"],["单票上限","20%"],["止损","核心不止损；卫星 −10%"],["预期换手","0.3–1 倍/年"]],
-    fail:["底仓也在追热点，核心失去稳定作用", "卫星数量涨到 8 只以上，实质变成分散组合却没分散风险"],
-    risk:"低–中",
-    src:"结构来自核心卫星配置的通用做法与雪球「主要仓 80%–90% + 机动仓 10%–20%」的实盘框架。"
-  },
-  {
-    id:"S2", name:"高景气行业集中轮动", en:"Sector Concentration",
-    tagline:"只押 1–2 个景气上行行业，行业内的 3–5 只龙头，季度级轮动",
-    cats:["trend","quant"],
-    logic:"A 股的行业收益差异远大于个股差异。与其在全市场选股，不如先解决「哪个行业在赚钱」，再在行业内部取前三。集中度体现在行业，而不是单票。机构研究显示，按动量 + 风险调整动量 + 成交额趋势三个因子对申万 31 个一级行业打分，取前 5 个行业等权，长期可获稳定超额，但月均换手约 40%。",
-    market:"结构市、行业分化明显时最有效；全面普涨或系统性下跌时效果差。",
-    pick:[
-      "行业层面：取近 6–12 个月涨幅前 20%，且近 3 个月成交额环比抬升的行业",
-      "行业景气：营收增速、利润增速连续 2 个季度环比改善",
-      "个股层面：行业内市值前 3 或市占率前 3，剔除 ST、次新、日均成交 < 2 亿",
-      "每个行业最多 3 只，总持仓 3–5 只"
-    ],
-    buy:["月末（或季末）统一打分，次月首个交易日开盘调仓，避免盘中临时决策","单行业首次建仓不超过该行业目标权重的 60%，余量等确认"],
-    sell:["行业跌出打分前 30% → 清仓该行业","行业内个股跌破 60 日线且行业指数同步走弱 → 减半", "每月固定调仓日执行，非调仓日不做调整"],
-    params:[["总持仓","3–5 只"],["行业数","1–2 个"],["单票上限","25%"],["单行业上限","50%"],["调仓频率","月度"],["预期换手","4–6 倍/年"]],
-    fail:["在行业已经涨了 100% 之后才追进去，买在景气顶点", "换手过高，手续费与冲击成本吃掉超额", "把「主题概念」当成「行业景气」，概念没有业绩验证"],
-    risk:"中–高",
-    src:"因子构造参考申万行业轮动开源实现与卖方六维度行业打分研究（历史年化约 15%–18%、最大回撤 23%–35%，均为样本内回测）。"
-  },
-  {
-    id:"S3", name:"主线龙头集中（龙空龙）", en:"Leader Only",
-    tagline:"任何时点最多 1 只核心，退潮期空仓。用空仓代替分散",
-    cats:["short"],
-    logic:"极端聚焦的短线策略：以情绪周期为纲，主线为核，只做市场辨识度最高的那只，没有主线就空仓。它用「时间上的分散」（大部分时间空仓）替代「持仓上的分散」，回撤控制完全依赖空仓纪律而不是止损技巧。",
-    market:"需要有明确的政策或产业主线，且市场有赚钱效应。无主线时空仓等待。",
-    pick:[
-      "先定主线：板块内涨停 ≥ 5 家、有政策或产业逻辑、有龙头—中军—跟风的完整梯队",
-      "再定龙头：连板高度最高、最先上板、分时最主动、板块带动性最强，具备唯一性",
-      "剔除：一字板无换手、支线小题材、纯跟风补涨股",
-      "同时持仓 1 只，最多 1 只核心 + 1 只备选观察（不买入）"
-    ],
-    buy:["启动期：2 成以内试错，只做首板或 1 进 2 弱转强","发酵期：分歧转一致的首次回封，或次日弱转强确认后加至 5–6 成","高潮期不加仓，只减仓"],
-    sell:["跌破启动阳线最低点 / 5 日线 → 无条件走","高位放量长上影、封不住板、板块批量跌停 → 清仓","退潮期信号出现（跌停家数上升、高标断板）→ 全部空仓"],
-    params:[["总持仓","1 只"],["单票上限","30%"],["主升期总仓","50%–60%"],["退潮期总仓","0%"],["单笔止损","−5%"],["预期换手","20 倍以上/年"]],
-    fail:["只学了「重仓龙头」，没学「退潮空仓」，在下跌周期反复止损","把支线小龙头当主线总龙，持有周期错配","一字板接力，开板即天地板"],
-    risk:"极高",
-    src:"结构来自多个自媒体整理的游资龙头战法（情绪周期四阶段、二板定龙头、单票 ≤ 40%、亏损 5% 止损）。此类内容无公开可验证的长期业绩，仅作方法论拆解，不建议作为普通人起步策略。"
-  },
-  {
-    id:"S4", name:"高质量成长集中", en:"Quality Growth",
-    tagline:"5–8 只高 ROE、高现金流、可预测成长的公司，长期持有",
-    cats:["long"],
-    logic:"赚企业盈利增长的钱。核心是用「确定性」换「仓位」：确定性越高，允许的仓位越重。要求每只标的都能通过三张报表的检验，且增长来源可解释（不是靠并购、不是靠补贴、不是靠一次性收益）。",
-    market:"适合中长期，对指数点位不敏感，但对买入估值敏感。",
-    pick:[
-      "ROE 连续 5 年 > 15%，且非高杠杆驱动（资产负债率 < 60%）",
-      "经营性现金流净额 / 净利润 > 0.8，连续 3 年",
-      "营收与利润 3 年复合增速 > 15%，且增速来源可解释",
-      "毛利率稳定或提升，行业格局未恶化（CR5 未下降）",
-      "买入时 PE 低于自身 5 年中位数，或 PEG < 1.2"
-    ],
-    buy:["估值分位 < 50% 时建首仓 40%","每下跌 15% 且逻辑未变，加一档（最多加两档，总仓不超上限）","财报确认增长后补足目标仓位"],
-    sell:["ROE 连续 2 年跌破 12%，或现金流质量恶化 → 减半","买入逻辑破坏（核心竞争力丧失、行业逻辑反转）→ 清仓","估值分位 > 90% 且增速开始下滑 → 减仓"],
-    params:[["总持仓","5–8 只"],["单票上限","20%–25%"],["前五大占比","60%–70%"],["止损","逻辑止损优先，不设机械止损"],["持有周期","1–5 年"],["预期换手","0.3–0.8 倍/年"]],
-    fail:["把「高增长」当「高质量」，忽略现金流与资本开支","在增速见顶时买入，用过去的增长给未来的估值","用杠杆持有，被波动逼出"],
-    risk:"中",
-    src:"参考集中投资策略的通用特征（5–10 只、长周期、低换手、能力圈）与公募基金经理「持股不超 20 只、前十大 &gt; 60%、景气度定买不买、确定性定买多重」的实践。"
-  },
-  {
-    id:"S5", name:"趋势动量集中", en:"Trend Following",
-    tagline:"3–5 只处于明确上升趋势的标的，破位即走，规则完全可回测",
-    cats:["trend","quant"],
-    logic:"不预测方向，只跟随。价格创新高 + 均线多头排列 + 量能配合时买入，趋势破坏时卖出。优点是规则客观、可回测、不依赖主观判断；缺点是胜率通常只有 35%–45%，靠盈亏比赚钱，需要接受连续小亏。",
-    market:"趋势市有效；震荡市会被反复止损（这是策略的正常成本，不是失效）。",
-    pick:[
-      "股价创 250 日新高，或站上 20/60/120 日均线且多头排列",
-      "近 60 日相对沪深 300 有正超额（相对强度 > 1）",
-      "日均成交额 > 2 亿，非 ST、非停牌频发",
-      "按相对强度排名取前 3–5 只"
-    ],
-    buy:["突破日收盘价买入第一笔（40%）","回踩 20 日线不破，加第二笔（30%）","突破后 10 日内再创新高，补足（30%）"],
-    sell:["跌破 20 日线减半，跌破 60 日线清仓","从最高点回撤 10%（或 2 倍 ATR）离场","单笔亏损达 −8% 无条件止损"],
-    params:[["总持仓","3–5 只"],["单票上限","25%"],["单笔止损","−8% 或 2×ATR"],["胜率预期","35%–45%"],["盈亏比要求","> 2.5"],["预期换手","3–6 倍/年"]],
-    fail:["在震荡市里怀疑策略、频繁改参数","止损设太窄，被正常波动打掉","只看技术形态不看流动性，买进卖不出"],
-    risk:"中–高",
-    src:"通用趋势跟踪框架；执行细节参考雪球交易系统搭建指南中的「突破买入 / 回调买入 + 移动止盈 + 单笔风险 1%–2%」。胜率与盈亏比为经验区间，未针对 A 股具体回测验证。"
-  },
-  {
-    id:"S6", name:"事件驱动集中", en:"Event Driven",
-    tagline:"2–3 只，赌一个明确的可验证事件，事件兑现即走",
-    cats:["short","quant"],
-    logic:"收益来自事件本身的信息差与定价偏差：业绩超预期、重大订单、重组、政策落地、被纳入指数。这类机会的关键不是「事件好不好」，而是「市场预期在哪、赔率够不够」。持仓周期短、集中度高、必须事前定好退出时点。",
-    market:"任何市况都可能有事件，但需要足够的交易活跃度来提供流动性。",
-    pick:[
-      "事件必须可验证、有明确时间窗口（财报日、股东大会、政策生效日）",
-      "事前估算：兑现情形下的上行空间 vs 落空情形下的下行空间，赔率 ≥ 2:1",
-      "标的日均成交额 > 3 亿，确保事件日能进出",
-      "同时持有不超过 3 只，且事件类型不重复（避免同一次冲击打穿全部）"
-    ],
-    buy:["事件确认前一天至当天建仓，不超过计划仓位的 60%","落空后的错杀反弹是第二类机会，但只在逻辑未破坏时参与"],
-    sell:["事件兑现当日或次日无条件减仓 70% 以上","事件落空：当日清仓，不等反弹","持有超过 10 个交易日未兑现 → 时间止损，减半"],
-    params:[["总持仓","2–3 只"],["单票上限","20%"],["单笔止损","−6%"],["持有周期","2 天–4 周"],["赔率要求","≥ 2:1"],["预期换手","10 倍以上/年"]],
-    fail:["事件已经公告后才买入，赚的是别人的出货量","用「事件」当借口，其实是没有逻辑的追涨","事件落空后改成「长期看好」，把小亏拖成大亏"],
-    risk:"高",
-    src:"事件驱动策略的通用框架；交易系统指南中的「事件能免则免」「事件兑现前走」原则来自雪球个人交易体系手册。"
-  },
-  {
-    id:"S7", name:"红利低波集中", en:"Dividend Concentration",
-    tagline:"5–8 只高股息、低波动、现金流稳定的标的，靠分红与估值修复赚钱",
-    cats:["value","long"],
-    logic:"收益来源是股息 + 估值均值回归，而不是成长。这类策略的集中是「集中在确定性上」：要求分红可预测、现金流真实、行业地位稳固。它最大的价值是在震荡与下跌市中提供正现金流与心理支撑，让人拿得住。",
-    market:"震荡市、利率下行期、市场风险偏好低时表现最好；大牛市会显著跑输。",
-    pick:[
-      "股息率 > 3.5%，且连续 5 年分红未中断",
-      "分红率（股利支付率）30%–70%，过高说明缺乏再投资机会，过低说明不愿分",
-      "经营性现金流 / 净利润 > 1，自由现金流为正",
-      "近 3 年净利润波动率低，行业需求稳定（公用事业、能源、银行、交运等）",
-      "选择 5–8 只，跨 3 个以上行业"
-    ],
-    buy:["股息率高于自身 5 年中位数时建仓","分批建仓，每跌 8% 加一档（此策略允许有计划的向下加仓，但总仓不超上限）"],
-    sell:["股息率因股价上涨降至 2% 以下 → 减仓","分红被削减或取消 → 清仓（这是逻辑破坏，不是波动）","基本面恶化（现金流断裂、行业政策转向）→ 清仓"],
-    params:[["总持仓","5–8 只"],["单票上限","20%"],["行业上限","40%"],["止损","逻辑止损为主；单票 −15% 复核"],["持有周期","1–3 年"],["预期换手","0.2–0.5 倍/年"]],
-    fail:["只看到高股息，忽略了股息来自股价下跌（股息率陷阱）","集中在同一行业（如全银行），失去分散意义","把它当短线策略做，频繁交易抹掉分红收益"],
-    risk:"低–中",
-    src:"红利策略的通用选股条件；「本金求安全、利润求弹性」的仓位思想来自雪球个人交易体系手册。"
-  },
-  {
-    id:"S8", name:"困境反转集中", en:"Turnaround",
-    tagline:"3–5 只处于周期底部或经营低谷、但资产负债表能撑住的标的",
-    cats:["value"],
-    logic:"赚的是「预期修复」的钱：行业周期见底、公司最坏的时候已经过去、市场仍按最坏情形定价。这类策略赔率极高但胜率低，核心不是判断反弹，而是判断「它不会死」——只要资产负债表撑得住，时间就是你的朋友。",
-    market:"行业周期底部、政策转向初期；不适合在盈利仍在下修的阶段介入。",
-    pick:[
-      "行业出现供给侧收缩信号：产能退出、价格止跌、库存见底",
-      "公司资产负债率 < 70%，短期借款可覆盖，无到期违约风险",
-      "经营性现金流已转正或亏损幅度连续 2 个季度收窄",
-      "股价处于历史 PB 分位 20% 以下，且机构持仓已大幅出清",
-      "3–5 只，跨 2 个以上行业，避免押注单一周期"
-    ],
-    buy:["左侧分三笔建仓，每笔间隔至少 1 个季度或 −15% 幅度","右侧确认（价格突破年线、行业价格连续 2 月上涨）后补足"],
-    sell:["行业景气回升至中位、PB 分位回到 50% 以上 → 分批止盈","逻辑破坏（资产负债表恶化、行业需求永久性下移）→ 清仓，不摊平","持有 2 年仍未反转 → 时间止损"],
-    params:[["总持仓","3–5 只"],["单票上限","20%"],["单笔止损","逻辑止损；单票 −20% 强制复核"],["持有周期","1–3 年"],["赔率要求","≥ 3:1"],["预期换手","0.3 倍/年"]],
-    fail:["把「跌得多」当「困境反转」，忽视基本面还在恶化","用杠杆熬左侧，等不到反转先被平仓","仓位给得太重，回撤 30% 时被迫止损在最低点"],
-    risk:"高",
-    src:"困境反转的通用框架；「深度研究获得确定性，压力测试控制最坏回撤」的买入前风控来自私募访谈中的做法。"
-  }
-];
-
-/* ============ 渲染策略卡 ============ */
-const listEl = document.getElementById('slist');
-
-function render(filter){
-  listEl.innerHTML = '';
-  STRATS.filter(s => filter === 'all' || s.cats.includes(filter)).forEach((s, i) => {
-    const d = document.createElement('details');
-    d.className = 'sitem';
-    d.innerHTML = `
-      <summary>
-        <div class="idx">${s.id}</div>
-        <div>
-          <div class="nm">${s.name}</div>
-          <div class="ds">${s.tagline}</div>
+      <div class="card" style="padding:14px;margin-top:4px">
+        <div style="font-size:11px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">一条铁律</div>
+        <div style="font-size:13px;line-height:1.75;color:var(--ink-2)">
+          阶段判断错误的代价，远大于选股错误的代价。选错一只股票亏 8%，判断错阶段满仓扛一轮下跌亏 30%。<b style="color:var(--brand-2)">先定阶段，再定仓位，最后才选股。</b>
         </div>
-        <div class="chev">›</div>
-      </summary>
-      <div class="sbody">
-        <div class="block" style="grid-column:1/-1">
-          <h5>核心逻辑</h5>
-          <p style="font-size:14px;color:var(--ink-2)">${s.logic}</p>
-          <p style="font-size:13px;color:var(--muted);margin-top:8px"><b>适用市况：</b>${s.market}</p>
+      </div>
+    </section>
+
+    <!-- ================= 我的 ================= -->
+    <section class="view" id="v-me">
+      <div class="sec-title" style="margin-top:4px"><h2>我的</h2><span>本地保存</span></div>
+
+      <div class="stat3">
+        <div class="s"><div class="v" id="mCourse">0/8</div><div class="k">课程</div></div>
+        <div class="s"><div class="v" id="mAcc">—</div><div class="k">K线正确率</div></div>
+        <div class="s"><div class="v" id="mViol">0</div><div class="k">违规记录</div></div>
+      </div>
+
+      <div class="sec-title"><h2>成就</h2><span id="badgeCount">0 / 4</span></div>
+      <div class="badges" id="badges"></div>
+
+      <div class="sec-title"><h2>盘后三问</h2><span>每天勾一次</span></div>
+      <div class="card" style="padding:6px 14px" id="reviewList"></div>
+
+      <div class="card" style="padding:14px;margin-top:14px;background:var(--gold-soft);border-color:#f0e2c0">
+        <div style="font-size:11px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#96702a;margin-bottom:6px">风险提示</div>
+        <div style="font-size:11.5px;color:#6b521a;line-height:1.7">
+          本应用为交易方法论的教学演示，全部行情为程序生成的合成数据，不构成投资建议。集中持仓会放大单一判断错误的后果，实盘决策及后果由本人承担。
         </div>
-        <div class="block"><h5>选股 / 标的条件</h5><ul>${s.pick.map(x=>`<li>${x}</li>`).join('')}</ul></div>
-        <div class="block"><h5>买入规则</h5><ul>${s.buy.map(x=>`<li>${x}</li>`).join('')}</ul></div>
-        <div class="block"><h5>卖出规则</h5><ul>${s.sell.map(x=>`<li>${x}</li>`).join('')}</ul></div>
-        <div class="block"><h5>仓位与参数</h5>${s.params.map(p=>`<div class="kv"><span>${p[0]}</span><span>${p[1]}</span></div>`).join('')}</div>
-        <div class="warnrow"><b>失效信号 / 常见误用：</b>${s.fail.join('；')}。风险等级：${s.risk}。</div>
-        <div class="srcline">来源：${s.src}</div>
-      </div>`;
-    listEl.appendChild(d);
-  });
-}
-render('all');
+      </div>
 
-document.getElementById('filters').addEventListener('click', e => {
-  const b = e.target.closest('button');
-  if(!b) return;
-  document.querySelectorAll('#filters button').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on');
-  render(b.dataset.f);
-});
+      <div style="text-align:center;margin-top:18px">
+        <a href="playbook.html" style="font-size:11.5px;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)">打开完整文档版 · 八套策略手册</a>
+      </div>
+    </section>
+  </main>
 
-/* ============ 仓位计算器 ============ */
-const $ = id => document.getElementById(id);
-function calc(){
-  const cap = parseFloat($('cap').value) || 0;
-  const riskPct = parseFloat($('risk').value) || 0;
-  const stopPct = parseFloat($('stop').value) || 0;
-  const maxPct = parseFloat($('capmax').value) || 0;
+  <nav class="tabbar" id="tabbar">
+    <button data-v="learn" class="on">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H19v3H6.5"/></svg>
+      <span>学院</span>
+    </button>
+    <button data-v="train">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12h4l2.5-7 5 14 2.5-7h5"/></svg>
+      <span>训练</span>
+    </button>
+    <button data-v="map">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v4.5l3 2"/></svg>
+      <span>图谱</span>
+    </button>
+    <button data-v="me">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/></svg>
+      <span>我的</span>
+    </button>
+  </nav>
+</div>
 
-  const riskAmt = cap * riskPct / 100;
-  const posByRisk = stopPct > 0 ? riskAmt / (stopPct / 100) : 0;
-  const posByRiskPct = cap > 0 ? posByRisk / cap * 100 : 0;
-  const finalPct = Math.min(posByRiskPct, maxPct);
-  const finalAmt = cap * finalPct / 100;
+<div class="mask" id="mask"></div>
+<div class="sheet" id="sheet"><div class="handle"></div><div id="sheetBody"></div></div>
 
-  $('o-risk').textContent = riskAmt.toFixed(2) + ' 万';
-  $('o-pos').textContent = posByRiskPct.toFixed(1) + '%';
-  $('o-final').textContent = finalPct.toFixed(1) + '%';
-  $('o-amt').textContent = finalAmt.toFixed(1) + ' 万';
-  $('o-loss').textContent = '−' + (finalAmt * stopPct / 100).toFixed(2) + ' 万';
-}
-['cap','risk','stop','capmax'].forEach(id => $(id).addEventListener('input', calc));
-calc();
-
-/* ============ 复盘清单 ============ */
-const DAILY = [
-  "今天有没有因为盘中情绪改过既定计划？",
-  "持仓标的的买入逻辑，今天有变化吗？（有变化才动手）",
-  "有没有触及止损位却没执行的持仓？",
-  "今天新开仓是否符合单票上限与风险预算？",
-  "总仓位是否在计划区间内？"
-];
-const WEEKLY = [
-  "统计本周交易：笔数、胜率、平均盈亏比、最大单笔亏损",
-  "检查违规次数（补仓、追高、改止损、超配）",
-  "复盘持仓逻辑是否仍成立，逐只写一句话结论",
-  "检查行业集中度是否超过 50%",
-  "账户回撤是否触发熔断档位",
-  "更新股票池：删除逻辑已变的标的，补入新的候选"
-];
-
-function buildChecks(container, items, key, bar){
-  const saved = JSON.parse(localStorage.getItem(key) || '[]');
-  container.innerHTML = items.map((t,i)=>`
-    <label class="check"><input type="checkbox" data-i="${i}" ${saved.includes(i)?'checked':''}><span>${t}</span></label>
-  `).join('');
-  const update = () => {
-    const boxes = [...container.querySelectorAll('input')];
-    const done = boxes.filter(b=>b.checked).map(b=>+b.dataset.i);
-    localStorage.setItem(key, JSON.stringify(done));
-    bar.style.width = (done.length / items.length * 100) + '%';
-  };
-  container.addEventListener('change', update);
-  update();
-}
-buildChecks($('daily'), DAILY, 'wb_daily_checks', $('pd'));
-buildChecks($('weekly'), WEEKLY, 'wb_weekly_checks', $('pw'));
-
-/* ================= 模拟交易实验室 ================= */
-(function(){
-  const el = id => document.getElementById(id);
-  const money = n => (n < 0 ? '−' : '') + '¥' + Math.abs(n).toLocaleString('zh-CN', {maximumFractionDigits:0});
-  function rng(seed){ let a = seed >>> 0; return function(){ a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-
-  const UNI = [
-    {code:'600001', name:'恒远科技', sector:'科技'},
-    {code:'600002', name:'明和消费', sector:'消费'},
-    {code:'600003', name:'北岭资源', sector:'资源'}
-  ];
-  const N = 140;
-
-  const SCENES = {
-    trend:{ label:'趋势场',
-      desc:'三只标的震荡上行，中途各有一次约 10 天的回调。练「顺趋势拿住 + 破位就走」。',
-      seed:7311,
-      plan:[
-        {base:32.4, vol:0.0155, mu:i => (i>45 && i<57) ? -0.0022 : 0.0027},
-        {base:18.6, vol:0.0140, mu:i => (i>50 && i<60) ? -0.0018 : 0.0022},
-        {base:11.2, vol:0.0130, mu:i => (i>40 && i<52) ? -0.0020 : 0.0019}
-      ]},
-    range:{ label:'震荡场',
-      desc:'没有趋势，价格围绕中枢来回。用来体验「趋势策略在震荡市被反复止损」——这是成本，不是失效。',
-      seed:9902,
-      plan:[
-        {base:26.0, vol:0.018, anchor:26.0, mu:() => 0},
-        {base:15.4, vol:0.017, anchor:15.4, mu:() => 0},
-        {base:9.80, vol:0.016, anchor:9.80, mu:() => 0}
-      ]},
-    bear:{ label:'退潮场',
-      desc:'前 70 天上涨，之后转为持续下跌。练最重要的一件事：空仓。',
-      seed:4417,
-      plan:[
-        {base:22.0, vol:0.017, mu:i => i<70 ? 0.0030 : -0.0048},
-        {base:13.5, vol:0.016, mu:i => i<70 ? 0.0026 : -0.0044},
-        {base:8.60, vol:0.015, mu:i => i<70 ? 0.0029 : -0.0042}
-      ]}
-  };
-
-  function genBars(seed, base, vol, mu, anchor, n){
-    const r = rng(seed); let p = base; const out = [];
-    for(let i=0;i<n;i++){
-      const shock = (r()*2-1)*vol;
-      let ret = Math.exp(mu(i) + shock) - 1;
-      if(anchor) ret += (anchor/p - 1) * 0.07;
-      let c = p * (1 + ret);
-      c = Math.max(p*0.9, Math.min(p*1.1, c));
-      const hi = Math.max(p,c) * (1 + r()*0.006);
-      const lo = Math.min(p,c) * (1 - r()*0.006);
-      out.push({o:p, h:hi, l:lo, c:c});
-      p = c;
-    }
-    return out;
-  }
-  function buildBars(key){
-    const sc = SCENES[key], bars = {};
-    sc.plan.forEach((p,i) => { bars[UNI[i].code] = genBars(sc.seed + i*977, p.base, p.vol, p.mu, p.anchor, N); });
-    return bars;
-  }
-
-  let st = null;
-  const pxOf = c => st.bars[c][st.day].c;
-  const nameOf = c => (UNI.find(u => u.code === c) || {}).name || c;
-  function mv(){ let m = 0; for(const c in st.pos) m += st.pos[c].shares * pxOf(c); return m; }
-  function equity(){ return st.cash + mv(); }
-  function newState(key){
-    st = {scene:key, day:0, cash:1000000, init:1000000, pos:{}, bars:buildBars(key),
-          trades:[], viol:[], eq:[1000000], maxEq:1000000, maxDD:0,
-          validOpen:0, stopHits:0, quiet:0, ch:0, warned:false};
-  }
-
-  /* ---- 老师 ---- */
-  function say(who, text){
-    const box = el('chat'); if(!box) return;
-    const d = document.createElement('div');
-    d.className = 'msg' + (who === 'me' ? ' me' : '');
-    d.innerHTML = '<div class="av">' + (who === 'me' ? '我' : '师') + '</div><div class="bub">' + String(text).replace(/\n/g,'<br>') + '</div>';
-    box.appendChild(d);
-    box.scrollTop = box.scrollHeight;
-  }
-
-  const CH = [
-    { n:'第 1 课', t:'规则先于行情',
-      goal:'完成 1 次合规开仓（填止损、单票 ≤ 25%、风险 ≤ 2%），然后推进 1 个交易日。',
-      intro:'欢迎进训练场。这里不考你选股，只考动作是否合规。\n\n第一步：点左边任意一只标的，选数量，填止损价，点买入。写完止损才算完成开仓——止损价才是你真实的仓位上限。\n\n买入后点「下一日」，等这一天走完。',
-      ok: s => s.validOpen >= 1 && s.day >= 1 },
-    { n:'第 2 课', t:'仓位是算出来的',
-      goal:'用「按 25% 仓位」按钮再完成 1 笔合规交易（累计 2 次合规开仓）。',
-      intro:'多数人先决定买多少，再想止损在哪。顺序反了。\n\n正确顺序：先找止损位 → 算这笔最多能亏总资金的 2% → 反推股数。\n\n点「按 15%」或「按 25%」，它会按你填的止损价反推股数。',
-      ok: s => s.validOpen >= 2 },
-    { n:'第 3 课', t:'让止损替你决策',
-      goal:'触发一次止损（不管盈亏），接受它是成本。',
-      intro:'这一课的目的不是赚钱，是体验「被止损打掉」的感觉。\n\n切到「震荡场」，随便按规则开一笔带止损的单，然后连点「下一周」，看止损什么时候被触发。\n\n真正要命的不是止损，是止损时手软。',
-      ok: s => s.stopHits >= 1 },
-    { n:'第 4 课', t:'空仓也是一种仓位',
-      goal:'切到退潮场，连续 5 个交易日不交易，且账户回撤 < 8%。',
-      intro:'最后一课最重要：不交易。\n\n切到「退潮场」，什么都别买，只点「下一日」五次。你会看到标的在往下走。\n\n空仓不是浪费时间，是策略的一部分。',
-      ok: s => s.scene === 'bear' && s.quiet >= 5 && (equity()/s.init - 1) > -0.08 },
-    { n:'第 5 课', t:'交作业',
-      goal:'点「体检报告」，看三个数：胜率、盈亏比、违规次数。',
-      intro:'课程跑完了。点下方「体检报告」。\n\n重点看三个数：胜率、盈亏比、违规次数。\n\n胜率不重要——40% 胜率配 3 倍盈亏比照样赚钱；违规次数才决定你能不能活到那天。',
-      ok: () => false }
-  ];
-
-  function tick(){
-    let guard = 0;
-    while(CH[st.ch] && CH[st.ch].ok(st) && guard++ < 6){
-      st.ch++;
-      if(CH[st.ch]) say('t', '过关。\n\n' + CH[st.ch].intro);
-      else say('t', '全部课程完成。想继续就用「震荡场」或「退潮场」自己跑，重点观察违规次数和回撤。');
-    }
-    const cur = CH[st.ch];
-    el('chLabel').textContent = '课程 ' + Math.min(st.ch + 1, CH.length) + '/' + CH.length;
-    el('goalText').innerHTML = cur ? ('<b style="display:inline;font-size:11px">' + cur.n + ' · ' + cur.t + '</b>　' + cur.goal) : '全部完成';
-  }
-
-  /* ---- 渲染 ---- */
-  function spark(code){
-    const arr = st.bars[code].slice(Math.max(0, st.day - 29), st.day + 1).map(b => b.c);
-    if(arr.length < 2) return '';
-    const mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr);
-    const span = (mx - mn) || 1;
-    const pts = arr.map((v,i) => (i/(arr.length-1)*100).toFixed(1) + ',' + (26 - (v-mn)/span*24).toFixed(1)).join(' ');
-    const up = arr[arr.length-1] >= arr[0];
-    return '<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="' + pts + '" fill="none" stroke="' + (up ? '#c0392b' : '#1a7f5a') + '" stroke-width="2"/></svg>';
-  }
-
-  function renderQuotes(){
-    const sel = el('selCode').value;
-    const box = el('quotes');
-    box.innerHTML = UNI.map(u => {
-      const b = st.bars[u.code][st.day];
-      const prev = st.day > 0 ? st.bars[u.code][st.day-1].c : b.o;
-      const chg = (b.c/prev - 1) * 100;
-      const q = st.pos[u.code];
-      let line = '';
-      if(q){
-        const pnl = (b.c/q.cost - 1) * 100;
-        line = '<div class="posline">持 ' + q.shares + ' 股 · 成本 ' + q.cost.toFixed(2) +
-               ' · <span class="' + (pnl >= 0 ? 'up' : 'down') + '">' + (pnl >= 0 ? '+' : '') + pnl.toFixed(1) + '%</span>' +
-               (q.stop ? ' · 止损 ' + q.stop.toFixed(2) : ' · <span style="color:#a83228">无止损</span>') + '</div>';
-      }
-      return '<div class="qitem' + (sel === u.code ? ' on' : '') + '" data-code="' + u.code + '">' +
-        '<div><div class="nm">' + u.name + '</div><div class="mt">' + u.code + ' · ' + u.sector + '</div>' + line + '</div>' +
-        spark(u.code) +
-        '<div class="r"><div class="px">' + b.c.toFixed(2) + '</div><div class="chg ' + (chg >= 0 ? 'up' : 'down') + '">' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</div></div>' +
-        '</div>';
-    }).join('');
-  }
-
-  function preview(){
-    const code = el('selCode').value;
-    if(!code) return;
-    const sh = Math.floor((parseFloat(el('inShares').value) || 0) / 100) * 100;
-    const sp = parseFloat(el('inStop').value);
-    const px = pxOf(code), amt = px * sh, eq = equity();
-    const pct = eq > 0 ? amt/eq*100 : 0;
-    const risk = (sp > 0 && sp < px) ? (px - sp) * sh : null;
-    el('preview').innerHTML = '金额 <b>' + money(amt) + '</b> · 仓位 <b>' + pct.toFixed(1) + '%</b>' +
-      (risk !== null ? ' · 止损风险 <b>' + money(risk) + '</b>（' + (risk/eq*100).toFixed(2) + '%）'
-                     : ' · <b style="color:#a83228">未设止损</b>');
-  }
-
-  function renderStats(){
-    const eq = equity();
-    const ret = (eq/st.init - 1) * 100;
-    const closed = st.trades.filter(t => t.side === '卖');
-    const wins = closed.filter(t => t.pnl > 0);
-    const loss = closed.filter(t => t.pnl <= 0);
-    const wr = closed.length ? (wins.length/closed.length*100) : 0;
-    const avgW = wins.length ? wins.reduce((a,b) => a + b.pnl, 0)/wins.length : 0;
-    const avgL = loss.length ? Math.abs(loss.reduce((a,b) => a + b.pnl, 0)/loss.length) : 0;
-    const pl = avgL > 0 ? (avgW/avgL) : null;
-
-    el('pnlLabel').textContent = '第 ' + (st.day + 1) + ' 日 / 共 ' + N + ' 日';
-    el('dayLabel').textContent = '第 ' + (st.day + 1) + ' 日';
-    el('stats').innerHTML = [
-      ['总资产', money(eq), ret < 0],
-      ['累计收益', (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%', ret < 0],
-      ['可用现金', money(st.cash), false],
-      ['持仓市值', money(mv()), false],
-      ['最大回撤', st.maxDD.toFixed(1) + '%', st.maxDD < -8],
-      ['平仓笔数', closed.length, false],
-      ['胜率', closed.length ? wr.toFixed(0) + '%' : '—', false],
-      ['盈亏比', pl === null ? '—' : pl.toFixed(2), false],
-      ['违规次数', st.viol.length, st.viol.length > 0]
-    ].map(x => '<div class="out"><div class="k">' + x[0] + '</div><div class="v' + (x[2] ? ' bad' : '') + '">' + x[1] + '</div></div>').join('');
-  }
-
-  function renderTrades(){
-    const rows = st.trades.slice(-12).reverse();
-    el('tradeBody').innerHTML = rows.length ? rows.map(t =>
-      '<tr><td class="mono">D' + t.day + '</td>' +
-      '<td style="color:' + (t.side === '买' ? 'var(--accent)' : 'var(--muted)') + ';font-weight:600">' + t.side + '</td>' +
-      '<td>' + t.name + '<span style="color:var(--muted);font-size:11px"> ' + t.code + '</span></td>' +
-      '<td class="mono">' + t.px.toFixed(2) + '</td>' +
-      '<td class="mono" style="color:' + (t.pnl == null ? 'var(--muted)' : (t.pnl >= 0 ? 'var(--up)' : 'var(--down)')) + '">' +
-        (t.pnl == null ? '—' : (t.pnl >= 0 ? '+' : '') + money(t.pnl)) + '</td>' +
-      '<td style="color:var(--muted)">' + t.note + '</td></tr>'
-    ).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">还没有交易。先做一笔合规开仓。</td></tr>';
-  }
-
-  function drawEq(){
-    const cv = el('equityChart'); if(!cv) return;
-    const w = cv.clientWidth || 600, h = 170, dpr = window.devicePixelRatio || 1;
-    cv.width = w * dpr; cv.height = h * dpr;
-    const ctx = cv.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-    const arr = st.eq, p = 34;
-    const mn = Math.min.apply(null, arr.concat([st.init]));
-    const mx = Math.max.apply(null, arr.concat([st.init]));
-    const pad = (mx - mn) * 0.15 || 1;
-    const lo = mn - pad, hi = mx + pad;
-    const X = i => arr.length < 2 ? p : p + i/(arr.length-1) * (w - p - 12);
-    const Y = v => (h - 22) - (v - lo)/(hi - lo) * (h - 44);
-    const up = arr[arr.length-1] >= st.init;
-    const color = up ? '#c0392b' : '#1a7f5a';
-
-    ctx.strokeStyle = '#eef1f2'; ctx.lineWidth = 1;
-    for(let i=0;i<=3;i++){
-      const y = 22 + i * (h - 44)/3;
-      ctx.beginPath(); ctx.moveTo(p, y); ctx.lineTo(w - 12, y); ctx.stroke();
-    }
-    ctx.setLineDash([4,4]); ctx.strokeStyle = '#cdd5d9';
-    ctx.beginPath(); ctx.moveTo(p, Y(st.init)); ctx.lineTo(w - 12, Y(st.init)); ctx.stroke();
-    ctx.setLineDash([]);
-
-    const grad = ctx.createLinearGradient(0, 20, 0, h);
-    grad.addColorStop(0, up ? 'rgba(192,57,43,.15)' : 'rgba(26,127,90,.15)');
-    grad.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.beginPath(); ctx.moveTo(X(0), Y(arr[0]));
-    arr.forEach((v,i) => ctx.lineTo(X(i), Y(v)));
-    ctx.lineTo(X(arr.length-1), h - 22); ctx.lineTo(X(0), h - 22); ctx.closePath();
-    ctx.fillStyle = grad; ctx.fill();
-
-    ctx.beginPath(); ctx.moveTo(X(0), Y(arr[0]));
-    arr.forEach((v,i) => ctx.lineTo(X(i), Y(v)));
-    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
-
-    ctx.fillStyle = '#6b7885'; ctx.font = '10px ui-monospace,monospace';
-    ctx.fillText((hi/10000).toFixed(0) + '万', 2, 26);
-    ctx.fillText((lo/10000).toFixed(0) + '万', 2, h - 18);
-  }
-
-  function all(){ renderQuotes(); renderStats(); renderTrades(); drawEq(); preview(); }
-
-  /* ---- 交易动作 ---- */
-  function autoStop(code){
-    const seg = st.bars[code].slice(Math.max(0, st.day - 19), st.day + 1);
-    const low = Math.min.apply(null, seg.map(b => b.l));
-    const px = pxOf(code);
-    return Math.min(Math.max(px * 0.92, low * 0.99), px * 0.999).toFixed(2);
-  }
-
-  function buy(){
-    const code = el('selCode').value;
-    const sh = Math.floor((parseFloat(el('inShares').value) || 0) / 100) * 100;
-    const sp = parseFloat(el('inStop').value);
-    const px = pxOf(code);
-    if(sh < 100) return say('t', '数量至少 100 股，且必须是 100 的整数倍。');
-    if(sp > 0 && sp >= px) return say('t', '止损价必须低于买入价，否则这笔单没有意义。');
-    const fee = Math.max(5, px * sh * 0.00025);
-    if(px * sh + fee > st.cash) return say('t', '现金不足：可用 ' + money(st.cash) + '，这笔需要 ' + money(px * sh + fee) + '（含佣金）。');
-
-    const eq = equity(), pct = px * sh / eq, q = st.pos[code];
-    const vs = [];
-    if(!(sp > 0)) vs.push(['未设止损', '这笔单没有止损价。没有止损就没有仓位上限——风险不可计算，这不算一次开仓，算一次赌。']);
-    else if((px - sp) * sh / eq > 0.02) vs.push(['单笔风险超预算', '这笔的止损风险是总资金的 ' + ((px-sp)*sh/eq*100).toFixed(1) + '%，超过 2% 预算。要么减少股数，要么接受更宽的止损并同步减仓。']);
-    if(pct > 0.25) vs.push(['单票超限', '单票仓位 ' + (pct*100).toFixed(0) + '%，超过 25% 硬顶。集中不等于梭哈。']);
-    if(q && px < q.cost) vs.push(['向下补仓', '你在低于成本价的价位加仓，这是摊平成本。集中式体系里禁止这个动作。']);
-    const sector = (UNI.find(u => u.code === code) || {}).sector;
-    let secAmt = px * sh;
-    for(const c in st.pos){ if((UNI.find(u => u.code === c) || {}).sector === sector) secAmt += st.pos[c].shares * pxOf(c); }
-    if(secAmt / eq > 0.5) vs.push(['行业超限', '加上这笔，' + sector + '行业占总资产 ' + (secAmt/eq*100).toFixed(0) + '%，超过 50% 上限。']);
-
-    st.cash -= px * sh + fee;
-    if(q){ q.cost = (q.cost * q.shares + px * sh) / (q.shares + sh); q.shares += sh; if(sp > 0) q.stop = sp; }
-    else st.pos[code] = {shares:sh, cost:px, stop:(sp > 0 ? sp : null), openDay:st.day};
-    st.trades.push({day:st.day, code:code, name:nameOf(code), side:'买', px:px, shares:sh, pnl:null, note:(sp > 0 ? '止损 ' + sp.toFixed(2) : '无止损')});
-    if(vs.length === 0) st.validOpen++;
-
-    if(vs.length === 0){
-      say('t', '成交。' + nameOf(code) + ' ' + sh + ' 股 @ ' + px.toFixed(2) + '，止损 ' + sp.toFixed(2) +
-        '。这笔最大亏损 ' + money((px-sp)*sh) + '，占总资金 ' + ((px-sp)*sh/eq*100).toFixed(2) + '%。' +
-        '\n\n现在点「下一日」，让市场说话。');
-    } else {
-      say('t', '单子成交了，但有 ' + vs.length + ' 条规则被突破：');
-      vs.forEach(v => { st.viol.push({day:st.day, k:v[0]}); say('t', '· ' + v[0] + '：' + v[1]); });
-    }
-    el('inStop').value = '';
-    all(); tick();
-  }
-
-  function sellAt(code, price, note){
-    const q = st.pos[code]; if(!q) return;
-    const amt = price * q.shares;
-    const fee = Math.max(5, amt * 0.00025) + amt * 0.0005;
-    st.cash += amt - fee;
-    const pnl = (price - q.cost) * q.shares - fee;
-    st.trades.push({day:st.day, code:code, name:nameOf(code), side:'卖', px:price, shares:q.shares, pnl:pnl, note:note});
-    delete st.pos[code];
-    return pnl;
-  }
-
-  function sellAll(){
-    const code = el('selCode').value, q = st.pos[code];
-    if(!q) return say('t', '这只没有持仓。');
-    if(q.openDay >= st.day) return say('t', 'T+1：当日买入的仓位，要下一个交易日才能卖。');
-    const pnl = sellAt(code, pxOf(code), '手动卖出');
-    say('t', (pnl >= 0 ? '按纪律止盈，' : '按纪律止损，') + '这笔 ' + (pnl >= 0 ? '+' : '') + money(pnl) + '。' +
-      (pnl >= 0 ? '\n\n注意：赚钱不代表动作对，亏钱也不代表动作错。先看动作，再看结果。' : '\n\n止损执行了就是对的。不要回头算「如果不卖会怎样」。'));
-    all(); tick();
-  }
-
-  function nextDay(n){
-    for(let k=0;k<n;k++){
-      if(st.day >= N - 1){ say('t', '这一轮行情走完了（' + N + ' 个交易日）。点「重置」可以重开一轮。'); break; }
-      st.day++;
-      let traded = false;
-      for(const c in st.pos){
-        const q = st.pos[c], b = st.bars[c][st.day];
-        if(q.stop && b.l <= q.stop){
-          const fill = Math.min(q.stop, b.o);
-          const pnl = sellAt(c, fill, '止损 ' + q.stop.toFixed(2));
-          st.stopHits++; traded = true;
-          say('t', '止损触发：' + nameOf(c) + ' 跌破 ' + q.stop.toFixed(2) + '，按 ' + fill.toFixed(2) + ' 离场，' + (pnl >= 0 ? '+' : '') + money(pnl) + '。' +
-            (pnl < 0 ? '\n\n这就是成本。控制它是仓位的工作，不是止损的工作——止损只负责把亏损锁在你事先算过的范围内。' : ''));
-        }
-      }
-      st.quiet = traded ? 0 : st.quiet + 1;
-      const e = equity();
-      st.eq.push(e);
-      if(e > st.maxEq) st.maxEq = e;
-      const dd = (e/st.maxEq - 1) * 100;
-      if(dd < st.maxDD) st.maxDD = dd;
-      if(dd <= -8 && !st.warned){
-        st.warned = true;
-        say('t', '账户从峰值回撤 ' + dd.toFixed(1) + '%，触发 −8% 档位。规则要求把总仓位降到 60% 以下——现在就该减，不等反弹。');
-      }
-      if(st.day === 70 && st.scene === 'bear'){
-        say('t', '注意：从这一段开始，趋势转向下了。还在持仓的话，问自己一句——买入理由还在吗？');
-      }
-    }
-    all(); tick();
-  }
-
-  function ask(q){
-    if(q === 'next'){
-      const cur = CH[st.ch];
-      say('me', '我现在该做什么？');
-      say('t', cur ? (cur.n + '：' + cur.goal + '\n\n提示：' + ({0:'先填止损价再点买入，止损建议用「前 20 日最低价 × 0.99」或 −8%，取更近的那个。',
-        1:'点「按 25% 仓位」，股数会自动按止损价反推，然后买入。',
-        2:'切到震荡场，开一笔带止损的单，连点「下一周」。',
-        3:'切到退潮场，只点「下一日」，别买。',
-        4:'点「体检报告」。'}[st.ch] || '') ) : '全部课程已完成，自己跑一轮吧。');
-    }
-    if(q === 'stop'){
-      say('me', '止损怎么设？');
-      say('t', '三个锚，选最靠得住的那个：\n\n1）技术位：前 20 日最低价下方一点，或箱体下沿。破了说明你的判断已经被证伪。\n2）波动率：2 倍 ATR。波动大的票给宽一点，否则会被正常波动扫掉。\n3）固定比例：−5% 到 −8%。简单，但和个股波动无关，只适合快进快出。\n\n定完止损，仓位就固定了：仓位 = 总资金 × 2% ÷ 止损幅度。止损越宽，买得越少，两者是替代关系。');
-    }
-    if(q === 'check'){
-      const closed = st.trades.filter(t => t.side === '卖');
-      const wins = closed.filter(t => t.pnl > 0);
-      const loss = closed.filter(t => t.pnl <= 0);
-      const wr = closed.length ? (wins.length/closed.length*100).toFixed(0) : '—';
-      const avgW = wins.length ? wins.reduce((a,b) => a + b.pnl, 0)/wins.length : 0;
-      const avgL = loss.length ? Math.abs(loss.reduce((a,b) => a + b.pnl, 0)/loss.length) : 0;
-      const pl = avgL > 0 ? (avgW/avgL).toFixed(2) : '—';
-      const ret = ((equity()/st.init - 1) * 100).toFixed(2);
-      let verdict;
-      if(st.viol.length === 0 && closed.length >= 1) verdict = '动作干净，零违规。可以开始加大仓位了。';
-      else if(st.viol.length > 0) verdict = '有 ' + st.viol.length + ' 次违规。先修纪律，别急着加仓——违规的盈利会强化坏习惯。';
-      else verdict = '还没有平仓记录，打完一轮再看。';
-      say('me', '体检报告。');
-      say('t', '第 ' + (st.day + 1) + ' 个交易日\n累计收益 ' + ret + '% · 最大回撤 ' + st.maxDD.toFixed(1) + '%\n平仓 ' + closed.length + ' 笔 · 胜率 ' + wr + '% · 盈亏比 ' + pl + ' · 违规 ' + st.viol.length + ' 次\n\n' + verdict);
-    }
-  }
-
-  /* ---- 初始化 ---- */
-  function start(key, keepCh){
-    const ch = (keepCh && st) ? st.ch : 0;
-    newState(key);
-    st.ch = ch;
-    el('selCode').innerHTML = UNI.map(u => '<option value="' + u.code + '">' + u.name + '（' + u.code + '）</option>').join('');
-    el('chat').innerHTML = '';
-    el('sceneDesc').textContent = SCENES[key].desc;
-    document.querySelectorAll('#sceneTabs button').forEach(b => b.classList.toggle('on', b.dataset.s === key));
-    el('inStop').value = autoStop(UNI[0].code);
-    all();
-    if(keepCh && st.ch > 0 && CH[st.ch]) say('t', CH[st.ch].intro);
-    else say('t', CH[0].intro);
-    tick();
-  }
-
-  el('quotes').addEventListener('click', e => {
-    const it = e.target.closest('.qitem'); if(!it) return;
-    el('selCode').value = it.dataset.code;
-    el('inStop').value = autoStop(it.dataset.code);
-    renderQuotes(); preview();
-  });
-  el('selCode').addEventListener('change', () => { el('inStop').value = autoStop(el('selCode').value); renderQuotes(); preview(); });
-  ['inShares','inStop'].forEach(id => el(id).addEventListener('input', preview));
-  el('quickPos').addEventListener('click', e => {
-    const b = e.target.closest('button'); if(!b) return;
-    const code = el('selCode').value, px = pxOf(code);
-    const eq = equity(), pct = parseFloat(b.dataset.p);
-    let sh = Math.floor(eq * pct / px / 100) * 100;
-    if(sh < 100) sh = 100;
-    el('inShares').value = sh;
-    preview();
-  });
-  el('btnBuy').addEventListener('click', buy);
-  el('btnSell').addEventListener('click', sellAll);
-  el('btnDay').addEventListener('click', () => nextDay(1));
-  el('btnWeek').addEventListener('click', () => nextDay(5));
-  el('btnReset').addEventListener('click', () => start(st.scene, false));
-  document.querySelector('.askrow').addEventListener('click', e => {
-    const b = e.target.closest('button'); if(!b) return;
-    ask(b.dataset.q);
-  });
-  el('sceneTabs').addEventListener('click', e => {
-    const b = e.target.closest('button'); if(!b) return;
-    if(st.scene !== b.dataset.s) start(b.dataset.s, true);
-  });
-  window.addEventListener('resize', () => { if(st) drawEq(); });
-
-  start('trend', false);
-})();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
