@@ -210,6 +210,15 @@ export default {
       pickK: null
     }
   },
+  onShow() {
+    // 从「学」页流派自测跳过来：ta_open_school 存的是要展开的流派 key
+    const k = uni.getStorageSync('ta_open_school')
+    if (k) {
+      uni.removeStorageSync('ta_open_school')
+      const t = this.schools.find(x => x.k === k)
+      if (t) this.cur = t
+    }
+  },
   methods: {
     vlabel(t) {
       if (t.verified === '无') return '无凭证'
