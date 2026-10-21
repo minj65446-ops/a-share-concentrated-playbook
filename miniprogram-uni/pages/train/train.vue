@@ -19,7 +19,7 @@
           <view class="h3">{{ qa.title }}</view>
           <view class="q">{{ qa.q }}</view>
         </view>
-        <text class="pill brand">连对 {{ streak }}</text>
+        <text class="pill brand">{{ idx + 1 }}/{{ total }} · 连对 {{ streak }}</text>
       </view>
 
       <canvas canvas-id="kline" id="kline" class="kbox" @touchstart="onTap"></canvas>
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { buildCase } from '../../common/kline.js'
+import { buildCase, size } from '../../common/cases.js'
 
 export default {
   data() {
@@ -54,6 +54,7 @@ export default {
         { k: 'm', s: '期', t: '情绪周期', d: '几成仓看阶段' }
       ],
       idx: 0, qa: {}, answered: false, lastOK: false, pick: '',
+      total: size,
       streak: 0, stats: { total: 0, right: 0 }
     }
   },
@@ -79,7 +80,7 @@ export default {
       this.pick = ''
       this.$nextTick(() => this.draw())
     },
-    next() { this.load((this.idx + 1) % 2) },
+    next() { this.load((this.idx + 1) % size) },
     resultClass(k) {
       if (!this.answered) return ''
       if (k === this.qa.ans) return 'right'
@@ -168,6 +169,16 @@ export default {
         const y1 = Y(Math.max(b.o, b.c)), y2 = Y(Math.min(b.o, b.c))
         ctx.fillRect(X(i) - bw / 2, y1, bw, Math.max(1.5, y2 - y1))
       })
+
+      // 颈线（双头那类题）
+      if (this.qa.neck) {
+        ctx.setStrokeStyle('rgba(15,26,38,.35)')
+        ctx.setLineWidth(1)
+        const y = Y(this.qa.neck)
+        ctx.setLineDash([3, 3])
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke()
+        ctx.setLineDash([])
+      }
 
       // 标记
       this.qa.marks.forEach(m => {
