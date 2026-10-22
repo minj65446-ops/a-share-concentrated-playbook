@@ -5,6 +5,45 @@
       <view class="s">数据保存在本机</view>
     </view>
 
+    <!-- 等级卡：经验值 + 段内进度（段位仍由 rank.js 判定，经验值买不到毕业） -->
+    <view class="lvcard">
+      <view class="lvtop">
+        <view class="lvl">
+          <view class="lvno">LV{{ lv.lv }}</view>
+          <view class="lvs">经验 {{ prof.xp }} · 连续 {{ prof.streak }} 天</view>
+        </view>
+        <view class="lvfreeze" v-if="prof.freezes">{{ prof.freezes }} 张补签卡</view>
+      </view>
+      <view class="lvtrack"><view class="fi" :style="{ width: lv.pct + '%' }"></view></view>
+      <view class="lvfoot">本段 {{ lv.into }} / {{ lv.need }}　经验只影响本段进度，不影响段位判定</view>
+    </view>
+
+    <!-- 近 7 天：打卡记录是段位的基础数据之一，摆出来比藏着有用 -->
+    <view class="sec-title">
+      <view class="h">近 7 天</view>
+      <view class="s">{{ weekOn }} 天学过</view>
+    </view>
+    <view class="week">
+      <view class="wd" v-for="(d, i) in weekDays" :key="i" :class="{ on: d.on, today: d.today }">
+        <view class="dot"></view>
+        <view class="lb">{{ d.wd }}</view>
+      </view>
+    </view>
+
+    <view class="sec-title">
+      <view class="h">今天做了什么</view>
+      <view class="s">+{{ todayXp }} 经验</view>
+    </view>
+    <view class="card list">
+      <view class="logrow" v-if="!todayList.length">
+        <view class="lt">今天还没开始。答一张题卡就算打卡。</view>
+      </view>
+      <view class="logrow" v-for="(x, i) in todayList" :key="i">
+        <view class="lt">{{ x.w }}</view>
+        <view class="lx">+{{ x.xp }}</view>
+      </view>
+    </view>
+
     <view class="stat3">
       <view class="s">
         <view class="v">{{ done.length }}/8</view>
@@ -77,6 +116,7 @@
 
 <script>
 import { THEMES, apply as applyTheme, read as readTheme } from '../../common/theme.js'
+import { store, readProf, week, levelOf, todayLog, todayXp } from '../../common/learn.js'
 
 export default {
   data() {
@@ -90,7 +130,13 @@ export default {
         '没有触及止损却没执行的单子',
         '持仓的买入理由今天仍然成立'
       ],
-      checked: []
+      checked: [],
+      /* v8 */
+      prof: { xp: 0, streak: 0, freezes: 0 },
+      lv: { lv: 1, into: 0, need: 200, pct: 0 },
+      weekDays: [],
+      todayList: [],
+      todayXp: 0
     }
   },
   computed: {
@@ -114,6 +160,7 @@ export default {
       ]
     },
     badgeOn() { return this.badges.filter(b => b.on).length },
+    weekOn() { return this.weekDays.filter(d => d.on).length },
     themeName() {
       const t = this.themes.find(x => x.k === this.theme)
       return t ? t.name : ''
@@ -131,6 +178,14 @@ export default {
     const key = 'ta_review_' + this.today()
     this.checked = uni.getStorageSync(key) || []
     this._key = key
+
+    /* 学习档案 */
+    const p = readProf(store)
+    this.prof = { xp: p.xp || 0, streak: p.streak || 0, freezes: p.freezes || 0 }
+    this.lv = levelOf(p.xp || 0)
+    this.weekDays = week(store)
+    this.todayList = todayLog(store)
+    this.todayXp = todayXp(store)
   },
   methods: {
     pick(k) {
@@ -154,6 +209,51 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/* 等级卡 */
+.lvcard {
+  background: linear-gradient(150deg, var(--brand) 0%, var(--hero-mid) 62%, var(--hero-end) 100%);
+  border-radius: var(--r-lg); padding: 30rpx; color: #fff;
+  box-shadow: 0 12rpx 30rpx rgba(22, 40, 63, .2);
+}
+.lvtop { display: flex; align-items: flex-end; justify-content: space-between; }
+.lvno { font-size: 42rpx; font-weight: 800; letter-spacing: -.5rpx; line-height: 1; }
+.lvs { font-size: 21rpx; opacity: .75; margin-top: 10rpx; }
+.lvfreeze {
+  font-size: 20rpx; padding: 6rpx 16rpx; border-radius: 30rpx;
+  background: rgba(255, 255, 255, .16);
+}
+.lvtrack {
+  height: 10rpx; border-radius: 6rpx; margin-top: 22rpx;
+  background: rgba(255, 255, 255, .2); overflow: hidden;
+}
+.lvtrack .fi { height: 100%; background: #fff; border-radius: 6rpx; }
+.lvfoot { font-size: 19rpx; opacity: .68; margin-top: 14rpx; line-height: 1.6; }
+
+/* 近 7 天 */
+.week { display: flex; gap: 12rpx; }
+.week .wd {
+  flex: 1; background: var(--card); border: 1rpx solid var(--line);
+  border-radius: var(--r-sm); padding: 20rpx 0; text-align: center;
+}
+.week .wd .dot {
+  width: 20rpx; height: 20rpx; border-radius: 50%;
+  background: var(--bg-2); margin: 0 auto;
+}
+.week .wd .lb { font-size: 19rpx; color: var(--muted); margin-top: 10rpx; }
+.week .wd.on { background: var(--brand-soft); border-color: var(--brand-line); }
+.week .wd.on .dot { background: var(--brand); }
+.week .wd.on .lb { color: var(--brand-2); }
+.week .wd.today { border-color: var(--brand); }
+
+/* 今天做了什么 */
+.logrow {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 18rpx; padding: 22rpx 0; border-bottom: 1rpx solid var(--line-2);
+}
+.logrow:last-child { border-bottom: none; }
+.logrow .lt { font-size: 24rpx; color: var(--ink-2); line-height: 1.55; }
+.logrow .lx { font-size: 23rpx; font-weight: 800; color: var(--brand); flex: 0 0 auto; }
+
 .stat3 { display: flex; gap: 16rpx; }
 .stat3 .s {
   flex: 1; background: #fff; border: 1px solid var(--line); border-radius: var(--r);
