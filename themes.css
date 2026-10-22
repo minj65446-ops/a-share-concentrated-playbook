@@ -1,0 +1,274 @@
+/* ============================================================
+   A股交易学院 · 界面风格（5 套）
+   切换：<html data-theme="dark">，落盘 ta_theme
+   新增主题只需补一段 [data-theme="x"]，变量全集见 :root
+   ============================================================ */
+
+/* ================= 1. 晨光蓝（默认） ================= */
+/* 就是 :root 的原值，这里留空位只为文档完整性 */
+
+/* ================= 2. 夜航深 · 终端观感 ================= */
+[data-theme="dark"]{
+  --bg:#0e131a;
+  --bg-2:#0a0e14;
+  --card:#161c26;
+  --card-2:#1b2230;
+  --ink:#e8edf4;
+  --ink-2:#b8c2d0;
+  --muted:#7c8798;
+  --line:#252d3a;
+  --line-2:#1f2733;
+
+  --brand:#4a90d9;
+  --brand-2:#7fb3ea;
+  --brand-soft:#182a3f;
+  --up:#ff5f5a;
+  --up-soft:#3a1f20;
+  --down:#28c07d;
+  --down-soft:#14322a;
+  --gold:#e0a83a;
+  --gold-soft:#33280f;
+  --danger:#ff6b60;
+
+  --ok-line:#20493c;
+  --ok-ink:#7fd6b0;
+  --ok-ink-2:#5cc79b;
+  --bad-line:#4a2626;
+  --bad-ink:#ff9b95;
+  --bad-ink-2:#ff8f88;
+  --bad-bg-2:#241618;
+  --gold-line:#4a3c1c;
+  --gold-ink:#e8c069;
+  --gold-ink-2:#d4ab52;
+  --brand-line:#25405c;
+  --brand-line-2:#2b3a4d;
+
+  --hero-mid:#1f5b96;
+  --hero-end:#2b7fc4;
+  --hero-shadow:0 14px 32px rgba(0,0,0,.45);
+  --focus-ring:0 0 0 2.5px rgba(74,144,217,.22);
+  --glass:rgba(14,19,26,.88);
+  --glass-2:rgba(22,28,38,.96);
+  --mask:rgba(0,0,0,.62);
+  --page-shadow:0 0 80px rgba(0,0,0,.5);
+  --panel-1:#1a212c;
+  --panel-2:#141a23;
+
+  --shadow-s:0 1px 2px rgba(0,0,0,.30);
+  --shadow:0 2px 10px rgba(0,0,0,.35);
+  --shadow-l:0 12px 32px rgba(0,0,0,.50);
+
+  --hero-btn-bg:#ffffff;
+  --hero-btn-ink:#10283f;
+}
+/* 深色下这两处半透明白底会糊 */
+[data-theme="dark"] .btn-ghost{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.20)}
+[data-theme="dark"] .mark{background:linear-gradient(140deg,var(--brand),var(--brand-2));color:#0e131a}
+
+/* ================= 3. 纸感暖 · 长文阅读 ================= */
+[data-theme="paper"]{
+  --bg:#faf7f0;
+  --bg-2:#f1ebdf;
+  --card:#fffdf8;
+  --card-2:#faf5ec;
+  --ink:#1e1a14;
+  --ink-2:#4a4237;
+  --muted:#8a7f6d;
+  --line:#e3dbc9;
+  --line-2:#efe8da;
+
+  --brand:#7a3b2e;
+  --brand-2:#9c5340;
+  --brand-soft:#f7ece6;
+  --up:#c0392b;
+  --up-soft:#fbeae6;
+  --down:#1e7a52;
+  --down-soft:#e6f2ea;
+  --gold:#a67c0d;
+  --gold-soft:#faf1d8;
+  --danger:#a32f22;
+
+  --ok-line:#cfe3d5;
+  --ok-ink:#1e5c3e;
+  --ok-ink-2:#2c7a52;
+  --bad-line:#edcec6;
+  --bad-ink:#8f2f24;
+  --bad-ink-2:#9c3b2e;
+  --bad-bg-2:#fdf6f3;
+  --gold-line:#e8d8a8;
+  --gold-ink:#8a6a10;
+  --gold-ink-2:#6b521a;
+  --brand-line:#e6d5cc;
+  --brand-line-2:#d9c8bd;
+
+  --hero-mid:#8f4a38;
+  --hero-end:#a9614a;
+  --hero-shadow:0 14px 32px rgba(122,59,46,.22);
+  --focus-ring:0 0 0 2.5px rgba(122,59,46,.14);
+  --glass:rgba(250,247,240,.90);
+  --glass-2:rgba(255,253,248,.97);
+  --mask:rgba(30,26,20,.45);
+  --page-shadow:0 0 80px rgba(122,100,60,.12);
+  --panel-1:#fffdf8;
+  --panel-2:#f6f0e4;
+}
+/* 纸感：标题走衬线，正文保持无衬线（移动端宋体小字会糊） */
+[data-theme="paper"] .sec-title h2,
+[data-theme="paper"] .hero .big,
+[data-theme="paper"] .rankcard .rk-name,
+[data-theme="paper"] .course .tt,
+[data-theme="paper"] .sheet-title{font-family:var(--font-serif);letter-spacing:.01em}
+[data-theme="paper"] .device{box-shadow:none;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+
+/* ================= 4. 极简黑白 · 高对比 ================= */
+[data-theme="mono"]{
+  --bg:#ffffff;
+  --bg-2:#f7f7f8;
+  --card:#ffffff;
+  --card-2:#fafafa;
+  --ink:#0a0a0a;
+  --ink-2:#3f3f46;
+  --muted:#8b8b93;
+  --line:#e7e7e9;
+  --line-2:#f2f2f3;
+
+  --brand:#0a0a0a;
+  --brand-2:#2b2b31;
+  --brand-soft:#f2f2f3;
+  --up:#d92d20;
+  --up-soft:#fdeceb;
+  --down:#067647;
+  --down-soft:#e6f5ee;
+  --gold:#a15c07;
+  --gold-soft:#fdf3e3;
+  --danger:#c4261c;
+
+  --ok-line:#c8e6d6;
+  --ok-ink:#07553a;
+  --ok-ink-2:#0b6b48;
+  --bad-line:#f2c9c5;
+  --bad-ink:#912018;
+  --bad-ink-2:#9e2219;
+  --bad-bg-2:#fdf7f6;
+  --gold-line:#e8d5b0;
+  --gold-ink:#7d4a08;
+  --gold-ink-2:#5e3706;
+  --brand-line:#e0e0e3;
+  --brand-line-2:#d4d4d8;
+
+  --hero-mid:#26262b;
+  --hero-end:#3f3f46;
+  --hero-shadow:0 14px 32px rgba(10,10,10,.20);
+  --focus-ring:0 0 0 2.5px rgba(10,10,10,.12);
+  --glass:rgba(255,255,255,.90);
+  --glass-2:rgba(255,255,255,.97);
+  --mask:rgba(10,10,10,.45);
+  --page-shadow:0 0 80px rgba(10,10,10,.08);
+  --panel-1:#ffffff;
+  --panel-2:#f7f7f8;
+
+  --r-lg:14px;
+  --r:10px;
+  --r-sm:7px;
+  --shadow-s:0 1px 2px rgba(10,10,10,.04);
+  --shadow:0 2px 8px rgba(10,10,10,.06);
+  --shadow-l:0 12px 28px rgba(10,10,10,.10);
+
+}
+/* 极简：去掉一切装饰性渐变，靠边框说话 */
+[data-theme="mono"] .hero,
+[data-theme="mono"] .rankcard,
+[data-theme="mono"] .topbar .mark{background:var(--brand);background-image:none}
+[data-theme="mono"] .hero::after{display:none}
+[data-theme="mono"] .card,
+[data-theme="mono"] .course,
+[data-theme="mono"] .rk{box-shadow:none}
+
+/* ================= 5. 青瓷 · 低饱和护眼 ================= */
+[data-theme="celadon"]{
+  --bg:#f2f6f5;
+  --bg-2:#e7eeec;
+  --card:#ffffff;
+  --card-2:#f7faf9;
+  --ink:#12241f;
+  --ink-2:#33524a;
+  --muted:#74908a;
+  --line:#dde7e4;
+  --line-2:#eaf1ef;
+
+  --brand:#12594c;
+  --brand-2:#1a7a68;
+  --brand-soft:#e6f2ef;
+  --up:#d6453f;
+  --up-soft:#fbeceb;
+  --down:#0f8a5f;
+  --down-soft:#e5f4ed;
+  --gold:#a67c0d;
+  --gold-soft:#fbf3df;
+  --danger:#b3342c;
+
+  --ok-line:#c9e5d8;
+  --ok-ink:#12563f;
+  --ok-ink-2:#14754f;
+  --bad-line:#f0ccc7;
+  --bad-ink:#8f2f26;
+  --bad-ink-2:#9c3b30;
+  --bad-bg-2:#fdf7f5;
+  --gold-line:#e6d7ab;
+  --gold-ink:#7f6110;
+  --gold-ink-2:#5e4708;
+  --brand-line:#cfe0da;
+  --brand-line-2:#c3d6d0;
+
+  --hero-mid:#1a6f5e;
+  --hero-end:#22897a;
+  --hero-shadow:0 14px 32px rgba(18,89,76,.22);
+  --focus-ring:0 0 0 2.5px rgba(18,89,76,.14);
+  --glass:rgba(242,246,245,.88);
+  --glass-2:rgba(255,255,255,.95);
+  --mask:rgba(10,30,26,.45);
+  --page-shadow:0 0 80px rgba(18,60,52,.10);
+  --panel-1:#fbfdfc;
+  --panel-2:#f1f6f4;
+
+}
+
+/* ================= 风格选择卡片 ================= */
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
+.tcard{
+  position:relative;text-align:left;padding:0;border:1px solid var(--line);
+  border-radius:var(--r);background:var(--card);overflow:hidden;cursor:pointer;
+  transition:border-color .18s,box-shadow .18s,transform .12s;
+}
+.tcard:active{transform:scale(.985)}
+.tcard.on{border-color:var(--brand-2);box-shadow:var(--focus-ring)}
+.tcard .pv{padding:12px 12px 10px}
+.tcard .pv .row1{display:flex;align-items:center;gap:6px;margin-bottom:9px}
+.tcard .pv .dot{width:16px;height:16px;border-radius:5px;flex:none}
+.tcard .pv .nm{font-size:12px;font-weight:700;color:var(--ink)}
+.tcard .pv .ln{height:6px;border-radius:99px;margin-bottom:5px}
+.tcard .pv .ln.s{width:62%}
+.tcard .pv .ln.m{width:88%}
+.tcard .pv .tag{
+  display:inline-flex;align-items:center;gap:4px;margin-top:8px;
+  font:700 10px/1 var(--mono);padding:3px 7px;border-radius:99px;
+}
+.tcard .foot{
+  padding:7px 12px;border-top:1px solid var(--line);
+  font-size:11px;color:var(--muted);line-height:1.5;background:var(--card-2);
+}
+.tcard .ck{
+  position:absolute;top:9px;right:9px;width:17px;height:17px;border-radius:50%;
+  background:var(--brand);color:#fff;font-size:10px;display:none;
+  place-items:center;font-weight:800;
+}
+.tcard.on .ck{display:grid}
+
+/* 预览色块：不写死颜色——卡片自身的 t-* 类已经把该套主题的变量铺开了，
+   直接读变量即可，新增主题不用再补一段 */
+.tcard .pv{background:var(--bg)}
+.tcard .dot{background:var(--brand)}
+.tcard .nm{color:var(--ink)}
+.tcard .ln{background:var(--line)}
+.tcard .ln.hi{background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+.tcard .tag{background:var(--brand-soft);color:var(--brand-2)}
