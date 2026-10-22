@@ -22,6 +22,26 @@
 | 讲「不要违规」    | 模拟盘里下单即检测：未设止损 / 超配 / 补仓，全部记账   |
 | 推荐「跟哪个老师学」 | 不列人名，列 8 个流派 + 4 类话术；每派都配「谁不该用」 |
 | 从入门一路读到系统  | 五段路径，毕业标准全部从你的真实记录里算，没有「我觉得我懂了」 |
+| 读完就忘，第二天不再打开 | **连击 + 每日目标 + 十题一组**：每天有理由回来，错题会自动回来 |
+
+## 每天有个理由回来（v8）
+
+内容够了以后，缺的是**第二天再打开的理由**。参考多邻国和百词斩的做法，只借机制：
+
+| 机制 | 怎么用 | 没搬的东西 |
+|------|--------|-----------|
+| **连续打卡** | 一天学一次就 +1，断一天归 1（不归 0，不羞辱人） | 生命值 —— 答错就死会让人不敢答 |
+| **补签卡** | 只能补昨天，最多 9 张，藏在断签提示里 | 付费恢复 |
+| **经验值** | 一次 10–50，`200` 一段，只显示段内进度 | 用经验买段位 / 加速 |
+| **十题一组** | 有明确终点，错题优先但最多占一半 | 无限刷 |
+| **掌握度** | 连对两次才算「掌握」，答错掉回「生疏」 | 掌握度排行 |
+| **今日四要点** | 答一张卡 / 读一条启蒙 / 判一道题 / 盘后三问 | 排行榜 |
+
+有条硬约束写进了测试：**经验值买不到段位**。段位只认「读完多少、做对多少、复盘几天」，
+`_test/v8.js` 直接扫源码，谁敢让 `rank.js` 读经验值就红。
+
+数据都在本机，所以「我的」页给了导出 / 导入——清缓存不用从头再来。
+
 
 ## 从小白到有系统（五段路径）
 
@@ -136,9 +156,9 @@
 
 | 端         | 位置                                                                                                          |
 | --------- | ----------------------------------------------------------------------------------------------------------- |
-| Web       | 根目录 `index.html` + `app.css` + `app.js` + `teachers.js` + `basics.js` + `rank.js` + `quiz.js` + `deaths.js` + `cases.js` + `theme.js` + `themes.css` |
-| 小程序 / App | `miniprogram-uni/`，`pages.json` 已配好 5 个 tabBar；数据层在 `common/`（ESM，与 Web 同源）                                 |
-| 设计规范      | `docs/DESIGN.md`——设计令牌、组件映射表、三端差异清单、v4 成长体系说明                                                               |
+| Web       | 根目录 `index.html` + `app.css` + `app.js` + `teachers.js` + `basics.js` + `rank.js` + `quiz.js` + `deaths.js` + `cases.js` + `theme.js` + `learn.js` + `cards.js` + `srs.js` + `themes.css` |
+| 小程序 / App | `miniprogram-uni/`，`pages.json` 已配好 5 个 tabBar；数据层在 `common/`（ESM，与 Web 同源；`learn/cards/srs` 由 BODY 段生成，规则与网页逐字一致）                                 |
+| 设计规范      | `docs/DESIGN.md`——设计令牌、组件映射表、三端差异清单、v4 成长体系、v8 学习机制说明                                                               |
 
 > 小程序工程为**同源骨架**，未在微信开发者工具中实际编译，`appid` 需自行填写。canvas 绘制逻辑与 Web 端不同（`uni.createCanvasContext`），在 `pages/train/train.vue` 里单独实现；题目数据由 `common/cases.js`（Web 端生成）提供。
 
@@ -169,6 +189,9 @@ python -m http.server 8000
 ├── themes.html           # 主题预览页：5 套并排，点「用这套」直接生效
 ├── rank.js               # 五段成长路径：段位定义 + 毕业判定 + 当前段位计算
 ├── quiz.js               # 流派自测：8 题 + 权重打分 + 结果
+├── learn.js              # 学习档案（v8）：经验 / 连击 / 补签 / 掌握度 / 本周 / 段内等级
+├── cards.js              # 答题卡题库（v8）：24 张概念卡，三组（地基 / 算得清 / 守得住）
+├── srs.js                # 判题引擎（v8）：一次十题、错题优先、组内均衡、选项洗牌
 ├── playbook.html         # 规则手册（八套策略 + 风控 + 模拟盘）
 ├── miniprogram-uni/      # uni-app 工程（小程序 / App / H5）
 │   ├── pages.json
@@ -178,6 +201,7 @@ python -m http.server 8000
 │   │                     #   basics.js / deaths.js 由 tools/gen-uni.js 生成
 │   │                     #   cases.js 由 tools/gen-cases.js 生成，勿手改
 │   │                     #   theme.js 由 tools/gen-theme.js 生成，勿手改
+│   │                     #   learn.js / cards.js / srs.js 由 tools/gen-learn.js 生成，勿手改
 │   └── pages/{learn,train,map,teacher,me}
 ├── docs/DESIGN.md        # 多端设计规范
 ├── tools/                # 同步与生成工具（见下节）
@@ -197,12 +221,16 @@ TOKEN=<token> node tools/upload.js . "commit message"
 
 # 从 Web 源生成小程序端数据文件（改完 basics.js / deaths.js 后跑一次）
 node tools/gen-uni.js
+
+# 生成小程序端学习模块（改完 learn.js / cards.js / srs.js 后跑一次）
+node tools/gen-learn.js
 ```
 
 | 脚本                | 作用                                                |
 | ----------------- | ------------------------------------------------- |
 | `tools/check.js`  | 用 git blob sha1 算法比对本地文件与远端 tree，列出新增 / 变更 / 远端多出 |
 | `tools/upload.js` | 用 contents API 逐文件提交（带 sha 更新，无 sha 新建）           |
+| `tools/gen-learn.js` | 把 `learn.js` / `cards.js` / `srs.js` 的 BODY 段切给小程序端（规则只留一份） |
 
 Token 需要 repo 写权限（fine-grained PAT 勾 `Contents: Read and write`）。只在 `upload.js` 的 `FILES` 列表内的文件会被同步。
 
