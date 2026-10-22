@@ -25,6 +25,7 @@
      ============================================================ */
   const L = window.LEARN || null;
   const CARDD = window.CARDS || { list: [], groups: [], byGroup: () => [], size: 0 };
+  const CF = window.CRAFT || { SLOTS: [], CHECKS: [], SEEDS: [], read: () => ({ name:'', base:'fuso', draft:{}, checks:{}, at:'' }), save(){}, filled(){ return 0 }, review(){ return { pass:false, gates:[], n:0, good:0, answered:0 } }, nameOf(){ return '未命名草稿' }, verdict(){ return '还不能挂牌' } };
   const JD = window.JUDGE || null;
   const XP = (L && L.XP) || { basic:10, course:30, card:15, kline:15, review:20, quiz:40, death:5, session:50 };
 
@@ -174,7 +175,7 @@
   ];
 
   /* ================= 路由 ================= */
-  const VIEWS = ['learn', 'train', 'map', 'teacher', 'me'];
+  const VIEWS = ['learn', 'train', 'map', 'teacher', 'craft', 'me'];
 
   function go(v){
     if(VIEWS.indexOf(v) < 0) v = 'learn';
@@ -185,6 +186,7 @@
     if(v === 'train'){ setTimeout(drawK, 30); renderPane(); }
     if(v === 'me') renderMe();
     if(v === 'teacher') renderTeachers();
+    if(v === 'craft') renderCraft();
     if(v === 'learn'){ renderRank(); renderBasics(); renderDeaths(); renderQuizCard(); renderToday(); renderDeck(); }
   }
   $('#tabbar').addEventListener('click', e => {
@@ -988,9 +990,11 @@
         <div style="display:flex;gap:8px;margin-top:14px">
           <button class="btn btn-sm btn-block" id="seeFit" style="background:var(--brand);color:#fff;border-color:var(--brand)">看这一派的约束</button>
           <button class="btn btn-sm btn-block" id="redoQuiz">重测</button>
-        </div>`;
+        </div>
+        <button class="btn btn-sm btn-block" id="fromQuiz" style="margin-top:8px">以这一派为底，写自己的流派 ›</button>`;
       $('#seeFit').addEventListener('click', () => { go('teacher'); setTimeout(() => openTeacher(saved.top), 120); });
       $('#redoQuiz').addEventListener('click', () => { store.set('ta_quiz', null); quizAns = {}; quizIdx = 0; renderQuizCard(); renderRank(); });
+      $('#fromQuiz').addEventListener('click', () => seedFromSchool(saved.top));
       return;
     }
     $('#quizState').textContent = '8 题 · 约 2 分钟';
@@ -1354,6 +1358,162 @@
     }
   }
 
+  /* ============================================================
+     自创流派：装配台
+     ------------------------------------------------------------
+     状态全在 CF.read(store) 里，改动即时落盘（不留"忘了保存"这种坑），
+     重渲染只做局部：填字不重画整页，否则输入框会丢焦点。
+     ============================================================ */
+  function renderCraft(){
+    const c = CF.read(store);
+    paintGates(c); paintSlots(c); paintSeeds(); paintChecks(c); paintVerdict(c);
+
+    const nm = $('#cfName');
+    if(nm && $$('.view.on').length && nm.value !== c.name) nm.value = c.name;
+
+    if(nm && !nm._bound){
+      nm._bound = true;
+      nm.addEventListener('input', () => {
+        const v = CF.read(store); v.name = nm.value; CF.save(store, v);
+        paintVerdict(v);
+      });
+    }
+    const sv = $('#cfSave');
+    if(sv && !sv._bound){
+      sv._bound = true;
+      sv.addEventListener('click', () => {
+        const v = CF.read(store); v.at = todayKey(); CF.save(store, v);
+        const r = CF.review(v);
+        toast(r.pass ? '已保存 · ' + CF.verdict(r) : '已保存为草稿，还差：' + r.gates.filter(g => !g.ok)[0].why);
+        paintVerdict(v);
+      });
+    }
+    const rs = $('#cfReset');
+    if(rs && !rs._bound){
+      rs._bound = true;
+      rs.addEventListener('click', () => {
+        CF.save(store, { name:'', base:'fuso', draft:{}, checks:{}, at:'' });
+        const nm2 = $('#cfName'); if(nm2) nm2.value = '';
+        renderCraft();
+        toast('已清空');
+      });
+    }
+  }
+
+  /* 从自测结果起个草稿：把那一派的核心规则塞进前四格，
+     禁区塞进第 5 格，第 6 格留空 —— 那一格只能自己写。 */
+  function seedFromSchool(k){
+    const t = T.ALL.find(x => x.k === k);
+    if(!t){ toast('没找到这一派'); return; }
+    const c = CF.read(store);
+    const core = (t.core || []).slice(0, 4);
+    ['entry', 'size', 'stop', 'exit'].forEach((s, i) => {
+      if(core[i]) c.draft[s] = core[i];
+    });
+    if(!(c.draft.forbid || '').trim()) c.draft.forbid = '退潮期 / 条件不满足时一律空仓';
+    if(!c.name) c.name = t.name + '（改）';
+    CF.save(store, c);
+    go('craft');
+    setTimeout(() => { paintSlots(CF.read(store)); paintGates(CF.read(store)); paintVerdict(CF.read(store)); }, 60);
+    toast('已按「' + t.name + '」起了草稿，第 6 格留给你自己写');
+  }
+
+  function paintGates(c){
+    const box = $('#cfGates'); if(!box) return;
+    const r = CF.review(c);
+    box.innerHTML = r.gates.map((g, i) => `
+      <div class="gate ${g.ok ? 'on' : ''}">
+        <span class="gi">${g.ok ? '✓' : i + 1}</span>
+        <span class="gt">${g.why}</span>
+      </div>`).join('');
+    $('#cfState').textContent = r.pass ? '已挂牌' : (r.n ? '装配中' : '未开始');
+  }
+
+  function paintSlots(c){
+    const box = $('#cfSlots'); if(!box) return;
+    box.innerHTML = CF.SLOTS.map(s => {
+      const v = (c.draft[s.k] || '');
+      return `
+      <div class="slot ${v.trim().length >= 2 ? 'on' : ''}">
+        <div class="sh"><span class="no">${s.no}</span><span class="sn">${s.name}</span>
+          ${s.k === 'forbid' ? '<span class="req">必填</span>' : ''}</div>
+        <div class="sd">${s.hint}</div>
+        <textarea class="sin" data-s="${s.k}" rows="2" placeholder="—">${v}</textarea>
+        <div class="sw">填错了通常会是这样：${s.wrong}</div>
+      </div>`;
+    }).join('');
+    $('#cfFill').textContent = CF.filled(c) + ' / ' + CF.SLOTS.length + ' 格';
+
+    $$('#cfSlots .sin').forEach(t => {
+      t.addEventListener('input', () => {
+        const v = CF.read(store);
+        v.draft[t.dataset.s] = t.value;
+        CF.save(store, v);
+        /* 只更新轻量部分，不动 textarea，避免光标跳 */
+        $('#cfFill').textContent = CF.filled(v) + ' / ' + CF.SLOTS.length + ' 格';
+        t.closest('.slot').classList.toggle('on', t.value.trim().length >= 2);
+        paintGates(v); paintVerdict(v);
+      });
+    });
+  }
+
+  function paintSeeds(){
+    const box = $('#cfSeeds'); if(!box) return;
+    if(box._done) return;
+    box._done = true;
+    box.innerHTML = CF.SEEDS.map((s, i) => `<button class="seed" data-i="${i}">${s.from} · ${s.t}</button>`).join('');
+    box.addEventListener('click', e => {
+      const b = e.target.closest('.seed'); if(!b) return;
+      const s = CF.SEEDS[+b.dataset.i];
+      const c = CF.read(store);
+      /* 借来的规则默认落到「我明确不做的事」——八派的禁止条款本来就长这样 */
+      const cur = (c.draft.forbid || '').trim();
+      if(cur.indexOf(s.t) >= 0){ toast('这条已经在禁区里了'); return; }
+      c.draft.forbid = cur ? cur + '\n' + s.t : s.t;
+      CF.save(store, c);
+      const t = $('#cfSlots .sin[data-s="forbid"]');
+      if(t) t.value = c.draft.forbid;
+      paintSlots(c); paintGates(c); paintVerdict(c);
+      toast('已加进「我明确不做的事」');
+    });
+  }
+
+  function paintChecks(c){
+    const box = $('#cfChecks'); if(!box) return;
+    box.innerHTML = CF.CHECKS.map((q, i) => {
+      const a = c.checks[q.k];
+      return `
+      <div class="ckcard ${a ? 'done' : ''}" data-k="${q.k}">
+        <div class="ckq"><span class="cn">${i + 1}</span>${q.name}</div>
+        <button class="ckopt ${a === 'good' ? 'picked' : ''}" data-a="good">${q.good}</button>
+        <button class="ckopt ${a === 'bad' ? 'picked bad' : ''}" data-a="bad">${q.bad}</button>
+      </div>`;
+    }).join('');
+    const good = Object.keys(c.checks).filter(k => c.checks[k] === 'good').length;
+    $('#cfScore').textContent = good + ' / ' + CF.CHECKS.length;
+
+    $$('#cfChecks .ckopt').forEach(b => {
+      b.addEventListener('click', () => {
+        const v = CF.read(store);
+        v.checks[b.closest('.ckcard').dataset.k] = b.dataset.a;
+        CF.save(store, v);
+        paintChecks(v); paintGates(v); paintVerdict(v);
+      });
+    });
+  }
+
+  function paintVerdict(c){
+    const box = $('#cfVerdict'); if(!box) return;
+    const r = CF.review(c);
+    box.className = 'cfverdict ' + (r.pass ? 'ok' : '');
+    box.innerHTML = `
+      <div class="cv-nm">${CF.nameOf(c)}</div>
+      <div class="cv-t">${CF.verdict(r)}</div>
+      <div class="cv-d">${r.pass
+        ? '规则 ' + r.n + ' 条 · 场景 ' + r.good + '/12。挂牌只是说明它<b>自洽</b>，不说明它能赚钱。'
+        : '还差：' + r.gates.filter(g => !g.ok).map(g => g.why).join('；')}</div>`;
+  }
+
   function renderMe(){
     const d = done();
     const s = kb(), c = cb();
@@ -1596,6 +1756,7 @@
   renderToday();
   renderDeck();
   renderPane();
+  renderCraft();
   const lastTab = store.get('ta_tab', 'learn');
   go(location.hash === '#train' ? 'train' : lastTab);
   window.addEventListener('resize', () => { if($('#v-train').classList.contains('on')) drawK(); });
