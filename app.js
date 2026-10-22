@@ -16,6 +16,63 @@
     return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
   };
 
+  /* ---------- 主题 ---------- */
+  const TH = window.THEMES || { list: [], DEFAULT: 'light', valid(){ return false }, nameOf(){ return '' }, apply(){ return 'light' } };
+  /* 主题来源优先级：URL ?theme= > 本地存储 > 默认。URL 命中后立刻抹掉参数，
+     否则用户在应用里换主题后一刷新又会被参数拉回去 */
+  let themeKey = (function(){
+    let k = store.get(TH.KEY, TH.DEFAULT);
+    try{
+      const m = /[?&]theme=([A-Za-z]+)/.exec(location.search || '');
+      if(m && TH.valid(m[1])){
+        k = m[1];
+        if(history && history.replaceState) history.replaceState(null, '', location.pathname + location.hash);
+      }
+    }catch(e){}
+    return k;
+  })();
+  themeKey = TH.apply(themeKey);
+  store.set(TH.KEY, themeKey);
+
+  /* theme.js 万一没加载时的画布兜底色（= 晨光蓝），保证 K 线不白屏 */
+  const CC0 = { grid:'#f0f2f5', bg:'#fafbfc', up:'#d94a45', down:'#17855f',
+    volUp:'rgba(217,74,69,.32)', volDown:'rgba(23,133,95,.32)',
+    ma5:'rgba(32,69,110,.55)', ma20:'rgba(176,124,23,.55)',
+    axis:'rgba(15,26,38,.35)', mark:'rgba(32,69,110,.35)', markDone:'rgba(15,26,38,.22)',
+    lab:'#20456e', labInk:'#ffffff' };
+  const cvs = () => (TH.canvas ? TH.canvas(themeKey) : CC0);
+
+  function setTheme(k){
+    if(!TH.valid(k)) return;
+    themeKey = TH.apply(k);
+    store.set(TH.KEY, k);
+    renderThemes();
+    if($('#v-train') && $('#v-train').classList.contains('on')) drawK();
+  }
+
+  function renderThemes(){
+    const box = $('#themeList');
+    if(!box) return;
+    box.innerHTML = TH.list.map(t =>
+      `<button class="tcard t-${t.k}${t.k === themeKey ? ' on' : ''}" data-t="${t.k}">
+         <span class="ck">✓</span>
+         <span class="pv">
+           <span class="row1"><span class="dot"></span><span class="nm">${t.name}</span></span>
+           <span class="ln hi" style="display:block"></span>
+           <span class="ln m" style="display:block"></span>
+           <span class="ln s" style="display:block"></span>
+           <span class="tag">${t.k === TH.DEFAULT ? '默认' : 'Aa'}</span>
+         </span>
+         <span class="foot">${t.desc}</span>
+       </button>`
+    ).join('');
+    Array.from(box.querySelectorAll('.tcard')).forEach(el => {
+      el.addEventListener('click', () => setTheme(el.dataset.t));
+    });
+    const nm = $('#themeName');
+    if(nm) nm.textContent = TH.nameOf(themeKey);
+  }
+
   /* ================= 课程数据 ================= */
   const COURSES = [
     { id:'01', title:'核心 + 卫星：先活下来', sub:'60% 底仓 + 30% 进攻，把择时的压力关进 30% 里',
@@ -171,7 +228,8 @@
   let curCase = null, curIdx = 0, answered = false;
   const kb = () => store.get('ta_kline', { total:0, right:0, streak:0, best:0 });
 
-  function drawK(){
+  function drawK(){ const CC = cvs();
+
     const cv = $('#kcanvas'); if(!cv || !curCase) return;
     const w = cv.clientWidth || 320, h = 210, dpr = window.devicePixelRatio || 1;
     cv.width = w * dpr; cv.height = h * dpr;
@@ -193,7 +251,7 @@
     const X = i => padL + iw * i + iw / 2;
 
     // 网格
-    ctx.strokeStyle = '#f0f2f5'; ctx.lineWidth = 1;
+    ctx.strokeStyle = CC.grid; ctx.lineWidth = 1;
     for(let i=0;i<=3;i++){
       const y = padT + chartH / 3 * i;
       ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
@@ -204,14 +262,14 @@
     const vTop = h - 10 - volH;
     bars.forEach((b,i) => {
       const bh = Math.max(1, b.v / vmax * volH);
-      ctx.fillStyle = b.c >= b.o ? 'rgba(217,74,69,.32)' : 'rgba(23,133,95,.32)';
+      ctx.fillStyle = b.c >= b.o ? CC.volUp : CC.volDown;
       ctx.fillRect(X(i) - bw/2, h - 10 - bh, bw, bh);
     });
 
     // K线
     bars.forEach((b,i) => {
       const up = b.c >= b.o;
-      const col = up ? '#d94a45' : '#17855f';
+      const col = up ? CC.up : CC.down;
       const x = X(i);
       ctx.strokeStyle = col; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(x, Y(b.h)); ctx.lineTo(x, Y(b.l)); ctx.stroke();
@@ -231,12 +289,12 @@
       }
       ctx.stroke();
     };
-    ma(5, 'rgba(32,69,110,.55)');
-    ma(20, 'rgba(176,124,23,.55)');
+    ma(5, CC.ma5);
+    ma(20, CC.ma20);
 
     // 颈线
     if(curCase.neck){
-      ctx.setLineDash([3,3]); ctx.strokeStyle = 'rgba(15,26,38,.35)'; ctx.lineWidth = 1;
+      ctx.setLineDash([3,3]); ctx.strokeStyle = CC.axis; ctx.lineWidth = 1;
       const y = Y(curCase.neck);
       ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
       ctx.setLineDash([]);
@@ -246,12 +304,12 @@
     curCase.marks.forEach(m => {
       const x = X(m.i);
       ctx.setLineDash([3,3]);
-      ctx.strokeStyle = answered ? 'rgba(15,26,38,.22)' : 'rgba(32,69,110,.35)';
+      ctx.strokeStyle = answered ? CC.markDone : CC.mark;
       ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h - 10); ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = '#20456e';
+      ctx.fillStyle = CC.lab;
       ctx.beginPath(); ctx.arc(x, padT - 2, 9, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#fff'; ctx.font = '700 10px ui-monospace,monospace';
+      ctx.fillStyle = CC.labInk; ctx.font = '700 10px ui-monospace,monospace';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(m.label, x, padT - 1);
     });
@@ -884,6 +942,7 @@
         <span>${b.label}</span></div>`;
     }).join('');
     $('#badgeCount').textContent = BADGES.filter(b => b.on()).length + ' / 4';
+    renderThemes();
 
     const key = 'ta_review_' + todayKey();
     const saved = store.get(key, []);
