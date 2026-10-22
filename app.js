@@ -292,6 +292,8 @@
 
     let hi = -Infinity, lo = Infinity;
     bars.forEach(b => { if(b.h > hi) hi = b.h; if(b.l < lo) lo = b.l; });
+    /* 刻度标签要显示真实的高低点，不是下面加了留白之后的 hi/lo */
+    const hiTop = hi, loBot = lo;
     const pad = (hi - lo) * 0.08 || 0.5;
     hi += pad; lo -= pad;
     const Y = v => padT + (hi - v) / (hi - lo) * chartH;
@@ -303,6 +305,17 @@
       const y = padT + chartH / 3 * i;
       ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
     }
+
+    /* 价格轴：左上角最高、左下角最低。
+       没有刻度的走势图看起来像示意图 —— 读者没法判断"这个突破有多高"。
+       有了两个数字，它才是一张能读的行情图。 */
+    ctx.fillStyle = CC.lab;
+    ctx.font = '600 9px ui-monospace,monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText(hiTop.toFixed(2), padL + 3, padT + 2);
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(loBot.toFixed(2), padL + 3, padT + chartH - 2);
 
     // 成交量
     let vmax = 0; bars.forEach(b => { if(b.v > vmax) vmax = b.v; });
@@ -1546,7 +1559,8 @@
        读者也读不出「这是准确率，只是还没数」。空态直接说话。 */
     const acc = $('#mAcc');
     if(tot){
-      acc.textContent = Math.round(rgt / tot * 100) + '%';
+      /* 单位单独套一层 .u：和主数字同字号会把「30%」读成一坨 */
+      acc.innerHTML = Math.round(rgt / tot * 100) + '<i class="u">%</i>';
       acc.className = 'v';
       $('#mAccNote').textContent = '已判 ' + tot + ' 题 · 对 ' + rgt + ' 题';
     } else {
@@ -1554,7 +1568,11 @@
       acc.className = 'v na';
       $('#mAccNote').textContent = '判过题之后，这里显示你的准确率';
     }
-    if($('#mSolid')) $('#mSolid').textContent = L ? L.mastery(store, CARDD.size).solid : 0;
+    /* 副格同理：分子是数，分母是说明 */
+    const mc = $('#mCourse');
+    if(mc) mc.innerHTML = d.length + '<i class="u">/' + COURSES.length + '</i>';
+    const ms = $('#mSolid');
+    if(ms) ms.innerHTML = (L ? L.mastery(store, CARDD.size).solid : 0) + '<i class="u">张</i>';
 
     /* 等级卡 */
     const p = L ? L.readProf(store) : { xp:0, streak:0 };
