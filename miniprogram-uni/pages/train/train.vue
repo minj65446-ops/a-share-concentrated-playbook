@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page" :class="themeCls">
     <view class="sec-title">
       <view class="h">训练场</view>
       <view class="s">{{ accText }}</view>
@@ -43,10 +43,12 @@
 
 <script>
 import { buildCase, size } from '../../common/cases.js'
+import { canvas as canvasColors } from '../../common/theme.js'
 
 export default {
   data() {
     return {
+      theme: 'light',
       tools: [
         { k: 'k', s: 'K', t: 'K线读图', d: '在图上找买卖点' },
         { k: 'c', s: '仓', t: '仓位计算', d: '先算能亏多少' },
@@ -59,6 +61,8 @@ export default {
     }
   },
   computed: {
+    themeCls() { return 't-' + this.theme },
+
     accText() {
       const s = this.stats
       return s.total ? '正确率 ' + Math.round(s.right / s.total * 100) + '%（' + s.right + '/' + s.total + '）' : '正确率 —'
@@ -71,6 +75,11 @@ export default {
     this.load(0)
   },
   onReady() { this.$nextTick(() => this.draw()) },
+  onShow() {
+    let v = uni.getStorageSync('ta_theme') || 'light'
+    if (v.charAt(0) === '"') { try { v = JSON.parse(v) } catch (e) { v = 'light' } }
+    this.theme = v
+  },
   methods: {
     load(i) {
       this.idx = i
@@ -129,6 +138,7 @@ export default {
       const padL = 6, padR = 6, padT = 18, volH = 34
       const chartH = h - padT - volH - 18
       const iw = (w - padL - padR) / bars.length
+      const CC = canvasColors(this.theme)
       const bw = Math.max(2, iw * 0.62)
 
       let hi = -Infinity, lo = Infinity
@@ -138,11 +148,11 @@ export default {
       const Y = v => padT + (hi - v) / (hi - lo) * chartH
       const X = i => padL + iw * i + iw / 2
 
-      ctx.setFillStyle('#fafbfc')
+      ctx.setFillStyle(CC.bg)
       ctx.fillRect(0, 0, w, h)
 
       // 网格
-      ctx.setStrokeStyle('#f0f2f5')
+      ctx.setStrokeStyle(CC.grid)
       ctx.setLineWidth(1)
       for (let i = 0; i <= 3; i++) {
         const y = padT + chartH / 3 * i
@@ -154,14 +164,14 @@ export default {
       bars.forEach(b => { if (b.v > vmax) vmax = b.v })
       bars.forEach((b, i) => {
         const bh = Math.max(1, b.v / vmax * volH)
-        ctx.setFillStyle(b.c >= b.o ? 'rgba(217,74,69,.32)' : 'rgba(23,133,95,.32)')
+        ctx.setFillStyle(b.c >= b.o ? CC.volUp : CC.volDown)
         ctx.fillRect(X(i) - bw / 2, h - 12 - bh, bw, bh)
       })
 
       // K线
       bars.forEach((b, i) => {
         const up = b.c >= b.o
-        const col = up ? '#d94a45' : '#17855f'
+        const col = up ? CC.up : CC.down
         ctx.setStrokeStyle(col)
         ctx.setFillStyle(col)
         ctx.setLineWidth(1)
@@ -172,7 +182,7 @@ export default {
 
       // 颈线（双头那类题）
       if (this.qa.neck) {
-        ctx.setStrokeStyle('rgba(15,26,38,.35)')
+        ctx.setStrokeStyle(CC.axis)
         ctx.setLineWidth(1)
         const y = Y(this.qa.neck)
         ctx.setLineDash([3, 3])
@@ -183,14 +193,14 @@ export default {
       // 标记
       this.qa.marks.forEach(m => {
         const x = X(m.i)
-        ctx.setStrokeStyle('rgba(32,69,110,.35)')
+        ctx.setStrokeStyle(CC.mark)
         ctx.setLineWidth(1)
         ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h - 12); ctx.stroke()
 
-        ctx.setFillStyle('#20456e')
+        ctx.setFillStyle(CC.lab)
         ctx.beginPath(); ctx.arc(x, padT - 4, 10, 0, Math.PI * 2); ctx.fill()
 
-        ctx.setFillStyle('#ffffff')
+        ctx.setFillStyle(CC.labInk)
         ctx.setFontSize(11)
         ctx.setTextAlign('center')
         ctx.fillText(m.label, x, padT)
@@ -209,48 +219,48 @@ export default {
 <style lang="scss" scoped>
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }
 .tcard {
-  background: #fff; border: 1px solid $line; border-radius: $r; padding: 26rpx;
+  background: #fff; border: 1px solid var(--line); border-radius: var(--r); padding: 26rpx;
 }
 .ic {
   width: 66rpx; height: 66rpx; border-radius: 20rpx; margin-bottom: 16rpx;
   display: flex; align-items: center; justify-content: center;
-  font-size: 28rpx; font-weight: 800; color: $brand-2; background: $brand-soft;
+  font-size: 28rpx; font-weight: 800; color: var(--brand-2); background: var(--brand-soft);
 }
 .tt { font-size: 27rpx; font-weight: 750; }
-.td { font-size: 22rpx; color: $muted; margin-top: 4rpx; }
+.td { font-size: 22rpx; color: var(--muted); margin-top: 4rpx; }
 
 .trainer { padding: 30rpx; margin-top: 24rpx; }
 .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16rpx; }
 .h3 { font-size: 30rpx; font-weight: 800; letter-spacing: -.4rpx; }
-.q { font-size: 23rpx; color: $muted; margin-top: 8rpx; line-height: 1.6; }
+.q { font-size: 23rpx; color: var(--muted); margin-top: 8rpx; line-height: 1.6; }
 
 .kbox {
   width: 100%; height: 420rpx; margin: 22rpx 0 0;
-  border: 1px solid $line-2; border-radius: $r-sm; background: $card-2;
+  border: 1px solid var(--line-2); border-radius: var(--r-sm); background: var(--card-2);
 }
 
 .opt {
   display: flex; align-items: center; gap: 18rpx;
-  border: 1px solid $line; border-radius: $r-sm;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
   padding: 20rpx 22rpx; margin-top: 14rpx; background: #fff;
 }
 .opt .kb {
   width: 44rpx; height: 44rpx; border-radius: 12rpx; flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
-  font-size: 22rpx; font-weight: 700; background: $bg-2; color: $ink-2;
+  font-size: 22rpx; font-weight: 700; background: var(--bg-2); color: var(--ink-2);
 }
 .opt .ot { font-size: 25rpx; line-height: 1.5; }
-.opt.right { border-color: $down; background: $down-soft; }
-.opt.right .kb { background: $down; color: #fff; }
-.opt.wrong { border-color: $up; background: $up-soft; }
-.opt.wrong .kb { background: $up; color: #fff; }
+.opt.right { border-color: var(--down); background: var(--down-soft); }
+.opt.right .kb { background: var(--down); color: #fff; }
+.opt.wrong { border-color: var(--up); background: var(--up-soft); }
+.opt.wrong .kb { background: var(--up); color: #fff; }
 
 .explain {
-  margin-top: 22rpx; padding: 24rpx; border-radius: $r-sm;
-  background: $brand-soft; border: 1px solid #dbe6f2;
-  font-size: 24rpx; color: $ink-2; line-height: 1.75;
+  margin-top: 22rpx; padding: 24rpx; border-radius: var(--r-sm);
+  background: var(--brand-soft); border: 1px solid var(--brand-line);
+  font-size: 24rpx; color: var(--ink-2); line-height: 1.75;
 }
-.explain .b { font-weight: 800; color: $brand-2; }
+.explain .b { font-weight: 800; color: var(--brand-2); }
 .mt { margin-top: 26rpx; }
-.tip { text-align: center; font-size: 22rpx; color: $muted; margin-top: 26rpx; line-height: 1.7; }
+.tip { text-align: center; font-size: 22rpx; color: var(--muted); margin-top: 26rpx; line-height: 1.7; }
 </style>
