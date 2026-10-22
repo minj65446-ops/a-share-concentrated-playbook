@@ -38,6 +38,9 @@ const FILES = [
   'deaths.js',
   'cases.js',
   'theme.js',
+  'learn.js',
+  'cards.js',
+  'srs.js',
   'themes.css',
   'themes.html',
   'playbook.html',
@@ -56,6 +59,9 @@ const FILES = [
   'miniprogram-uni/common/quiz.js',
   'miniprogram-uni/common/deaths.js',
   'miniprogram-uni/common/theme.js',
+  'miniprogram-uni/common/learn.js',
+  'miniprogram-uni/common/cards.js',
+  'miniprogram-uni/common/srs.js',
   'miniprogram-uni/pages/learn/learn.vue',
   'miniprogram-uni/pages/train/train.vue',
   'miniprogram-uni/pages/map/map.vue',
@@ -65,7 +71,8 @@ const FILES = [
   'tools/check.js',
   'tools/gen-uni.js',
   'tools/gen-cases.js',
-  'tools/gen-theme.js'
+  'tools/gen-theme.js',
+  'tools/gen-learn.js'
 ];
 
 const H = {
