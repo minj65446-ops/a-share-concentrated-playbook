@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page" :class="themeCls">
     <view class="sec-title">
       <view class="h">市场阶段</view>
       <view class="s">仓位由阶段决定</view>
@@ -58,6 +58,7 @@
 export default {
   data() {
     return {
+      theme: 'light',
       cur: 0,
       stages: [
         { name: '冰点', pos: '0–20%', pct: 12,
@@ -86,6 +87,8 @@ export default {
     }
   },
   computed: {
+    themeCls() { return 't-' + this.theme },
+
     stage() { return this.stages[this.cur] }
   }
 }
@@ -93,30 +96,30 @@ export default {
 
 <style lang="scss" scoped>
 .seg {
-  display: flex; gap: 8rpx; background: #fff; border: 1px solid $line;
+  display: flex; gap: 8rpx; background: #fff; border: 1px solid var(--line);
   border-radius: 99rpx; padding: 8rpx; margin-bottom: 24rpx;
 }
 .seg-b {
   flex: 1; text-align: center; font-size: 25rpx; font-weight: 700;
-  padding: 16rpx 0; border-radius: 99rpx; color: $muted;
+  padding: 16rpx 0; border-radius: 99rpx; color: var(--muted);
 }
-.seg-b.on { background: $brand; color: #fff; }
+.seg-b.on { background: var(--brand); color: #fff; }
 
 .cycle { padding: 32rpx; }
 .stage { display: flex; align-items: baseline; justify-content: space-between; }
 .sn { font-size: 36rpx; font-weight: 800; }
-.pos { font-size: 40rpx; font-weight: 800; color: $brand-2; }
-.desc { font-size: 24rpx; color: $muted; margin: 8rpx 0 24rpx; line-height: 1.7; }
-.bar { height: 16rpx; border-radius: 99rpx; background: $line-2; overflow: hidden; margin-bottom: 28rpx; }
-.fill { height: 100%; border-radius: 99rpx; background: linear-gradient(90deg, $brand-2, $up); }
+.pos { font-size: 40rpx; font-weight: 800; color: var(--brand-2); }
+.desc { font-size: 24rpx; color: var(--muted); margin: 8rpx 0 24rpx; line-height: 1.7; }
+.bar { height: 16rpx; border-radius: 99rpx; background: var(--line-2); overflow: hidden; margin-bottom: 28rpx; }
+.fill { height: 100%; border-radius: 99rpx; background: linear-gradient(90deg, var(--brand-2), var(--up)); }
 
 .split { display: flex; gap: 16rpx; }
-.box { flex: 1; border-radius: $r-sm; padding: 20rpx 22rpx; }
-.box.do { background: $down-soft; border: 1px solid #cfeadf; }
-.box.dont { background: $up-soft; border: 1px solid #f6d7d5; }
+.box { flex: 1; border-radius: var(--r-sm); padding: 20rpx 22rpx; }
+.box.do { background: var(--down-soft); border: 1px solid var(--ok-line); }
+.box.dont { background: var(--up-soft); border: 1px solid var(--bad-line); }
 .box .bk { font-size: 20rpx; letter-spacing: 2rpx; font-weight: 700; margin-bottom: 10rpx; opacity: .8; }
-.box.do .bk, .box.do .li { color: #125c43; }
-.box.dont .bk, .box.dont .li { color: #8f312c; }
+.box.do .bk, .box.do .li { color: var(--ok-ink-2); }
+.box.dont .bk, .box.dont .li { color: var(--bad-ink); }
 .li { font-size: 22rpx; line-height: 1.7; padding-left: 20rpx; position: relative; margin-bottom: 6rpx; }
 .li::before {
   content: ''; position: absolute; left: 0; top: 14rpx;
@@ -127,18 +130,18 @@ export default {
 .mx {
   display: inline-block; white-space: normal; vertical-align: top;
   width: 580rpx; margin-right: 18rpx;
-  background: #fff; border: 1px solid $line; border-radius: $r; padding: 26rpx;
+  background: #fff; border: 1px solid var(--line); border-radius: var(--r); padding: 26rpx;
 }
-.qt { font-size: 20rpx; letter-spacing: 2rpx; color: $muted; font-weight: 600; }
+.qt { font-size: 20rpx; letter-spacing: 2rpx; color: var(--muted); font-weight: 600; }
 .mt { font-size: 30rpx; font-weight: 800; margin: 10rpx 0 16rpx; }
 .item {
   display: flex; justify-content: space-between; font-size: 23rpx;
-  padding: 12rpx 0; border-bottom: 1px solid $line-2; color: $ink-2;
+  padding: 12rpx 0; border-bottom: 1px solid var(--line-2); color: var(--ink-2);
 }
 .item:last-child { border-bottom: none; }
-.item .v { color: $brand-2; font-weight: 700; }
+.item .v { color: var(--brand-2); font-weight: 700; }
 
 .pad { padding: 28rpx; margin-top: 20rpx; }
-.bk { font-size: 20rpx; letter-spacing: 2rpx; color: $muted; font-weight: 600; text-transform: uppercase; margin-bottom: 10rpx; }
-.rule { font-size: 25rpx; line-height: 1.8; color: $ink-2; }
+.bk { font-size: 20rpx; letter-spacing: 2rpx; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-bottom: 10rpx; }
+.rule { font-size: 25rpx; line-height: 1.8; color: var(--ink-2); }
 </style>
