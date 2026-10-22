@@ -111,13 +111,32 @@
 
 > 本页**不列任何真实人名**，也不评价任何具体账号。列的是流派——流派的方法可以被检验，个人业绩不能。
 
+## 界面风格
+
+五套视觉方案，共用同一套内容与交互，只换配色 / 圆角 / 字重。切换入口在「我的 → 界面风格」，或直接打开 `themes.html` 并排对比。
+
+| 主题 | 观感 | 适合 |
+| --- | --- | --- |
+| **晨光蓝**（默认） | 券商蓝白，信息密度高 | 白天、通勤 |
+| **夜航深** | 深色终端，涨红跌绿做了亮度补偿 | 夜里看盘 |
+| **纸感暖** | 米白纸底 + 衬线标题 | 读 25 条启蒙 / 16 个死法这类长文 |
+| **极简黑白** | 纯黑白高对比，去掉一切渐变和阴影 | 只想要内容 |
+| **青瓷** | 低饱和青绿 | 长时间看不累 |
+
+两条硬约束（`_test/theme.js` 会校验）：
+
+1. **涨=红、跌=绿** 在五套里都不能反；
+2. 主文字 / 卡片对比度 ≥ 7:1，次文字 ≥ 4.5:1——深色主题最容易在这里翻车。
+
+颜色只有一份真源：Web 端 `app.css` 的 `:root` + `themes.css` 的 `[data-theme="..."]`。小程序端的 `common/theme.js` 与 `App.vue` 主题段都由 `tools/gen-theme.js` 生成，不手写。K 线画布拿不到 CSS 变量，配色放在 `theme.js` 的 `CANVAS` 里，两端共用。小程序端 5 个页面的根节点挂 `:class="themeCls"`，主题类一变，整页变量跟着换。
+
 ## 多端
 
 `miniprogram-uni/` 是 uni-app（Vue3）工程，一套代码编译到**微信小程序 / App / H5**。
 
 | 端         | 位置                                                                                                          |
 | --------- | ----------------------------------------------------------------------------------------------------------- |
-| Web       | 根目录 `index.html` + `app.css` + `app.js` + `teachers.js` + `basics.js` + `rank.js` + `quiz.js` + `deaths.js` + `cases.js` |
+| Web       | 根目录 `index.html` + `app.css` + `app.js` + `teachers.js` + `basics.js` + `rank.js` + `quiz.js` + `deaths.js` + `cases.js` + `theme.js` + `themes.css` |
 | 小程序 / App | `miniprogram-uni/`，`pages.json` 已配好 5 个 tabBar；数据层在 `common/`（ESM，与 Web 同源）                                 |
 | 设计规范      | `docs/DESIGN.md`——设计令牌、组件映射表、三端差异清单、v4 成长体系说明                                                               |
 
@@ -145,6 +164,9 @@ python -m http.server 8000
 ├── basics.js             # Lv1 启蒙层：25 条（是什么 / 怎么读 / 规则 / 为什么亏钱 / 制度 / 自己）
 ├── deaths.js             # 亏损案例库：16 个场景（场景 / 你以为 / 实际 / 正确做法 / 关联条目）
 ├── cases.js              # K线训练题库：10 题，每题随机路径 + 选项洗牌（小程序端由它生成）
+├── theme.js              # 界面风格元数据：5 套主题 + K 线画布配色（两端同源）
+├── themes.css            # 5 套主题的变量覆盖（[data-theme=...]）
+├── themes.html           # 主题预览页：5 套并排，点「用这套」直接生效
 ├── rank.js               # 五段成长路径：段位定义 + 毕业判定 + 当前段位计算
 ├── quiz.js               # 流派自测：8 题 + 权重打分 + 结果
 ├── playbook.html         # 规则手册（八套策略 + 风控 + 模拟盘）
@@ -155,6 +177,7 @@ python -m http.server 8000
 │   ├── common/           # 课程、K线题、老师、启蒙、段位、自测、死法（与 Web 同源）
 │   │                     #   basics.js / deaths.js 由 tools/gen-uni.js 生成
 │   │                     #   cases.js 由 tools/gen-cases.js 生成，勿手改
+│   │                     #   theme.js 由 tools/gen-theme.js 生成，勿手改
 │   └── pages/{learn,train,map,teacher,me}
 ├── docs/DESIGN.md        # 多端设计规范
 ├── tools/                # 同步与生成工具（见下节）
