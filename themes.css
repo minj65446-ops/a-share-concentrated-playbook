@@ -190,6 +190,15 @@
 [data-theme="mono"] .rk{box-shadow:none}
 /* 选项卡片的选中态本来靠 --shadow-s 浮起来，这里没阴影就只剩白底白边，等于没选中 */
 [data-theme="mono"] .seg button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+/* 进度条填充的顶边高光、打卡格的白色高光同样只是装饰，极简主题里一并去掉。
+   槽的凹陷（inset 阴影）保留 —— 那是层次不是装饰，去掉就分不清槽和填充了。 */
+[data-theme="mono"] .bar i,[data-theme="mono"] .rankbar i,
+[data-theme="mono"] .qprog i,[data-theme="mono"] .grpbar-track i,
+[data-theme="mono"] .qbar .track i,[data-theme="mono"] .rk .mini i,
+[data-theme="mono"] .todaycard .goal .track i,[data-theme="mono"] .lvcard .bar i,
+[data-theme="mono"] .week .d.on .c{box-shadow:none}
+/* 「今天且已打卡」那一格只剩指示环，不能被上面的 none 一起抹掉 */
+[data-theme="mono"] .week .d.on.today .c{box-shadow:var(--focus-ring)}
 
 /* ================= 5. 青瓷 · 低饱和护眼 ================= */
 [data-theme="celadon"]{
