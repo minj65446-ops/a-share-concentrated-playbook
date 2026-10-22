@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page" :class="themeCls">
 
     <view class="hero">
       <view class="kicker">FROM ZERO TO SYSTEM</view>
@@ -289,6 +289,7 @@ import { SCHOOLS, RULES } from '../../common/teachers.js'
 export default {
   data() {
     return {
+      theme: 'light',
       courses: COURSES,
       BASICS, GROUPS, DEATHS, DGROUPS, QUIZ, RANKS,
       cur: current(),
@@ -301,6 +302,8 @@ export default {
     }
   },
   computed: {
+    themeCls() { return 't-' + this.theme },
+
     quizText() {
       if (!this.saved) return '8 题 · 约 2 分钟'
       return '已测 · ' + this.schoolName(this.saved.top)
@@ -313,6 +316,10 @@ export default {
     }
   },
   onShow() {
+    let v = uni.getStorageSync('ta_theme') || 'light'
+    if (v.charAt(0) === '"') { try { v = JSON.parse(v) } catch (e) { v = 'light' } }
+    this.theme = v
+
     this.refresh()
   },
   methods: {
@@ -441,8 +448,8 @@ export default {
 
 <style lang="scss" scoped>
 .hero {
-  background: linear-gradient(150deg, $brand 0%, #1c3f66 58%, #255a86 100%);
-  border-radius: $r-lg;
+  background: linear-gradient(150deg, var(--brand) 0%, var(--hero-mid) 58%, var(--hero-end) 100%);
+  border-radius: var(--r-lg);
   padding: 40rpx;
   color: #fff;
   box-shadow: 0 16rpx 40rpx rgba(22, 40, 63, .24);
@@ -460,8 +467,8 @@ export default {
 
 /* 段位卡 */
 .rankcard {
-  background: linear-gradient(150deg, $brand 0%, #1c3f66 62%, #255a86 100%);
-  border-radius: $r-lg; padding: 34rpx; color: #fff;
+  background: linear-gradient(150deg, var(--brand) 0%, var(--hero-mid) 62%, var(--hero-end) 100%);
+  border-radius: var(--r-lg); padding: 34rpx; color: #fff;
   box-shadow: 0 14rpx 34rpx rgba(22, 40, 63, .2);
 }
 .rankcard .top { display: flex; align-items: flex-start; justify-content: space-between; }
@@ -488,150 +495,150 @@ export default {
 /* 段位列表 */
 .rk {
   display: flex; align-items: center; gap: 22rpx;
-  background: #fff; border: 1rpx solid $line; border-radius: $r;
+  background: #fff; border: 1rpx solid var(--line); border-radius: var(--r);
   padding: 24rpx; margin-bottom: 16rpx;
 }
-.rk.passed { background: $card-2; }
-.rk.active { border-color: $brand-2; box-shadow: 0 6rpx 18rpx rgba(32, 69, 110, .1); }
+.rk.passed { background: var(--card-2); }
+.rk.active { border-color: var(--brand-2); box-shadow: 0 6rpx 18rpx rgba(32, 69, 110, .1); }
 .badge {
   width: 76rpx; height: 76rpx; border-radius: 22rpx; flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
-  font-size: 22rpx; font-weight: 800; color: $brand-2; background: $brand-soft;
+  font-size: 22rpx; font-weight: 800; color: var(--brand-2); background: var(--brand-soft);
 }
-.rk.passed .badge { color: $down; background: $down-soft; }
-.rk.active .badge { color: #fff; background: $brand-2; }
+.rk.passed .badge { color: var(--down); background: var(--down-soft); }
+.rk.active .badge { color: #fff; background: var(--brand-2); }
 .rk .body { flex: 1; min-width: 0; }
 .rk .t { font-size: 28rpx; font-weight: 750; letter-spacing: -.4rpx; }
-.rk .t .en { font-size: 19rpx; color: $muted; font-weight: 600; margin-left: 10rpx; }
-.rk .s { font-size: 22rpx; color: $muted; margin-top: 4rpx; line-height: 1.5; }
-.mini { height: 6rpx; background: $bg-2; border-radius: 99rpx; margin-top: 12rpx; overflow: hidden; }
-.mini .fi { height: 100%; background: $brand-2; border-radius: 99rpx; }
-.rk.passed .mini .fi { background: $down; }
-.chev { font-size: 32rpx; color: $line; flex: 0 0 auto; }
+.rk .t .en { font-size: 19rpx; color: var(--muted); font-weight: 600; margin-left: 10rpx; }
+.rk .s { font-size: 22rpx; color: var(--muted); margin-top: 4rpx; line-height: 1.5; }
+.mini { height: 6rpx; background: var(--bg-2); border-radius: 99rpx; margin-top: 12rpx; overflow: hidden; }
+.mini .fi { height: 100%; background: var(--brand-2); border-radius: 99rpx; }
+.rk.passed .mini .fi { background: var(--down); }
+.chev { font-size: 32rpx; color: var(--line); flex: 0 0 auto; }
 
-.intro { font-size: 22rpx; color: $muted; line-height: 1.7; margin: 0 4rpx 16rpx; }
+.intro { font-size: 22rpx; color: var(--muted); line-height: 1.7; margin: 0 4rpx 16rpx; }
 .grp-label {
-  font-size: 20rpx; letter-spacing: 3rpx; font-weight: 700; color: $muted;
+  font-size: 20rpx; letter-spacing: 3rpx; font-weight: 700; color: var(--muted);
   text-transform: uppercase; margin: 18rpx 4rpx 12rpx;
 }
 .basic {
   display: flex; align-items: flex-start; gap: 20rpx;
-  background: #fff; border: 1rpx solid $line; border-radius: $r;
+  background: #fff; border: 1rpx solid var(--line); border-radius: var(--r);
   padding: 24rpx; margin-bottom: 14rpx;
 }
-.basic.read { background: $card-2; border-color: $line-2; }
+.basic.read { background: var(--card-2); border-color: var(--line-2); }
 .basic .no {
   width: 66rpx; height: 66rpx; border-radius: 20rpx; flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
-  font-size: 24rpx; font-weight: 800; color: $brand-2; background: $brand-soft;
+  font-size: 24rpx; font-weight: 800; color: var(--brand-2); background: var(--brand-soft);
 }
-.basic.read .no { color: $down; background: $down-soft; }
+.basic.read .no { color: var(--down); background: var(--down-soft); }
 .basic .bd { flex: 1; min-width: 0; }
 .bt { font-size: 27rpx; font-weight: 750; letter-spacing: -.4rpx; }
-.one { font-size: 22rpx; color: $muted; line-height: 1.6; margin-top: 5rpx; }
-.tick { font-size: 24rpx; color: $down; font-weight: 800; flex: 0 0 auto; width: 28rpx; text-align: center; }
+.one { font-size: 22rpx; color: var(--muted); line-height: 1.6; margin-top: 5rpx; }
+.tick { font-size: 24rpx; color: var(--down); font-weight: 800; flex: 0 0 auto; width: 28rpx; text-align: center; }
 
 /* 亏损案例 */
 .death {
   display: flex; align-items: flex-start; gap: 20rpx;
-  background: #fff; border: 1rpx solid $line; border-radius: $r;
+  background: #fff; border: 1rpx solid var(--line); border-radius: var(--r);
   padding: 24rpx; margin-bottom: 14rpx;
 }
 .death .no {
   width: 66rpx; height: 66rpx; border-radius: 20rpx; flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
-  font-size: 24rpx; font-weight: 800; color: $up; background: $up-soft;
+  font-size: 24rpx; font-weight: 800; color: var(--up); background: var(--up-soft);
 }
 .death .bd { flex: 1; min-width: 0; }
 .dt { font-size: 27rpx; font-weight: 750; letter-spacing: -.4rpx; }
-.dh { font-size: 22rpx; color: $muted; line-height: 1.6; margin-top: 5rpx; }
-.dh .b { color: $up; font-weight: 700; }
+.dh { font-size: 22rpx; color: var(--muted); line-height: 1.6; margin-top: 5rpx; }
+.dh .b { color: var(--up); font-weight: 700; }
 
 .dt-scene {
-  margin-top: 18rpx; background: $bg-2; border-radius: $r-sm;
-  padding: 20rpx 22rpx; font-size: 23rpx; line-height: 1.7; color: $ink-2;
+  margin-top: 18rpx; background: var(--bg-2); border-radius: var(--r-sm);
+  padding: 20rpx 22rpx; font-size: 23rpx; line-height: 1.7; color: var(--ink-2);
 }
 .dt-scene .b { font-weight: 700; }
 .dt-k {
-  font-size: 20rpx; letter-spacing: 3rpx; color: $muted;
+  font-size: 20rpx; letter-spacing: 3rpx; color: var(--muted);
   font-weight: 700; margin: 26rpx 0 10rpx;
 }
 .dt-fix {
-  margin-top: 22rpx; background: $down-soft; border: 1rpx solid #cfeadf;
-  border-radius: $r-sm; padding: 22rpx;
-  font-size: 24rpx; line-height: 1.75; color: #0f5138;
+  margin-top: 22rpx; background: var(--down-soft); border: 1rpx solid var(--ok-line);
+  border-radius: var(--r-sm); padding: 22rpx;
+  font-size: 24rpx; line-height: 1.75; color: var(--ok-ink);
 }
 .dt-fix .b { font-weight: 700; }
 .dt-bad {
-  margin-top: 20rpx; background: $up-soft; border: 1rpx solid #f5cfca;
-  border-radius: $r-sm; padding: 22rpx;
-  font-size: 23rpx; line-height: 1.75; color: #8a2b26;
+  margin-top: 20rpx; background: var(--up-soft); border: 1rpx solid var(--bad-line);
+  border-radius: var(--r-sm); padding: 22rpx;
+  font-size: 23rpx; line-height: 1.75; color: var(--bad-ink);
 }
 .dt-bad .b { font-weight: 700; }
 
 /* 课程 */
 .course {
   display: flex; align-items: center; gap: 22rpx;
-  background: #fff; border: 1rpx solid $line; border-radius: $r;
+  background: #fff; border: 1rpx solid var(--line); border-radius: var(--r);
   padding: 26rpx; margin-bottom: 18rpx;
 }
 .course .no {
   width: 80rpx; height: 80rpx; border-radius: 22rpx; flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
-  font-size: 23rpx; font-weight: 800; color: $brand-2; background: $brand-soft;
+  font-size: 23rpx; font-weight: 800; color: var(--brand-2); background: var(--brand-soft);
 }
-.course .no.dim { color: $muted; background: $bg-2; }
+.course .no.dim { color: var(--muted); background: var(--bg-2); }
 .course .body { flex: 1; min-width: 0; }
 .course .t { font-size: 29rpx; font-weight: 750; letter-spacing: -.4rpx; }
-.course .sub { font-size: 23rpx; color: $muted; margin-top: 4rpx; line-height: 1.5; }
+.course .sub { font-size: 23rpx; color: var(--muted); margin-top: 4rpx; line-height: 1.5; }
 .meta { display: flex; gap: 10rpx; margin-top: 14rpx; flex-wrap: wrap; }
 .ring {
   width: 72rpx; height: 72rpx; border-radius: 50%; flex: 0 0 auto;
-  border: 2rpx solid $line-2;
+  border: 2rpx solid var(--line-2);
   display: flex; align-items: center; justify-content: center;
-  font-size: 24rpx; color: $muted;
+  font-size: 24rpx; color: var(--muted);
 }
-.ring.on { border-color: $down; color: $down; background: $down-soft; font-weight: 800; }
+.ring.on { border-color: var(--down); color: var(--down); background: var(--down-soft); font-weight: 800; }
 
 /* 自测 */
-.tip { font-size: 23rpx; color: $muted; line-height: 1.7; }
+.tip { font-size: 23rpx; color: var(--muted); line-height: 1.7; }
 .quiz-res { text-align: center; padding: 10rpx 0 4rpx; }
-.kick { font-size: 20rpx; letter-spacing: 3rpx; color: $muted; font-weight: 600; }
+.kick { font-size: 20rpx; letter-spacing: 3rpx; color: var(--muted); font-weight: 600; }
 .qn { font-size: 40rpx; font-weight: 800; letter-spacing: -1rpx; margin-top: 10rpx; }
-.qs { font-size: 24rpx; color: $gold; font-weight: 700; margin-top: 6rpx; }
-.qd { font-size: 23rpx; color: $muted; line-height: 1.65; margin-top: 10rpx; }
+.qs { font-size: 24rpx; color: var(--gold); font-weight: 700; margin-top: 6rpx; }
+.qd { font-size: 23rpx; color: var(--muted); line-height: 1.65; margin-top: 10rpx; }
 
 .rulebox {
-  margin-top: 22rpx; background: $card-2; border: 1rpx solid $line;
-  border-radius: $r-sm; padding: 22rpx;
+  margin-top: 22rpx; background: var(--card-2); border: 1rpx solid var(--line);
+  border-radius: var(--r-sm); padding: 22rpx;
 }
-.rh { font-size: 21rpx; letter-spacing: 2rpx; color: $muted; font-weight: 700; margin-bottom: 12rpx; }
-.ri { display: flex; justify-content: space-between; font-size: 23rpx; padding: 8rpx 0; color: $ink-2; }
+.rh { font-size: 21rpx; letter-spacing: 2rpx; color: var(--muted); font-weight: 700; margin-bottom: 12rpx; }
+.ri { display: flex; justify-content: space-between; font-size: 23rpx; padding: 8rpx 0; color: var(--ink-2); }
 .ri text:last-child { font-weight: 700; }
 .forbid {
-  margin-top: 12rpx; padding-top: 14rpx; border-top: 1rpx solid $line;
-  font-size: 22rpx; color: $up; line-height: 1.65;
+  margin-top: 12rpx; padding-top: 14rpx; border-top: 1rpx solid var(--line);
+  font-size: 22rpx; color: var(--up); line-height: 1.65;
 }
 .forbid .b { font-weight: 700; }
 
 /* 答题 */
 .qbar { display: flex; align-items: center; gap: 16rpx; margin-bottom: 22rpx; }
-.qtxt { font-size: 21rpx; font-weight: 700; color: $muted; flex: 0 0 auto; }
-.track { flex: 1; height: 6rpx; background: $bg-2; border-radius: 99rpx; overflow: hidden; }
-.track .fi { height: 100%; background: $brand-2; border-radius: 99rpx; }
+.qtxt { font-size: 21rpx; font-weight: 700; color: var(--muted); flex: 0 0 auto; }
+.track { flex: 1; height: 6rpx; background: var(--bg-2); border-radius: 99rpx; overflow: hidden; }
+.track .fi { height: 100%; background: var(--brand-2); border-radius: 99rpx; }
 .qt { font-size: 30rpx; font-weight: 750; line-height: 1.55; letter-spacing: -.4rpx; }
 .quiz-opt {
-  margin-top: 16rpx; padding: 22rpx; border: 1rpx solid $line;
-  border-radius: $r-sm; background: #fff;
+  margin-top: 16rpx; padding: 22rpx; border: 1rpx solid var(--line);
+  border-radius: var(--r-sm); background: #fff;
 }
-.quiz-opt.on { border-color: $brand-2; background: $brand-soft; }
-.quiz-opt.warn.on { border-color: $up; background: $up-soft; }
+.quiz-opt.on { border-color: var(--brand-2); background: var(--brand-soft); }
+.quiz-opt.warn.on { border-color: var(--up); background: var(--up-soft); }
 .ot { font-size: 25rpx; font-weight: 650; line-height: 1.5; }
-.nt { font-size: 21rpx; color: $muted; line-height: 1.6; margin-top: 8rpx; }
+.nt { font-size: 21rpx; color: var(--muted); line-height: 1.6; margin-top: 8rpx; }
 
 .pad { padding: 28rpx; }
 .task-t { font-size: 27rpx; font-weight: 700; }
-.task-d { font-size: 23rpx; color: $muted; line-height: 1.7; margin-top: 6rpx; }
+.task-d { font-size: 23rpx; color: var(--muted); line-height: 1.7; margin-top: 6rpx; }
 .mt { margin-top: 20rpx; }
 
 /* 弹层 */
@@ -645,40 +652,40 @@ export default {
   padding: 16rpx 36rpx 56rpx; max-height: 80vh; overflow-y: auto;
   box-sizing: border-box;
 }
-.handle { width: 76rpx; height: 8rpx; border-radius: 99rpx; background: $line; margin: 10rpx auto 26rpx; }
+.handle { width: 76rpx; height: 8rpx; border-radius: 99rpx; background: var(--line); margin: 10rpx auto 26rpx; }
 .chips { display: flex; gap: 10rpx; margin-bottom: 14rpx; }
 .sh-title { font-size: 36rpx; font-weight: 800; letter-spacing: -.6rpx; }
-.sh-lead { font-size: 24rpx; color: $muted; margin-top: 8rpx; line-height: 1.7; }
-.lead2 { color: $brand-2; font-weight: 700; font-size: 26rpx; }
+.sh-lead { font-size: 24rpx; color: var(--muted); margin-top: 8rpx; line-height: 1.7; }
+.lead2 { color: var(--brand-2); font-weight: 700; font-size: 26rpx; }
 .sh-block { margin-top: 30rpx; }
 .sh-block .k {
-  font-size: 21rpx; letter-spacing: 2rpx; color: $muted;
+  font-size: 21rpx; letter-spacing: 2rpx; color: var(--muted);
   text-transform: uppercase; margin-bottom: 12rpx; font-weight: 600;
 }
-.sh-block .txt { font-size: 25rpx; line-height: 1.8; color: $ink-2; }
+.sh-block .txt { font-size: 25rpx; line-height: 1.8; color: var(--ink-2); }
 .li {
-  font-size: 25rpx; color: $ink-2; line-height: 1.7;
+  font-size: 25rpx; color: var(--ink-2); line-height: 1.7;
   padding-left: 24rpx; position: relative; margin-bottom: 10rpx;
 }
 .li::before {
   content: ''; position: absolute; left: 0; top: 16rpx;
-  width: 9rpx; height: 9rpx; border-radius: 50%; background: $brand-2; opacity: .5;
+  width: 9rpx; height: 9rpx; border-radius: 50%; background: var(--brand-2); opacity: .5;
 }
 .eg {
-  margin-top: 22rpx; padding: 22rpx; background: $brand-soft;
-  border: 1rpx solid #dbe6f2; border-radius: $r-sm;
+  margin-top: 22rpx; padding: 22rpx; background: var(--brand-soft);
+  border: 1rpx solid var(--brand-line); border-radius: var(--r-sm);
 }
-.egk { font-size: 19rpx; letter-spacing: 3rpx; color: $muted; font-weight: 700; margin-bottom: 10rpx; }
-.egt { font-size: 23rpx; line-height: 1.75; color: $ink-2; }
+.egk { font-size: 19rpx; letter-spacing: 3rpx; color: var(--muted); font-weight: 700; margin-bottom: 10rpx; }
+.egt { font-size: 23rpx; line-height: 1.75; color: var(--ink-2); }
 .chk { display: flex; gap: 12rpx; align-items: flex-start; margin-bottom: 10rpx; }
-.mk { font-size: 23rpx; font-weight: 800; color: $muted; flex: 0 0 auto; }
-.mk.on { color: $down; }
-.ct { font-size: 23rpx; color: $ink-2; line-height: 1.6; flex: 1; }
-.ct.on { color: $down; }
+.mk { font-size: 23rpx; font-weight: 800; color: var(--muted); flex: 0 0 auto; }
+.mk.on { color: var(--down); }
+.ct { font-size: 23rpx; color: var(--ink-2); line-height: 1.6; flex: 1; }
+.ct.on { color: var(--down); }
 .warn {
-  margin-top: 26rpx; background: $gold-soft; border: 1rpx solid #f0e2c0;
-  border-radius: $r-sm; padding: 20rpx 22rpx;
-  font-size: 23rpx; color: #6b521a; line-height: 1.7;
+  margin-top: 26rpx; background: var(--gold-soft); border: 1rpx solid var(--gold-line);
+  border-radius: var(--r-sm); padding: 20rpx 22rpx;
+  font-size: 23rpx; color: var(--gold-ink-2); line-height: 1.7;
 }
 .warn .b { font-weight: 700; }
 </style>
