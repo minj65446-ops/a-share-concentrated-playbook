@@ -347,18 +347,42 @@
       ctx.setLineDash([]);
     }
 
-    // 标记
-    curCase.marks.forEach(m => {
-      const x = X(m.i);
-      ctx.setLineDash([3,3]);
+    /* 标记：竖虚线 + 圆球标签。
+       两个坑都出在「球」上：
+       ① 圆心原本画在 padT-2=12、半径 9，圆顶到 -1，被画布上边缘切掉一半；
+       ② 相邻标记的 i 很近时，两个球直接叠在一起，标签变成一团黑。
+       所以先把球的圆心 y 压到最小半径 + 2，再按 x 从左到右做一次避让（间距不足就右移）。 */
+    const R = 9, cy = R + 2;
+    const pts = curCase.marks.map(m => ({ ...m, x: X(m.i) }))
+      .sort((a, b) => a.x - b.x);
+    for(let k = 1; k < pts.length; k++){
+      const need = R * 2 + 4;
+      if(pts[k].x - pts[k - 1].x < need) pts[k].x = pts[k - 1].x + need;
+    }
+    /* 避让完可能顶出右边框：从右往左压回可画区域，再反向纠正间距 */
+    const gap = R * 2 + 4, maxX = w - padR - R - 1;
+    if(pts.length && pts[pts.length - 1].x > maxX) pts[pts.length - 1].x = maxX;
+    for(let k = pts.length - 1; k > 0; k--){
+      if(pts[k].x - pts[k - 1].x < gap) pts[k - 1].x = pts[k].x - gap;
+    }
+    if(pts.length && pts[0].x < padL + R) pts[0].x = padL + R;
+    pts.forEach(m => {
+      /* 虚线跟着球走（球可能被推开了，但竖线要对准球，否则读数会错） */
+      const lx = X(m.i);
+      ctx.setLineDash([3, 3]);
       ctx.strokeStyle = answered ? CC.markDone : CC.mark;
-      ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h - 10); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(lx, cy + R); ctx.lineTo(lx, h - 10); ctx.stroke();
       ctx.setLineDash([]);
+      /* 球被推开时补一条细引导线回原位，别让人以为标记点变了 */
+      if(Math.abs(m.x - lx) > 1){
+        ctx.strokeStyle = CC.mark; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(lx, cy + R); ctx.lineTo(m.x, cy + R); ctx.stroke();
+      }
       ctx.fillStyle = CC.lab;
-      ctx.beginPath(); ctx.arc(x, padT - 2, 9, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(m.x, cy, R, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = CC.labInk; ctx.font = '700 10px ui-monospace,monospace';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(m.label, x, padT - 1);
+      ctx.fillText(m.label, m.x, cy + 0.5);
     });
   }
 
@@ -1734,9 +1758,29 @@
       if(k.indexOf('ta_') !== 0) return;
       store.set(k, obj.data[k]); n++;
     });
-    h.className = 'iohint';
-    h.textContent = '导入 ' + n + ' 项，正在刷新…';
-    setTimeout(() => location.reload(), 600);
+    h.className = 'iohint ok';
+    h.textContent = '已导入 ' + n + ' 项，下面各页的数据都已更新。';
+    /* 原来这里 setTimeout(() => location.reload(), 600)。
+       问题是：整页重载会把 #ioHint 一起重置，用户只看到抽屉闪一下、
+       提示根本没机会读，还会怀疑"到底导入成功没有"。
+       导入只是把 localStorage 的键换掉，就地重渲染一遍就够了 —— 不重载。 */
+    try {
+      renderHud(); renderToday(); renderMe(); renderRank();
+      renderBasics(); renderDeaths(); renderQuizCard();
+      renderDeck(); renderPane(); renderCraft(); renderCourses();
+      updateAcc();
+      /* 导入的 ta_theme 可能和当前不同：从存储里读回来再走一遍 setTheme，
+         顺带把主题卡片的选中态一起刷新 */
+      const savedTheme = store.get(TH.KEY, null);
+      if(savedTheme && savedTheme !== themeKey) setTheme(savedTheme);
+      const t = $('#ioHint');
+      if(t) t.textContent = '已导入 ' + n + ' 项，下面各页的数据都已更新。';
+    } catch(e){
+      /* 极端情况下（数据结构不兼容）宁可重载一次，也不要留半更新的界面 */
+      h.className = 'iohint bad';
+      h.textContent = '导入完成但刷新界面出错，正在重载…';
+      setTimeout(() => location.reload(), 700);
+    }
   });
 
   /* ================= 其他 ================= */
