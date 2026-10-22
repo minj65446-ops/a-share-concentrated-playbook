@@ -16,6 +16,47 @@
     return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
   };
 
+  /* ============================================================
+     学习机制（v8）：经验值 / 连击 / 掌握度
+     ------------------------------------------------------------
+     原则：段位仍然只看真实成果（读完多少、做对多少、复盘几天），
+     经验值只负责「本段内的进度感」。所以这里不写任何解锁逻辑，
+     升级与否由 rank.js 决定 —— 积分不能买断毕业。
+     ============================================================ */
+  const L = window.LEARN || null;
+  const CARDD = window.CARDS || { list: [], groups: [], byGroup: () => [], size: 0 };
+  const JD = window.JUDGE || null;
+  const XP = (L && L.XP) || { basic:10, course:30, card:15, kline:15, review:20, quiz:40, death:5, session:50 };
+
+  const statOf = id => (L ? L.cardStat(store, id) : { level: 0, r: 0, w: 0 });
+  const weakList = () => (JD && L ? JD.weakIds(CARDD.list, statOf) : []);
+
+  function giveXp(n, why){
+    if(!L) return;
+    const before = L.readProf(store).xp;
+    L.addXp(store, n, why);
+    renderHud();
+    /* 首次到这一段时给一个动效，不打扰 */
+    if(Math.floor(before / L.SEG_XP) !== Math.floor(L.readProf(store).xp / L.SEG_XP)){
+      const el = $('#chipXp'); if(el){ el.classList.add('bump'); setTimeout(() => el.classList.remove('bump'), 520); }
+    }
+  }
+
+  function renderHud(){
+    if(!L) return;
+    const p = L.readProf(store);
+    const lv = L.levelOf(p.xp);
+    if($('#xpTop')) $('#xpTop').textContent = p.xp;
+    if($('#streakTop')) $('#streakTop').textContent = Math.max(0, p.streak || 0);
+    const cs = $('#chipStreak');
+    if(cs){
+      cs.title = p.streak ? ('连续学习 ' + p.streak + ' 天') : '还没开始打卡';
+      cs.style.opacity = p.streak ? '1' : '.55';
+    }
+    const cx = $('#chipXp');
+    if(cx) cx.title = '本段经验 ' + lv.into + ' / ' + lv.need;
+  }
+
   /* ---------- 主题 ---------- */
   const TH = window.THEMES || { list: [], DEFAULT: 'light', valid(){ return false }, nameOf(){ return '' }, apply(){ return 'light' } };
   /* 主题来源优先级：URL ?theme= > 本地存储 > 默认。URL 命中后立刻抹掉参数，
@@ -141,10 +182,10 @@
     $$('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
     window.scrollTo(0, 0);
     store.set('ta_tab', v);
-    if(v === 'train') setTimeout(drawK, 30);
+    if(v === 'train'){ setTimeout(drawK, 30); renderPane(); }
     if(v === 'me') renderMe();
     if(v === 'teacher') renderTeachers();
-    if(v === 'learn'){ renderRank(); renderBasics(); renderDeaths(); renderQuizCard(); }
+    if(v === 'learn'){ renderRank(); renderBasics(); renderDeaths(); renderQuizCard(); renderToday(); renderDeck(); }
   }
   $('#tabbar').addEventListener('click', e => {
     const b = e.target.closest('button'); if(!b) return;
@@ -180,7 +221,7 @@
         <div class="ring" style="--p:${p}"><span>${p ? '✓' : ''}</span></div>
       </div>`;
     }).join('');
-    $('#progressText').textContent = d.length + ' / 8 完成';
+    $('#progressText').textContent = d.length + ' / ' + COURSES.length + ' 完成';
   }
 
   $('#courseList').addEventListener('click', e => {
@@ -210,8 +251,8 @@
       </div>`;
     $('#markDone').addEventListener('click', () => {
       const d = done();
-      if(!d.includes(id)){ d.push(id); store.set('ta_done', d); }
-      renderCourses(); renderMe(); renderRank(); closeSheet();
+      if(!d.includes(id)){ d.push(id); store.set('ta_done', d); giveXp(XP.course, '完成课程'); }
+      renderCourses(); renderMe(); renderRank(); renderToday(); closeSheet();
       setTimeout(() => go('train'), 220);
     });
     $('#goDoc').addEventListener('click', () => { location.href = c.link; });
@@ -227,6 +268,10 @@
   /* ================= K线绘制 ================= */
   let curCase = null, curIdx = 0, answered = false;
   const kb = () => store.get('ta_kline', { total:0, right:0, streak:0, best:0 });
+  /* 答题卡的累计成绩，单独一份账，不和 K 线混。
+     两组题目的难度和含义完全不同，混在一起算正确率没有参考价值。 */
+  const cb = () => store.get('ta_cardstat', { total:0, right:0, combo:0, bestCombo:0, sessions:0 });
+  const cardTotal = () => cb();
 
   function drawK(){ const CC = cvs();
 
@@ -348,6 +393,8 @@
     store.set('ta_kline', s);
     $('#qStreak').textContent = '连对 ' + s.streak;
     updateAcc();
+    markToday('k');
+    if(ok) giveXp(XP.kline, '读懂 K 线');
 
     const ex = $('#explain');
     ex.innerHTML = '<b>' + (ok ? '对。' : '不对，正确答案是 ' + curCase.ans + '。') + '</b> ' + curCase.why;
@@ -355,8 +402,8 @@
     renderMe();
   });
 
-  $('#btnNextQ').addEventListener('click', () => { curIdx++; renderQ(); });
-  $('#btnShowWhy').addEventListener('click', () => {
+  $('#btnNextQ').addEventListener('click', () => { curIdx++; renderQ(); renderPane(); });
+  $('#btnWhyOpen').addEventListener('click', () => {
     if(answered) return;
     answered = true;
     $$('#opts .opt').forEach(x => { if(x.dataset.k === curCase.ans) x.classList.add('right'); });
@@ -366,8 +413,12 @@
   });
 
   function updateAcc(){
-    const s = kb();
-    $('#accText').textContent = s.total ? '正确率 ' + Math.round(s.right/s.total*100) + '%（' + s.right + '/' + s.total + '）' : '正确率 —';
+    const s = kb(), c = cb();
+    const tot = (s.total || 0) + (c.total || 0);
+    const rgt = (s.right || 0) + (c.right || 0);
+    $('#accText').textContent = tot
+      ? '正确率 ' + Math.round(rgt / tot * 100) + '%（' + rgt + '/' + tot + '）'
+      : '正确率 —';
   }
 
   // 画布点击：点标记附近即视为选择
@@ -384,6 +435,214 @@
       if(btn) btn.click();
     }
   });
+
+  /* ============================================================
+     答题卡：一次十题
+     ------------------------------------------------------------
+     状态不落盘（关掉就重来），但成绩和掌握度落盘。
+     理由：半场休息再回来，人已经忘了自己在第几题，
+     不如重开一组——一组才三分钟。
+
+     mode: 'idle' 未开始 / 'run' 答题中 / 'end' 结算
+     ============================================================ */
+  const QZ = { mode:'idle', qs:[], i:0, combo:0, right:0, pick:'', done:false, weakOnly:false };
+
+  function startQuizCards(weakOnly){
+    const weak = weakList();
+    if(weakOnly && !weak.length){
+      toast('还没有错题。先去答一组，答错的会自己回来。');
+      return;
+    }
+    if(!JD || !CARDD.size){ toast('题库没加载'); return; }
+    QZ.qs = JD.buildSession(CARDD.list, statOf, JD.SESSION, weakOnly ? weak : null);
+    QZ.mode = 'run'; QZ.i = 0; QZ.combo = 0; QZ.right = 0; QZ.pick = ''; QZ.done = false;
+    QZ.weakOnly = !!weakOnly;
+    renderPane();
+  }
+
+  function toast(msg){
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.classList.add('on'), 20);
+    setTimeout(() => { t.classList.remove('on'); setTimeout(() => t.remove(), 260); }, 2100);
+  }
+
+  function renderPane(){
+    const box = $('#qzBody'); if(!box) return;
+    const c = cb();
+    const lv = L ? L.levelOf(L.readProf(store).xp) : { lv:1, into:0, need:200, pct:0 };
+    const weak = weakList().length;
+    const solid = L ? L.mastery(store, CARDD.size).solid : 0;
+
+    /* 顶部数字：答题中显示本组连对，其它时候显示累计最高连对 */
+    $('#qzCombo').textContent = QZ.mode === 'run' ? QZ.combo : (c.bestCombo || 0);
+    $('#qzCombo').className = 'qzn' + ((QZ.mode === 'run' ? QZ.combo : c.bestCombo) >= 3 ? ' hot' : '');
+    /* 只显示一个短标签，前缀「每日一组 · 」在 HTML 里已经写死了 */
+    $('#qzMode').textContent = QZ.mode === 'run'
+      ? (QZ.weakOnly ? '错题重练' : '第 ' + (QZ.i + 1) + '/' + QZ.qs.length + ' 题')
+      : (QZ.mode === 'end' ? '本组结束' : (weak ? '错题 ' + weak + ' 张' : '准备'));
+    $('#qzProg').style.width = (QZ.mode === 'run' ? Math.round(QZ.i / QZ.qs.length * 100) : (QZ.mode === 'end' ? 100 : 0)) + '%';
+
+    $('#qzTitle').textContent = QZ.mode === 'run'
+      ? (QZ.qs[QZ.i] ? (QZ.i + 1) + '. ' + (QZ.qs[QZ.i].tag || '概念') : '')
+      : (QZ.mode === 'end' ? '一组做完' : '概念卡 · 一次十题');
+
+    if(QZ.mode === 'idle'){
+      box.innerHTML = `
+        <div class="qzempty">
+          <div class="big">${CARDD.size} 张概念卡</div>
+          <div class="sm">
+            一次十题，三分钟。答错的卡会自己回到复习队列 ——
+            比「再读一遍」有用，因为你是被问住过才知道没记住。
+          </div>
+          <div class="qzstat">
+            <div class="s"><div class="v">${solid}</div><div class="k">已掌握</div></div>
+            <div class="s"><div class="v">${weak}</div><div class="k">待复习</div></div>
+            <div class="s"><div class="v">+${(lv.pct ? lv.into : 0)}</div><div class="k">本段 XP</div></div>
+          </div>
+          <div class="deckrow" style="margin-top:14px">
+            <button class="btn btn-sm" id="qzStart">${weak ? '继续复习（' + weak + ' 张错题）' : '开始一组'}</button>
+            ${weak ? '<button class="btn btn-sm" id="qzFresh">答新题</button>' : ''}
+          </div>
+        </div>`;
+      $('#qzStart').addEventListener('click', () => startQuizCards(!!weak));
+      const f = $('#qzFresh'); if(f) f.addEventListener('click', () => startQuizCards(false));
+      return;
+    }
+
+    if(QZ.mode === 'end'){
+      const n = QZ.qs.length;
+      const pct = n ? Math.round(QZ.right / n * 100) : 0;
+      const weakNow = weakList().length;
+      box.innerHTML = `
+        <div class="qzempty">
+          <div class="big">${QZ.right} / ${n}</div>
+          <div class="sm">${pct >= 80 ? '这一组稳。别急着加量，明天再来一组就行。'
+            : pct >= 50 ? '过半了。答错的几张已经回到复习队列，下次会先问你那几张。'
+            : '这一组偏难。没关系——被问住才记得住，回去看一眼再来。'}</div>
+          <div class="qzstat">
+            <div class="s"><div class="v">${pct}%</div><div class="k">本组正确率</div></div>
+            <div class="s"><div class="v">${QZ.combo}</div><div class="k">本组最高连对</div></div>
+            <div class="s"><div class="v">${weakNow}</div><div class="k">待复习</div></div>
+          </div>
+          <div class="deckrow" style="margin-top:14px">
+            <button class="btn btn-sm" id="qzAgain">再来一组</button>
+            <button class="btn btn-sm" id="qzGoWeak">${weakNow ? '只练错题（' + weakNow + '）' : '没有错题'}</button>
+          </div>
+        </div>`;
+      $('#qzAgain').addEventListener('click', () => startQuizCards(false));
+      const gw = $('#qzGoWeak');
+      if(gw) gw.addEventListener('click', () => startQuizCards(true));
+      return;
+    }
+
+    /* ---- 答题中 ---- */
+    const q = QZ.qs[QZ.i];
+    if(!q){ QZ.mode = 'end'; renderPane(); return; }
+    box.innerHTML = `
+      <div class="card-q">
+        <div class="tagrow">
+          <span class="pill brand">${q.g}</span>
+          <span class="pill">${q.tag}</span>
+          ${q.weak ? '<span class="pill up">在错题本里</span>' : ''}
+        </div>
+        <div class="qtext">${q.q}</div>
+      </div>
+      ${q.opts.map(o => `<button class="copt" data-k="${o.k}" ${QZ.done ? 'disabled' : ''}>
+        <span class="k">${o.k}</span><span>${o.t}</span></button>`).join('')}
+      <div id="qfb"></div>
+      <div class="qznav">
+        <button class="btn btn-sm" id="qzNext">${QZ.i === QZ.qs.length - 1 ? '看本组结算' : '下一题'}</button>
+        <button class="btn btn-sm" id="qzQuit">退出</button>
+      </div>`;
+
+    if(QZ.done) paintAnswered();
+
+    Array.from(box.querySelectorAll('.copt')).forEach(b => {
+      b.addEventListener('click', () => answerCard(b.dataset.k));
+    });
+    $('#qzNext').addEventListener('click', () => {
+      if(!QZ.done){ toast('先选一个再往下'); return; }
+      if(QZ.i === QZ.qs.length - 1){ finishQuiz(); return; }
+      QZ.i++; QZ.done = false; QZ.pick = '';
+      renderPane();
+    });
+    $('#qzQuit').addEventListener('click', () => {
+      QZ.mode = 'idle'; QZ.qs = []; renderPane();
+    });
+  }
+
+  function answerCard(k){
+    if(QZ.done) return;
+    const q = QZ.qs[QZ.i]; if(!q) return;
+    QZ.done = true; QZ.pick = k;
+    const ok = k === q.ans;
+
+    /* 掌握度：答错掉回生疏，连对两次算掌握 */
+    if(L) L.markCard(store, q.id, ok);
+
+    const c = cb();
+    c.total++; if(ok) c.right++;
+    c.combo = ok ? (c.combo || 0) + 1 : 0;
+    c.bestCombo = Math.max(c.bestCombo || 0, c.combo);
+    store.set('ta_cardstat', c);
+
+    QZ.combo = c.combo;
+    QZ.right += ok ? 1 : 0;
+
+    if(ok) giveXp(XP.card, '答对概念卡');
+    else L && L.touch(store);
+    markToday('c');
+
+    $('#qzCombo').textContent = QZ.combo;
+    $('#qzCombo').className = 'qzn' + (QZ.combo >= 3 ? ' hot' : '');
+    paintAnswered();
+    updateAcc();
+    renderHud();
+    renderToday();
+  }
+
+  function paintAnswered(){
+    const q = QZ.qs[QZ.i]; if(!q) return;
+    Array.from(document.querySelectorAll('#qzBody .copt')).forEach(b => {
+      b.disabled = true;
+      const k = b.dataset.k;
+      b.classList.remove('right', 'wrong');
+      if(k === q.ans) b.classList.add('right');
+      else if(k === QZ.pick) b.classList.add('wrong');
+    });
+    const ok = QZ.pick === q.ans;
+    const fb = $('#qfb');
+    if(!fb) return;
+    fb.innerHTML = `
+      <div class="cfb ${ok ? 'ok' : 'no'}">
+        <div class="hd">
+          ${ok ? '✓ 对' : '✗ 不对，正确是 ' + q.ans}
+          ${ok ? `<span class="gain">+${XP.card} XP</span>` : ''}
+        </div>
+        <div class="bd">
+          ${ok ? '' : '<b>正确答案：</b>' + q.opts.find(o => o.k === q.ans).t + '<br><br>'}
+          ${q.why}
+          <div class="trap"><b>容易记反：</b>${q.trap}</div>
+        </div>
+      </div>`;
+  }
+
+  function finishQuiz(){
+    const c = cb();
+    c.sessions = (c.sessions || 0) + 1;
+    store.set('ta_cardstat', c);
+    /* 清完一组给一次奖励：这是「完成」而不是「坚持」的奖励 */
+    giveXp(XP.session, '清完一组');
+    QZ.mode = 'end';
+    renderPane();
+    renderMe();
+    renderRank();
+    renderToday();
+  }
+
 
   /* ================= 情绪周期 ================= */
   const STAGES = [
@@ -510,14 +769,40 @@
   /* ============================================================
      Lv1 启蒙
      ============================================================ */
+  /* ============================================================
+     Lv1 启蒙
+     ------------------------------------------------------------
+     25 条平铺像一堵墙。v8 拆成「分组筛选 + 单组进度」：
+     一次只看一组（通常 3–5 条），清完一组再换下一组。
+     分组顺序就是认知依赖顺序，所以「下一组」按钮直接推下一组。
+     ============================================================ */
+  let basicsGrp = null;   // null = 全部
+
   function renderBasics(){
     const box = $('#basicsList'); if(!box) return;
     const d = basicsDone();
+    const total = B.list.length;
+    const bar = $('#basicBar');
+    if(bar) bar.style.width = (total ? Math.round(d.length / total * 100) : 0) + '%';
+
+    /* 分组 chips：每组后面挂「已读 / 总数」 */
+    const chips = $('#basicChips');
+    if(chips){
+      chips.innerHTML = ['全部'].concat(B.groups).map(g => {
+        const items = g === '全部' ? B.list : B.list.filter(x => x.grp === g);
+        const rd = items.filter(x => d.indexOf(x.no) >= 0).length;
+        const on = (g === '全部' && basicsGrp === null) || g === basicsGrp;
+        return `<button data-g="${g}" class="${on ? 'on' : ''}">${g}
+          <span class="n">${rd}/${items.length}</span></button>`;
+      }).join('');
+    }
+
     let html = '';
     B.groups.forEach(g => {
+      if(basicsGrp !== null && basicsGrp !== g) return;
       const items = B.list.filter(x => x.grp === g);
       if(!items.length) return;
-      html += `<div class="grp-label">${g}</div>`;
+      html += `<div class="grp-label">${g} · ${items.filter(x => d.indexOf(x.no) >= 0).length}/${items.length}</div>`;
       html += items.map(b => {
         const read = d.indexOf(b.no) >= 0;
         return `<div class="basic ${read ? 'read' : ''}" data-b="${b.no}" role="button" tabindex="0">
@@ -530,11 +815,46 @@
         </div>`;
       }).join('');
     });
+
+    /* 当前组读完了：给一个明确的「下一组」，不用自己回去找 */
+    if(basicsGrp !== null){
+      const g = basicsGrp;
+      const items = B.list.filter(x => x.grp === g);
+      const allRead = items.length && items.every(x => d.indexOf(x.no) >= 0);
+      const gi = B.groups.indexOf(g);
+      const next = B.groups[gi + 1];
+      if(allRead){
+        html += `<div class="card" style="margin-top:10px;padding:13px 14px;background:var(--down-soft);border-color:var(--ok-line)">
+          <div style="font-size:12.5px;font-weight:800;color:var(--ok-ink)">这一组读完了 · ${items.length} 条</div>
+          <div style="font-size:11px;color:var(--ok-ink-2);line-height:1.65;margin-top:4px">
+            不急着往下。能用自己的话把这一组讲一遍，比读下一组有用。
+          </div>
+          ${next ? `<button class="btn btn-sm" id="nextGrp" style="margin-top:10px">下一组：${next}</button>`
+                 : `<button class="btn btn-sm" id="allGrp" style="margin-top:10px">看全部 25 条</button>`}
+        </div>`;
+      }
+    }
+
     box.innerHTML = html;
-    $('#basicsProgress').textContent = d.length + ' / ' + B.list.length;
+    $('#basicsProgress').textContent = d.length + ' / ' + total;
   }
 
+  $('#basicChips').addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    basicsGrp = b.dataset.g === '全部' ? null : b.dataset.g;
+    renderBasics();
+  });
   $('#basicsList').addEventListener('click', e => {
+    const ng = e.target.closest('#nextGrp');
+    if(ng){
+      const gi = B.groups.indexOf(basicsGrp);
+      basicsGrp = B.groups[gi + 1] || null;
+      renderBasics();
+      const box = $('#basicsList');
+      if(box) box.scrollIntoView({ behavior:'smooth', block:'start' });
+      return;
+    }
+    if(e.target.closest('#allGrp')){ basicsGrp = null; renderBasics(); return; }
     const b = e.target.closest('.basic'); if(!b) return;
     openBasic(b.dataset.b);
   });
@@ -544,7 +864,12 @@
     /* 打开就算读过：原来要点两次（点开 + 标记已读），25 条要 50 次点击。
        点开了就是在读，没必要再让用户确认一次；想回退就点「标记未读」。 */
     const d0 = basicsDone();
-    if(d0.indexOf(no) < 0){ d0.push(no); store.set('ta_basics', d0); renderBasics(); renderRank(); }
+    if(d0.indexOf(no) < 0){
+      d0.push(no); store.set('ta_basics', d0);
+      giveXp(XP.basic, '读启蒙 ' + no);
+      store.set('ta_today_b', todayKey());
+      renderBasics(); renderRank(); renderToday();
+    }
     const isRead = true;
     $('#sheetBody').innerHTML = `
       <div style="display:flex;gap:6px;margin-bottom:8px">
@@ -571,7 +896,7 @@
       const i = d.indexOf(no);
       if(i < 0) d.push(no); else d.splice(i, 1);
       store.set('ta_basics', d);
-      renderBasics(); renderRank(); closeSheet();
+      renderBasics(); renderRank(); renderToday(); closeSheet();
     });
     const tc = $('#toCourse');
     if(tc) tc.addEventListener('click', () => {
@@ -629,7 +954,16 @@
       </div>`;
     const tb = $('#toBasic');
     if(tb) tb.addEventListener('click', () => { closeSheet(); setTimeout(() => openBasic(d.link), 200); });
-    $('#dDone').addEventListener('click', closeSheet);
+    $('#dDone').addEventListener('click', () => {
+      /* 死法给的经验很少：读一遍就能拿分的东西给多了，会变成刷分 */
+      const tag = '读死法 ' + id;
+      const seen = L ? L.readProf(store).log.filter(x => x.w === tag).length : 1;
+      if(L && !seen){
+        giveXp(XP.death, tag);
+        renderToday();
+      }
+      closeSheet();
+    });
     openSheet();
   }
 
@@ -929,11 +1263,150 @@
 
   const REVIEW = ['今天的操作全部在计划内','没有触及止损却没执行的单子','持仓的买入理由今天仍然成立'];
 
+  /* 今日目标的四项。全部可计算，没有「你觉得今天学得怎么样」。 */
+  function goalItems(){
+    const k = kb(), c = cb();
+    const todayK = store.get('ta_today_k', { d:'', n:0 });
+    const kn = (todayK.d === todayKey() ? todayK.n : 0);
+    const cardToday = (store.get('ta_today_c', { d:'', n:0 }));
+    const cn = (cardToday.d === todayKey() ? cardToday.n : 0);
+    const rv = store.get('ta_review_' + todayKey(), []);
+    return [
+      { t:'答 1 张概念卡', ok: cn >= 1, n: cn + '/1' },
+      { t:'读 1 条启蒙', ok: basicsDone().length > 0 && store.get('ta_today_b','') === todayKey(), n: '' },
+      { t:'判 1 道题（K 线或卡片）', ok: (cn + kn) >= 1, n: '' },
+      { t:'盘后三问', ok: rv.length >= 3, n: rv.length + '/3' }
+    ];
+  }
+  const goalDone = () => goalItems().filter(g => g.ok).length;
+
+  function markToday(kind){
+    const key = kind === 'k' ? 'ta_today_k' : 'ta_today_c';
+    const cur = store.get(key, { d:'', n:0 });
+    const t = todayKey();
+    store.set(key, { d: t, n: (cur.d === t ? cur.n : 0) + 1 });
+  }
+
+  /* 首页里的「今日」卡：打卡状态 / 目标进度 / 断签补救 */
+  function renderToday(){
+    const box = $('#todayCard'); if(!box) return;
+    const p = L ? L.readProf(store) : { streak:0, xp:0, freezes:0, lastDay:'' };
+    const acts = L ? L.activeToday(store) : false;
+    const brk = L ? L.broken(store) : false;
+    const g = goalItems(), gd = goalDone();
+    const total = g.length;
+
+    box.className = 'card todaycard' + (acts ? ' on' : '');
+    box.innerHTML = `
+      <div class="top">
+        <div class="t"><i class="dot"></i>${acts ? '今天已打卡' : '今天还没开始'}</div>
+        <div class="sub">连续 ${p.streak || 0} 天${p.freezes ? ' · 补签卡 ' + p.freezes : ''}</div>
+      </div>
+      <div class="goal">
+        <div class="track"><i style="width:${Math.round(gd / total * 100)}%"></i></div>
+        <div class="pct">${gd}/${total}</div>
+      </div>
+      <div class="acts">
+        ${g.map(x => `<span class="mini ${x.ok ? 'ghost' : ''}" style="${x.ok ? 'text-decoration:line-through;opacity:.55' : ''}">
+          ${x.ok ? '✓' : '○'} ${x.t}</span>`).join('')}
+      </div>
+      ${brk ? `<div style="margin-top:11px;padding:9px 11px;border-radius:8px;background:var(--gold-soft);border:1px solid var(--gold-line);font-size:11px;line-height:1.65;color:var(--gold-ink-2)">
+        连击断了（上次 ${p.lastDay}）。断一天不算什么，别因为断了就彻底放弃——
+        ${p.freezes ? '你还有 ' + p.freezes + ' 张补签卡，可以补救昨天。' : '从今天重新开始就行。'}
+        ${p.freezes ? '<button class="mini primary" id="useFreeze" style="margin-left:6px">用补签卡</button>' : ''}
+      </div>` : ''}
+      <div class="acts" style="margin-top:11px">
+        <button class="mini primary" id="tQz">答题卡</button>
+        <button class="mini" id="tK">K 线一题</button>
+        <button class="mini" id="tBasic">读启蒙</button>
+        <button class="mini" id="tReview">盘后三问</button>
+      </div>`;
+
+    const uf = $('#useFreeze');
+    if(uf) uf.addEventListener('click', () => {
+      const r = L.useFreeze(store);
+      if(r.ok){ toast('补签成功，连击保住了'); renderToday(); renderHud(); }
+      else toast('补不了：' + (r.reason === 'gap-too-long' ? '断太久了' : '今天已经学过了'));
+    });
+    $('#tQz').addEventListener('click', () => { go('train'); startQuizCards(!!weakList().length); });
+    $('#tK').addEventListener('click', () => {
+      go('train');
+      setTimeout(() => { const t = $('#trainerCard'); if(t) t.scrollIntoView({ behavior:'smooth', block:'start' }); }, 80);
+    });
+    $('#tBasic').addEventListener('click', () => {
+      const d = basicsDone();
+      const first = B.list.filter(x => d.indexOf(x.no) < 0)[0];
+      if(first) openBasic(first.no); else toast('25 条已经全读完了');
+    });
+    $('#tReview').addEventListener('click', () => {
+      go('me');
+      setTimeout(() => { const t = $('#reviewList'); if(t) t.scrollIntoView({ behavior:'smooth', block:'center' }); }, 80);
+    });
+
+    /* hero 底部小字：今天做了什么，不刷屏 */
+    const tip = $('#heroTip');
+    if(tip){
+      const tx = L ? L.todayXp(store) : 0;
+      const lv = L ? L.levelOf(p.xp) : { into:0, need:200 };
+      tip.innerHTML = acts
+        ? `今天 <b>+${tx} XP</b> · 本段 ${lv.into}/${lv.need} · 连续 <b>${p.streak}</b> 天`
+        : '今天还没开始。一组十题大约三分钟，做完就算打卡。';
+    }
+  }
+
   function renderMe(){
-    $('#mCourse').textContent = done().length + '/8';
-    const s = kb();
-    $('#mAcc').textContent = s.total ? Math.round(s.right/s.total*100) + '%' : '—';
-    $('#mViol').textContent = s.total - s.right;
+    const d = done();
+    const s = kb(), c = cb();
+    $('#mCourse').textContent = d.length + '/' + COURSES.length;
+    const tot = (s.total || 0) + (c.total || 0), rgt = (s.right || 0) + (c.right || 0);
+    $('#mAcc').textContent = tot ? Math.round(rgt / tot * 100) + '%' : '—';
+    if($('#mSolid')) $('#mSolid').textContent = L ? L.mastery(store, CARDD.size).solid : 0;
+
+    /* 等级卡 */
+    const p = L ? L.readProf(store) : { xp:0, streak:0 };
+    const lv = L ? L.levelOf(p.xp) : { lv:1, into:0, need:200, pct:0 };
+    const rc = R ? R.current(store) : null;
+    if($('#lvCard')){
+      $('#lvCard').innerHTML = `
+        <div class="l1">
+          <div>
+            <span class="lv">LV ${lv.lv} · 学习等级</span>
+            <div style="font-size:15px;font-weight:800;margin-top:9px;letter-spacing:-.2px">
+              ${rc ? rc.rank.name : '启蒙'}${rc && rc.allDone ? ' · 通关' : ''}
+            </div>
+            <div style="font-size:11px;opacity:.72;margin-top:4px">段位毕业只看真实成果，经验值只表示这一段走了多远</div>
+          </div>
+          <div class="xp">${p.xp}<span>累计 XP</span></div>
+        </div>
+        <div class="bar"><i style="width:${lv.pct}%"></i></div>
+        <div class="foot"><span>本段 ${lv.into} / ${lv.need}</span><span>连续 ${p.streak || 0} 天</span></div>`;
+    }
+
+    /* 本周 */
+    if($('#weekBar') && L){
+      const wk = L.week(store);
+      const on = wk.filter(x => x.on).length;
+      $('#weekBar').innerHTML = wk.map(x =>
+        `<div class="d ${x.on ? 'on' : ''} ${x.today ? 'today' : ''}">
+           <div class="wd">${x.wd}</div>
+           <div class="c">${x.on ? '✓' : ''}</div>
+         </div>`).join('');
+      if($('#weekSub')) $('#weekSub').textContent = on + ' / 7 天';
+      if($('#weekTip')) $('#weekTip').textContent = on === 0
+        ? '这一周还没有记录。不用每天都学很久，学过一次就算。'
+        : on >= 6 ? '几乎全勤。注意别为了保持连击而敷衍——连续只是副产品。'
+        : '有记录的天数：' + on + '。断一天不影响，断一周就很难回来了。';
+    }
+
+    /* 今天做了什么 */
+    if($('#todayList') && L){
+      const log = L.todayLog(store);
+      const tx = L.todayXp(store);
+      if($('#todayXp')) $('#todayXp').textContent = '+' + tx + ' XP';
+      $('#todayList').innerHTML = log.length
+        ? log.map(x => `<div class="logrow"><span class="w">${x.w}</span><span class="x">+${x.xp}</span></div>`).join('')
+        : '<div class="logempty">今天还没有记录。<br>答一组卡或读一条启蒙，这里就会出现。</div>';
+    }
 
     $('#badges').innerHTML = BADGES.map(b => {
       const on = b.on();
@@ -941,7 +1414,7 @@
         <svg class="b" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${b.icon}"/></svg>
         <span>${b.label}</span></div>`;
     }).join('');
-    $('#badgeCount').textContent = BADGES.filter(b => b.on()).length + ' / 4';
+    $('#badgeCount').textContent = BADGES.filter(b => b.on()).length + ' / ' + BADGES.length;
     renderThemes();
 
     const key = 'ta_review_' + todayKey();
@@ -957,8 +1430,12 @@
     const key = 'ta_review_' + todayKey();
     const saved = [];
     $$('#reviewList input').forEach((x,i) => { if(x.checked) saved.push(i); });
+    const was = store.get(key, []).length;
     store.set(key, saved);
-    renderMe();
+    /* 三问全勾 = 完成一次复盘，这是 L4/L5 的硬指标，所以给分 */
+    if(saved.length >= 3 && was < 3) giveXp(XP.review, '完成盘后三问');
+    else if(saved.length) L && L.touch(store);
+    renderMe(); renderToday(); renderRank();
   });
 
   /* ================= 仓位计算器（抽屉） ================= */
@@ -996,26 +1473,119 @@
     openSheet();
   });
 
+  /* ================= 概念卡 / 数据 / 起始入口 ================= */
+  $('#btnWeak').addEventListener('click', () => {
+    const w = weakList();
+    if(!w.length){ toast('还没有错题。答错过的卡会自动出现在这里。'); return; }
+    go('train'); startQuizCards(true);
+  });
+
+  $('#btnDaily').addEventListener('click', () => {
+    go('train');
+    startQuizCards(!!weakList().length);
+    setTimeout(() => { const t = $('#quizPane'); if(t) t.scrollIntoView({ behavior:'smooth', block:'start' }); }, 80);
+  });
+
+  function renderDeck(){
+    const box = $('#deckBox'); if(!box) return;
+    const m = L ? L.mastery(store, CARDD.size) : { solid:0, weak:0, seen:0, pct:0 };
+    const cs = cb();
+    if($('#cardProg')) $('#cardProg').textContent = m.solid + ' / ' + CARDD.size + ' 掌握';
+    box.innerHTML = `
+      <div style="font-size:12px;line-height:1.7;color:var(--ink-2)">
+        已掌握 <b style="color:var(--brand-2)">${m.solid}</b> 张 · 待复习 <b style="color:var(--up)">${m.weak}</b> 张 ·
+        累计答对 <b>${cs.right || 0}</b> / ${cs.total || 0}
+      </div>
+      <div class="deckrow" style="margin-top:12px">
+        <button class="btn btn-sm" id="deckGo">${m.weak ? '复习错题（' + m.weak + '）' : '答一组新题'}</button>
+        <button class="btn btn-sm" id="deckNew">随机十题</button>
+      </div>`;
+    $('#deckGo').addEventListener('click', () => { go('train'); startQuizCards(!!m.weak); });
+    $('#deckNew').addEventListener('click', () => { go('train'); startQuizCards(false); });
+
+    /* 按组统计掌握度——哪一组最弱，一眼能看到 */
+    const box2 = $('#mastBox'); if(!box2) return;
+    box2.innerHTML = '<div class="mastlist" style="margin-top:0">' + CARDD.groups.map(g => {
+      const items = CARDD.list.filter(c => c.g === g);
+      const done = items.filter(c => statOf(c.id).level >= 3).length;
+      const pct = items.length ? Math.round(done / items.length * 100) : 0;
+      return `<div class="mastrow">
+        <div class="nm">${g}</div>
+        <div class="track"><i class="${pct < 50 ? 'low' : ''}" style="width:${pct}%"></i></div>
+        <div class="n">${done}/${items.length}</div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  /* 数据导入导出：本地存储最容易被清掉（换浏览器 / 清缓存），
+     而段位是靠几十天的记录算出来的。给一条自救的路，比写一百句提示有用。 */
+  const IO_KEYS = ['ta_prof','ta_mast','ta_cardstat','ta_kline','ta_done','ta_basics','ta_quiz','ta_theme','ta_best_streak'];
+  $('#btnExport').addEventListener('click', () => {
+    const out = { v: 8, at: todayKey(), data:{} };
+    IO_KEYS.forEach(k => { const v = store.get(k, null); if(v !== null) out.data[k] = v; });
+    /* 复盘记录按日期分开存，单独扫一遍 */
+    for(let i = 0; i < 400; i++){
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const k = 'ta_review_' + d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+      const v = store.get(k, null);
+      if(v) out.data[k] = v;
+    }
+    const txt = JSON.stringify(out);
+    const ta = $('#ioBox');
+    ta.classList.add('on');
+    ta.value = txt;
+    ta.select();
+    try { document.execCommand('copy'); } catch(e){}
+    const h = $('#ioHint');
+    h.className = 'iohint';
+    h.textContent = '已生成并尝试复制（' + Math.round(txt.length / 1024 * 10) / 10 + ' KB）。保存好这段文本。';
+  });
+
+  $('#btnImport').addEventListener('click', () => {
+    const ta = $('#ioBox');
+    const h = $('#ioHint');
+    if(!ta.classList.contains('on') || !ta.value.trim()){
+      ta.classList.add('on');
+      ta.value = '';
+      ta.focus();
+      h.className = 'iohint';
+      h.textContent = '把之前导出的文本粘贴进来，再点一次「导入」。';
+      return;
+    }
+    let obj = null;
+    try { obj = JSON.parse(ta.value); } catch(e){ obj = null; }
+    if(!obj || !obj.data || typeof obj.data !== 'object'){
+      h.className = 'iohint bad';
+      h.textContent = '这段文本读不出来。请确认是完整复制，没有被截断。';
+      return;
+    }
+    let n = 0;
+    Object.keys(obj.data).forEach(k => {
+      if(k.indexOf('ta_') !== 0) return;
+      store.set(k, obj.data[k]); n++;
+    });
+    h.className = 'iohint';
+    h.textContent = '导入 ' + n + ' 项，正在刷新…';
+    setTimeout(() => location.reload(), 600);
+  });
+
   /* ================= 其他 ================= */
   $('#btnSim').addEventListener('click', () => { location.href = 'playbook.html#sandbox'; });
   $('#btnContinue').addEventListener('click', () => {
     const d = done();
-    const next = COURSES.find(c => !d.includes(c.id)) || COURSES[0];
-    openCourse(next.id);
+    const next = COURSES.find(c => !d.includes(c.id));
+    if(next){ openCourse(next.id); return; }
+    const first = B.list.filter(x => basicsDone().indexOf(x.no) < 0)[0];
+    if(first){ openBasic(first.no); return; }
+    toast('课程和启蒙都读完了。去训练场练判断吧。');
+    go('train');
   });
 
-  $('#dailyTask').innerHTML = `
-    <div style="font-size:13px;font-weight:700;margin-bottom:4px">读一根不属于你的 K 线</div>
-    <div style="font-size:11.5px;color:var(--muted);line-height:1.7">随机出现，形态不告诉你。先在图上判断，再看解析——顺序反了就学不到东西。</div>
-    <button class="btn btn-sm" style="margin-top:10px;background:var(--brand);color:#fff;border-color:var(--brand)" data-go2="train">去训练</button>`;
-  $('#dailyTask').addEventListener('click', e => { if(e.target.dataset.go2) go('train'); });
-
   /* ================= 启动 ================= */
-  const s0 = kb();
-  $('#streakTop').textContent = Math.max(1, s0.best || 1);
   renderCourses();
   renderStage(0);
   updateAcc();
+  renderHud();
   renderMe();
   renderQ();
   renderTeachers();
@@ -1023,6 +1593,9 @@
   renderRank();
   renderDeaths();
   renderQuizCard();
+  renderToday();
+  renderDeck();
+  renderPane();
   const lastTab = store.get('ta_tab', 'learn');
   go(location.hash === '#train' ? 'train' : lastTab);
   window.addEventListener('resize', () => { if($('#v-train').classList.contains('on')) drawK(); });
