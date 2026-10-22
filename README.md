@@ -2,7 +2,8 @@
 
 把「集中式交易」做成可以练的东西，而不是一篇读完就忘的长文。
 
-**在线体验**：<https://minj65446-ops.github.io/a-share-concentrated-playbook/>
+**在线体验**：<https://a-share-trade-academy.app.workbuddy.host/?sharecode=HGYYAY5FPV>
+　镜像站点：<https://minj65446-ops.github.io/a-share-concentrated-playbook/>
 
 | 入口              | 说明                                           |
 | --------------- | -------------------------------------------- |
@@ -225,6 +226,7 @@ v10 解决的是「层次和排版」，这一版解决的是另一件事：**�
 
 | 端         | 位置                                                                                                          |
 | --------- | ----------------------------------------------------------------------------------------------------------- |
+| **在线体验** | <https://a-share-trade-academy.app.workbuddy.host/?sharecode=HGYYAY5FPV>（WorkBuddy 发布，移动优先）              |
 | Web       | 根目录 `index.html` + `app.css` + `app.js` + `teachers.js` + `basics.js` + `rank.js` + `quiz.js` + `deaths.js` + `cases.js` + `theme.js` + `learn.js` + `cards.js` + `srs.js` + `craft.js` + `themes.css` |
 | 小程序 / App | `miniprogram-uni/`，`pages.json` 已配好 5 个 tabBar；数据层在 `common/`（ESM，与 Web 同源；`learn/cards/srs` 由 BODY 段生成，规则与网页逐字一致）                                 |
 | 设计规范      | `docs/DESIGN.md`——设计令牌、组件映射表、三端差异清单、v4 成长体系、v8 学习机制说明                                                               |
