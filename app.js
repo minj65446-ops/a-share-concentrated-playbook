@@ -1310,9 +1310,8 @@
         <div class="track"><i style="width:${Math.round(gd / total * 100)}%"></i></div>
         <div class="pct">${gd}/${total}</div>
       </div>
-      <div class="acts">
-        ${g.map(x => `<span class="mini ${x.ok ? 'ghost' : ''}" style="${x.ok ? 'text-decoration:line-through;opacity:.55' : ''}">
-          ${x.ok ? '✓' : '○'} ${x.t}</span>`).join('')}
+      <div class="goals">
+        ${g.map(x => `<span class="mini${x.ok ? ' done' : ''}"><i class="mk">${x.ok ? '✓' : '○'}</i>${x.t}</span>`).join('')}
       </div>
       ${brk ? `<div style="margin-top:11px;padding:9px 11px;border-radius:8px;background:var(--gold-soft);border:1px solid var(--gold-line);font-size:11px;line-height:1.65;color:var(--gold-ink-2)">
         连击断了（上次 ${p.lastDay}）。断一天不算什么，别因为断了就彻底放弃——
@@ -1519,7 +1518,18 @@
     const s = kb(), c = cb();
     $('#mCourse').textContent = d.length + '/' + COURSES.length;
     const tot = (s.total || 0) + (c.total || 0), rgt = (s.right || 0) + (c.right || 0);
-    $('#mAcc').textContent = tot ? Math.round(rgt / tot * 100) + '%' : '—';
+    /* 没数据时不能只写一个「—」：跨两列的主格子里，一个短横撑不住版面，
+       读者也读不出「这是准确率，只是还没数」。空态直接说话。 */
+    const acc = $('#mAcc');
+    if(tot){
+      acc.textContent = Math.round(rgt / tot * 100) + '%';
+      acc.className = 'v';
+      $('#mAccNote').textContent = '已判 ' + tot + ' 题 · 对 ' + rgt + ' 题';
+    } else {
+      acc.textContent = '还没有数';
+      acc.className = 'v na';
+      $('#mAccNote').textContent = '判过题之后，这里显示你的准确率';
+    }
     if($('#mSolid')) $('#mSolid').textContent = L ? L.mastery(store, CARDD.size).solid : 0;
 
     /* 等级卡 */
