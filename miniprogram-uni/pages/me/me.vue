@@ -44,17 +44,19 @@
       </view>
     </view>
 
+    <!-- 数字后面的单位单独套 .u，和主数字分层：
+         「6/8」三个字符同字号读起来是一坨，单位小一半就立住了 -->
     <view class="stat3">
       <view class="s">
-        <view class="v">{{ done.length }}/8</view>
+        <view class="v">{{ done.length }}<text class="u">/8</text></view>
         <view class="k">课程</view>
       </view>
       <view class="s">
-        <view class="v">{{ acc }}</view>
+        <view class="v">{{ accNum }}<text class="u">{{ accUnit }}</text></view>
         <view class="k">K线正确率</view>
       </view>
       <view class="s">
-        <view class="v">{{ wrong }}</view>
+        <view class="v">{{ wrong }}<text class="u">题</text></view>
         <view class="k">错题数</view>
       </view>
     </view>
@@ -142,9 +144,14 @@ export default {
   computed: {
     themeCls() { return 't-' + this.theme },
 
-    acc() {
+    /* 数字和单位拆成两个字段，模板里才能分别排版。
+       空态返回「还没有数」而不是「—」，和 Web 端一致。 */
+    accNum() {
       const s = this.stats
-      return s.total ? Math.round(s.right / s.total * 100) + '%' : '—'
+      return s.total ? String(Math.round(s.right / s.total * 100)) : '还没有数'
+    },
+    accUnit() {
+      return this.stats.total ? '%' : ''
     },
     wrong() {
       return Math.max(0, (this.stats.total || 0) - (this.stats.right || 0))
@@ -222,9 +229,11 @@ export default {
   font-size: 20rpx; padding: 6rpx 16rpx; border-radius: 30rpx;
   background: rgba(255, 255, 255, .16);
 }
+/* 槽做凹陷（内阴影），和 Web 端同一套层次逻辑 */
 .lvtrack {
   height: 10rpx; border-radius: 6rpx; margin-top: 22rpx;
   background: rgba(255, 255, 255, .2); overflow: hidden;
+  box-shadow: inset 0 1rpx 3rpx rgba(10, 20, 32, .18);
 }
 .lvtrack .fi { height: 100%; background: #fff; border-radius: 6rpx; }
 .lvfoot { font-size: 19rpx; opacity: .68; margin-top: 14rpx; line-height: 1.6; }
@@ -260,6 +269,8 @@ export default {
   padding: 24rpx 12rpx; text-align: center;
 }
 .stat3 .v { font-size: 38rpx; font-weight: 800; color: var(--brand-2); }
+/* 单位退后一步：字号砍到一半、透明度 .5，数字本身才立得住 */
+.stat3 .v .u { font-size: 19rpx; font-weight: 700; opacity: .5; margin-left: 1rpx; }
 .stat3 .k { font-size: 21rpx; color: var(--muted); margin-top: 4rpx; }
 
 .badges { display: flex; gap: 14rpx; }
