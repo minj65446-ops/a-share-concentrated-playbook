@@ -339,7 +339,7 @@ export default {
 }
 .foot {
   display: flex; align-items: center; justify-content: space-between;
-  padding-top: 14rpx; border-top: 1px dashed var(--line-2);
+  padding-top: 14rpx; border-top: 1px solid var(--line-2);
 }
 .fit { font-size: 20rpx; color: var(--muted); }
 .fit .b { color: var(--brand-2); font-weight: 700; }
@@ -373,7 +373,7 @@ export default {
   content: ''; position: absolute; left: 10rpx; top: 12rpx; bottom: 12rpx;
   width: 3rpx; background: linear-gradient(180deg, var(--brand-2), var(--line));
 }
-.ln { position: relative; padding: 22rpx 0; border-bottom: 1px dashed var(--line-2); }
+.ln { position: relative; padding: 22rpx 0; border-bottom: 1px solid var(--line-2); }
 .ln::before {
   content: ''; position: absolute; left: -37rpx; top: 32rpx;
   width: 18rpx; height: 18rpx; border-radius: 50%;
