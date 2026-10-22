@@ -20,17 +20,17 @@ export default {
    ============================================================ */
 /* THEMES:BEGIN · 由 tools/gen-theme.js 从 Web 端 app.css / themes.css 生成，勿手改 */
 page {
-  --bg:#f4f5f7;
-  --bg-2:#eceef2;
+  --bg:#f6f7f9;
+  --bg-2:#eff1f4;
   --card:#ffffff;
-  --card-2:#fafbfc;
-  --ink:#0f1a26;
-  --ink-2:#35414f;
-  --muted:#7b8794;
-  --line:#e5e8ed;
-  --line-2:#eff1f4;
-  --brand:#16283f;
-  --brand-2:#20456e;
+  --card-2:#fbfcfd;
+  --ink:#1c2836;
+  --ink-2:#485566;
+  --muted:#8c97a4;
+  --line:#e8ebef;
+  --line-2:#f1f3f6;
+  --brand:#3d5a78;
+  --brand-2:#5a7fa6;
   --brand-soft:#eef3f9;
   --up:#d94a45;
   --up-soft:#fdecea;
@@ -41,22 +41,22 @@ page {
   --r-lg:40rpx;
   --r:28rpx;
   --r-sm:20rpx;
-  --ok-line:#cfeadf;
-  --ok-ink:#0f5138;
-  --ok-ink-2:#125c43;
-  --bad-line:#f6d7d5;
-  --bad-ink:#8a2b26;
-  --bad-ink-2:#8f312c;
-  --bad-bg-2:#fefaf9;
-  --gold-line:#f0e2c0;
-  --gold-ink:#96702a;
-  --gold-ink-2:#6b521a;
-  --brand-line:#dbe6f2;
-  --brand-line-2:#cfd8e2;
-  --hero-mid:#1c3f66;
-  --hero-end:#255a86;
-  --panel-1:#fbfcfd;
-  --panel-2:#f2f5f9;
+  --ok-line:#d5ece3;
+  --ok-ink:#155a40;
+  --ok-ink-2:#186349;
+  --bad-line:#f3dad7;
+  --bad-ink:#8d332d;
+  --bad-ink-2:#923a33;
+  --bad-bg-2:#fefbfa;
+  --gold-line:#f0e3c4;
+  --gold-ink:#8c6c25;
+  --gold-ink-2:#6d5520;
+  --brand-line:#dfe7f0;
+  --brand-line-2:#d6dfe9;
+  --hero-mid:#4a6c8e;
+  --hero-end:#54799f;
+  --panel-1:#fcfdfe;
+  --panel-2:#f4f6f9;
 }
 .t-dark {
   --bg:#0e131a;
