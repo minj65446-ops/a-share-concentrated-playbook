@@ -584,7 +584,8 @@ main{padding:16px 16px 96px}
   width:min(520px,100%);z-index:40;
   background:var(--glass-2);backdrop-filter:blur(16px);
   border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(5,1fr);
+  /* 6 个 tab（比原来的 5 个多一个「自创」），等分六列 */
+  display:grid;grid-template-columns:repeat(6,1fr);
   padding:8px 0 max(8px,env(safe-area-inset-bottom));
 }
 .tabbar button{
@@ -829,3 +830,115 @@ main{padding:16px 16px 96px}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 
+
+/* ============================================================
+   自创流派 · 装配台
+   ------------------------------------------------------------
+   视觉语言刻意比别处"更素"：这是草稿区，不是成果展示区。
+   唯一的彩色是三道闸的通过态，别处一律只用线和字重说话。
+   ============================================================ */
+
+/* ---------- 三道闸 ---------- */
+.gate{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px dashed var(--line)}
+.gate:first-child{border-top:none}
+.gate .gi{
+  flex:none;width:19px;height:19px;border-radius:50%;margin-top:1px;
+  font:700 10.5px/19px var(--mono);text-align:center;
+  background:var(--bg-2);color:var(--muted);border:1px solid var(--line);
+}
+.gate.on .gi{background:var(--down);color:#fff;border-color:var(--down)}
+.gate .gt{font-size:11.5px;line-height:1.6;color:var(--ink-2)}
+.gate.on .gt{color:var(--ink)}
+
+/* ---------- 装配台六格 ---------- */
+.slot{padding:12px 0;border-top:1px dashed var(--line)}
+.slot:first-child{border-top:none;padding-top:2px}
+.slot .sh{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+.slot .no{
+  font:700 9.5px/1 var(--mono);color:var(--muted);
+  width:17px;height:17px;border-radius:5px;text-align:center;
+  background:var(--bg-2);border:1px solid var(--line);
+}
+.slot.on .no{background:var(--brand-soft);color:var(--brand-2);border-color:var(--brand-line)}
+.slot .sn{font-size:12.5px;font-weight:800;letter-spacing:-.2px}
+.slot .req{
+  font:700 9px/1 var(--mono);letter-spacing:.06em;
+  color:var(--gold-ink);background:var(--gold-soft);border:1px solid var(--gold-line);
+  padding:3px 5px;border-radius:4px;
+}
+.slot .sd{font-size:10.5px;color:var(--muted);line-height:1.6;margin:0 0 7px 24px}
+.slot .sin{
+  width:100%;font:inherit;font-size:12px;line-height:1.6;color:var(--ink);
+  padding:9px 11px;border-radius:var(--r-sm);resize:vertical;min-height:46px;
+  background:var(--bg-2);border:1px solid var(--line);
+  transition:border-color .2s,background .2s;
+}
+.slot .sin:focus{outline:none;background:var(--card);border-color:var(--brand-2);box-shadow:var(--focus-ring)}
+.slot .sw{font-size:10px;line-height:1.6;color:var(--muted);margin-top:6px;opacity:.8}
+
+/* ---------- 从八派借一条 ---------- */
+.seeds{display:flex;flex-wrap:wrap;gap:6px}
+.seed{
+  font-size:11px;line-height:1.45;text-align:left;padding:7px 10px;border-radius:8px;
+  background:var(--bg-2);border:1px solid var(--line);color:var(--ink-2);
+  transition:border-color .18s,background .18s;
+}
+.seed:active{transform:scale(.985);background:var(--brand-soft);border-color:var(--brand-line)}
+
+/* ---------- 12 个场景 ---------- */
+.ckcard{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px 13px;margin-bottom:9px;
+}
+.ckcard.done{border-color:var(--brand-line-2)}
+.ckq{display:flex;gap:7px;font-size:12px;font-weight:800;line-height:1.5;margin-bottom:9px;letter-spacing:-.2px}
+.cnn,.ckcard .cn{
+  flex:none;font:700 9.5px/16px var(--mono);color:var(--muted);
+  width:16px;height:16px;border-radius:4px;text-align:center;background:var(--bg-2);
+}
+.ckopt{
+  display:block;width:100%;text-align:left;font-size:11.5px;line-height:1.6;
+  padding:9px 11px;border-radius:8px;margin-top:6px;
+  background:var(--bg-2);border:1px solid var(--line);color:var(--ink-2);
+  transition:.18s;
+}
+.ckopt.picked{background:var(--down-soft);border-color:var(--ok-line);color:var(--ok-ink-2);font-weight:600}
+.ckopt.picked.bad{background:var(--up-soft);border-color:var(--bad-line);color:var(--bad-ink-2)}
+
+/* ---------- 挂牌 ---------- */
+.cfname label{font:700 9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
+.cfname input{
+  width:100%;font:inherit;font-size:13px;font-weight:700;color:var(--ink);
+  padding:10px 12px;border-radius:var(--r-sm);
+  background:var(--bg-2);border:1px solid var(--line);
+}
+.cfname input:focus{outline:none;background:var(--card);border-color:var(--brand-2);box-shadow:var(--focus-ring)}
+.cfverdict{
+  margin-top:12px;padding:12px 13px;border-radius:var(--r-sm);
+  background:var(--bg-2);border:1px dashed var(--line-2);
+}
+.cfverdict .cv-nm{font-size:13px;font-weight:800;letter-spacing:-.2px}
+.cfverdict .cv-t{font:700 10.5px/1 var(--mono);letter-spacing:.06em;color:var(--muted);margin-top:6px}
+.cfverdict .cv-d{font-size:11px;line-height:1.65;color:var(--muted);margin-top:7px}
+.cfverdict.ok{background:var(--down-soft);border:1px solid var(--ok-line);border-style:solid}
+.cfverdict.ok .cv-t{color:var(--down)}
+.cfverdict.ok .cv-d{color:var(--ok-ink-2)}
+.cfnote{font-size:10.5px;line-height:1.7;color:var(--muted);margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+
+/* ---------- 老师页 → 自创流派的入口 ---------- */
+.craftlink{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  margin-top:12px;padding:13px 14px;border-radius:var(--r);
+  background:var(--card);border:1px dashed var(--brand-line-2);
+  transition:border-color .18s,background .18s;
+}
+.craftlink:active{background:var(--brand-soft)}
+.craftlink .ci{
+  flex:none;width:26px;height:26px;border-radius:8px;text-align:center;
+  font:800 13px/26px var(--mono);color:var(--brand-2);
+  background:var(--brand-soft);border:1px solid var(--brand-line);
+}
+.craftlink .ct{flex:1;min-width:0;display:block}
+.craftlink .ct b{display:block;font-size:12.5px;font-weight:800;letter-spacing:-.2px;color:var(--ink)}
+.craftlink .ct i{display:block;font-style:normal;font-size:10.5px;line-height:1.6;color:var(--muted);margin-top:3px}
+.craftlink .ca{flex:none;font-size:16px;color:var(--muted)}
