@@ -11,6 +11,36 @@
       </view>
     </view>
 
+    <!-- 今日：打卡 / 目标 / 连击（v8 学习机制） -->
+    <view class="today" :class="{ on: prof.activeToday }">
+      <view class="top">
+        <view class="tl">
+          <view class="tt"><view class="dot"></view>{{ prof.activeToday ? '今天已打卡' : '今天还没开始' }}</view>
+          <view class="ts">连续 {{ prof.streak }} 天{{ prof.freezes ? ' · 补签卡 ' + prof.freezes : '' }}</view>
+        </view>
+        <view class="xpbox">
+          <view class="xv">{{ prof.xp }}</view>
+          <view class="xl">经验</view>
+        </view>
+      </view>
+      <view class="track"><view class="fi" :style="{ width: goalPct + '%' }"></view></view>
+      <view class="acts">
+        <view class="mini" v-for="g in goals" :key="g.t" :class="{ ghost: g.ok }">
+          {{ g.ok ? '✓' : '○' }} {{ g.t }}
+        </view>
+      </view>
+      <view class="lvline">
+        <text class="lvt">LV{{ lv.lv }}</text>
+        <view class="lvtrack"><view class="fi" :style="{ width: lv.pct + '%' }"></view></view>
+        <text class="lvn">{{ lv.into }} / {{ lv.need }}</text>
+      </view>
+      <view class="brk" v-if="prof.broken">
+        连击断了（上次 {{ prof.lastDay }}）。断一天不算什么，别因为断了就彻底放弃——
+        {{ prof.freezes ? '你还有 ' + prof.freezes + ' 张补签卡，可以补救昨天。' : '从今天重新开始就行。' }}
+        <view class="btn sm" v-if="prof.freezes" @click="useFreeze">用补签卡</view>
+      </view>
+    </view>
+
     <!-- 当前段位 -->
     <view class="rankcard">
       <view class="top">
@@ -51,10 +81,17 @@
       <view class="h">Lv1 启蒙 · 先搞懂是什么</view>
       <view class="s">{{ basics.length }} / {{ BASICS.length }}</view>
     </view>
-    <view class="intro">这 13 条不讲任何策略。它们只回答一个问题：你买的到底是什么。跳过这一层直接学战法，是大多数人学不会的原因。</view>
+    <view class="intro">这 {{ BASICS.length }} 条不讲任何策略。它们只回答一个问题：你买的到底是什么。跳过这一层直接学战法，是大多数人学不会的原因。</view>
+    <!-- 25 条平铺像一堵墙：先按组筛，一次只看一组 -->
+    <scroll-view class="grpchips" scroll-x>
+      <view class="chip" v-for="g in grpChips" :key="g.key"
+            :class="{ on: curGrp === g.key }" @click="pickGrp(g.key)">
+        {{ g.label }}<text class="n">{{ g.read }}/{{ g.total }}</text>
+      </view>
+    </scroll-view>
     <view class="path">
-      <block v-for="g in GROUPS" :key="g">
-        <view class="grp-label">{{ g }}</view>
+      <block v-for="g in shownGroups" :key="g">
+        <view class="grp-label">{{ g }} · {{ groupRead(g) }}/{{ groupOf(g).length }}</view>
         <view class="basic" v-for="b in groupOf(g)" :key="b.no"
               :class="{ read: basics.includes(b.no) }" @click="openBasic(b.no)">
           <view class="no">{{ basics.includes(b.no) ? '✓' : b.no }}</view>
@@ -65,6 +102,14 @@
           <view class="tick">{{ basics.includes(b.no) ? '✓' : '' }}</view>
         </view>
       </block>
+    </view>
+
+    <!-- 这一组读完了：直接给下一组，不用自己回去找 -->
+    <view class="nextgrp" v-if="grpAllRead">
+      <view class="ngt">这一组读完了 · {{ groupOf(curGrp).length }} 条</view>
+      <view class="ngd">不急着往下。能用自己的话把这一组讲一遍，比读下一组有用。</view>
+      <view class="btn sm" v-if="nextGrpName" @click="pickGrp(nextGrpName)">下一组：{{ nextGrpName }}</view>
+      <view class="btn sm" v-else @click="pickGrp(null)">看全部 {{ BASICS.length }} 条</view>
     </view>
 
     <view class="sec-title">
@@ -285,6 +330,21 @@ import { DEATHS, DGROUPS } from '../../common/deaths.js'
 import { RANKS, current, readState } from '../../common/rank.js'
 import { QUIZ, result as quizResult } from '../../common/quiz.js'
 import { SCHOOLS, RULES } from '../../common/teachers.js'
+import {
+  store, readProf, touch, activeToday, broken, useFreeze, levelOf, week, addXp
+} from '../../common/learn.js'
+
+/* 今日目标：与 Web 端 goalItems 同一套口径。
+   小程序端没有「盘后三问」页，第四条换成「本周至少 3 天」——
+   小程序的定位就是碎片时间，日更比深度更现实。 */
+const dayKey = () => {
+  const d = new Date()
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()
+}
+const todayNum = (k) => {
+  const v = store.get(k, { d: '', n: 0 })
+  return v.d === dayKey() ? v.n : 0
+}
 
 export default {
   data() {
@@ -298,7 +358,12 @@ export default {
       saved: null,
       mode: null,          // course | basic | rank | death | quiz | qres
       c2: null, b2: null, r2: null, d2: null,
-      qi: 0, picked: -1, ans: {}, res: null
+      qi: 0, picked: -1, ans: {}, res: null,
+      /* v8 */
+      prof: { xp: 0, streak: 0, freezes: 0, lastDay: '', activeToday: false, broken: false },
+      lv: { lv: 1, into: 0, need: 200, pct: 0 },
+      todayC: 0, todayB: false, weekDays: 0,
+      curGrp: null         // null = 全部
     }
   },
   computed: {
@@ -313,6 +378,42 @@ export default {
     },
     rule() {
       return this.res ? (RULES[this.res.top] || null) : null
+    },
+
+    /* ---- v8：今日目标 / 分组 ---- */
+    goals() {
+      return [
+        { t: '答 1 张概念卡', ok: this.todayC >= 1 },
+        { t: '读 1 条启蒙', ok: this.todayB },
+        { t: '判 1 道题（K 线或卡片）', ok: (this.todayC + todayNum('ta_today_k')) >= 1 },
+        { t: '本周学满 3 天', ok: this.weekDays >= 3 }
+      ]
+    },
+    goalPct() {
+      const g = this.goals
+      return Math.round(g.filter(x => x.ok).length / g.length * 100)
+    },
+    grpChips() {
+      const all = { key: null, label: '全部', read: this.basics.length, total: BASICS.length }
+      const rest = GROUPS.map(g => ({
+        key: g, label: g,
+        read: BASICS.filter(x => x.grp === g && this.basics.includes(x.no)).length,
+        total: BASICS.filter(x => x.grp === g).length
+      }))
+      return [all].concat(rest)
+    },
+    shownGroups() {
+      return this.curGrp === null ? GROUPS : [this.curGrp]
+    },
+    grpAllRead() {
+      if (this.curGrp === null) return false
+      const items = this.groupOf(this.curGrp)
+      return items.length > 0 && items.every(x => this.basics.includes(x.no))
+    },
+    nextGrpName() {
+      if (this.curGrp === null) return null
+      const i = GROUPS.indexOf(this.curGrp)
+      return GROUPS[i + 1] || null
     }
   },
   onShow() {
@@ -328,7 +429,40 @@ export default {
       this.done = uni.getStorageSync('ta_done') || []
       this.saved = uni.getStorageSync('ta_quiz') || null
       this.cur = current()
+      this.refreshProf()
     },
+
+    /* 学习档案：每次进页面重算，不做缓存——连击是按「今天」判定的，
+       缓存一天就可能显示昨天的天数 */
+    refreshProf() {
+      const p = readProf(store)
+      this.prof = {
+        xp: p.xp || 0,
+        streak: p.streak || 0,
+        freezes: p.freezes || 0,
+        lastDay: p.lastDay || '',
+        activeToday: activeToday(store),
+        broken: broken(store)
+      }
+      this.lv = levelOf(p.xp || 0)
+      this.todayC = todayNum('ta_today_c')
+      this.todayB = store.get('ta_today_b', '') === dayKey()
+      const w = week(store)
+      /* 本周（近 7 天）有几天学过；含今天 */
+      this.weekDays = w.filter(d => d.on).length
+    },
+    bump() { this.refreshProf() },
+    useFreeze() {
+      const r = useFreeze(store)
+      if (r.ok) {
+        uni.showToast({ title: '补签成功，连击保住了', icon: 'none' })
+      } else {
+        uni.showToast({ title: r.reason === 'gap-too-long' ? '断太久了，补不了' : '今天已经学过了', icon: 'none' })
+      }
+      this.refreshProf()
+    },
+    pickGrp(k) { this.curGrp = k },
+    groupRead(g) { return BASICS.filter(x => x.grp === g && this.basics.includes(x.no)).length },
     go(tab) {
       uni.switchTab({ url: '/pages/' + tab + '/' + tab })
     },
@@ -385,11 +519,19 @@ export default {
     },
     markBasic() {
       const d = uni.getStorageSync('ta_basics') || []
-      if (d.indexOf(this.b2.no) < 0) d.push(this.b2.no)
+      const first = d.indexOf(this.b2.no) < 0
+      if (first) d.push(this.b2.no)
       uni.setStorageSync('ta_basics', d)
+      /* 打开就算读过（同 Web 端）：25 条如果要点两次，等于 50 次点击。
+         经验也只给第一次，重复看不再计分，否则可以靠反复点刷经验。 */
+      if (first) {
+        touch(store)
+        addXp(store, 10, '读启蒙 ' + this.b2.no)
+        store.set('ta_today_b', dayKey())
+      }
       this.close()
       this.refresh()
-      uni.showToast({ title: '已读', icon: 'none' })
+      uni.showToast({ title: first ? '已读 +10 经验' : '已读', icon: 'none' })
     },
     toCourse() {
       const c = this.courses.find(x => x.id === this.b2.link)
@@ -464,6 +606,73 @@ export default {
 .row .btn { flex: 0 0 auto; padding: 0 36rpx; height: 78rpx; }
 .row2 { display: flex; gap: 16rpx; margin-top: 28rpx; }
 .row2 .btn { flex: 1; }
+
+/* 今日卡：打卡状态 / 四点目标 / 段内经验 */
+.today {
+  background: var(--card); border: 1rpx solid var(--line);
+  border-radius: var(--r-lg); padding: 30rpx 30rpx 26rpx;
+  box-shadow: var(--shadow-sm);
+}
+.today.on { border-color: var(--ok-line); }
+.today .top { display: flex; align-items: flex-start; justify-content: space-between; }
+.today .tt {
+  display: flex; align-items: center; font-size: 30rpx;
+  font-weight: 800; color: var(--ink);
+}
+.today .dot {
+  width: 14rpx; height: 14rpx; border-radius: 50%;
+  background: var(--ink-3); margin-right: 12rpx;
+}
+.today.on .dot { background: var(--ok); }
+.today .ts { font-size: 22rpx; color: var(--ink-3); margin-top: 8rpx; }
+.xpbox { text-align: right; }
+.xpbox .xv { font-size: 40rpx; font-weight: 800; color: var(--brand); line-height: 1; }
+.xpbox .xl { font-size: 19rpx; color: var(--ink-3); margin-top: 6rpx; }
+.track {
+  height: 10rpx; border-radius: 6rpx; background: var(--bg-2);
+  margin: 22rpx 0 18rpx; overflow: hidden;
+}
+.track .fi { height: 100%; background: var(--brand); border-radius: 6rpx; }
+.acts { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.acts .mini {
+  font-size: 21rpx; padding: 8rpx 16rpx; border-radius: 40rpx;
+  background: var(--bg-2); color: var(--ink-2);
+}
+.acts .mini.ghost { background: transparent; color: var(--ink-3); }
+.lvline { display: flex; align-items: center; gap: 14rpx; margin-top: 22rpx; }
+.lvt { font-size: 20rpx; font-weight: 800; color: var(--brand); letter-spacing: 1rpx; }
+.lvtrack {
+  flex: 1; height: 8rpx; border-radius: 5rpx;
+  background: var(--bg-2); overflow: hidden;
+}
+.lvtrack .fi { height: 100%; background: var(--gold); }
+.lvn { font-size: 19rpx; color: var(--ink-3); }
+.brk {
+  margin-top: 22rpx; padding: 18rpx 20rpx; border-radius: 14rpx;
+  background: var(--gold-soft); border: 1rpx solid var(--gold-line);
+  font-size: 21rpx; line-height: 1.7; color: var(--ink-2);
+}
+.brk .btn.sm { margin-top: 14rpx; height: 62rpx; font-size: 23rpx; }
+
+/* 分组 chips：横向滚动，一组一次 */
+.grpchips { white-space: nowrap; margin: 18rpx 0 6rpx; }
+.grpchips .chip {
+  display: inline-flex; align-items: center; gap: 8rpx;
+  padding: 12rpx 22rpx; margin-right: 12rpx; border-radius: 40rpx;
+  background: var(--card); border: 1rpx solid var(--line);
+  font-size: 22rpx; color: var(--ink-2);
+}
+.grpchips .chip.on {
+  background: var(--brand); border-color: var(--brand); color: #fff;
+}
+.grpchips .chip .n { font-size: 19rpx; opacity: .7; }
+.nextgrp {
+  margin-top: 22rpx; padding: 24rpx; border-radius: var(--r);
+  background: var(--down-soft); border: 1rpx solid var(--ok-line);
+}
+.nextgrp .ngt { font-size: 24rpx; font-weight: 800; color: var(--ok-ink); }
+.nextgrp .ngd { font-size: 21rpx; color: var(--ink-2); line-height: 1.7; margin-top: 8rpx; }
+.nextgrp .btn.sm { margin-top: 16rpx; height: 66rpx; font-size: 23rpx; }
 
 /* 段位卡 */
 .rankcard {
