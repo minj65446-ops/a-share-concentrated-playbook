@@ -180,9 +180,16 @@
 [data-theme="mono"] .rankcard,
 [data-theme="mono"] .topbar .mark{background:var(--brand);background-image:none}
 [data-theme="mono"] .hero::after{display:none}
+/* 顶边高光也是装饰，极简主题里一并去掉 */
+[data-theme="mono"] .hero,
+[data-theme="mono"] .rankcard,
+[data-theme="mono"] .lvcard,
+[data-theme="mono"] .btn-primary{box-shadow:none}
 [data-theme="mono"] .card,
 [data-theme="mono"] .course,
 [data-theme="mono"] .rk{box-shadow:none}
+/* 选项卡片的选中态本来靠 --shadow-s 浮起来，这里没阴影就只剩白底白边，等于没选中 */
+[data-theme="mono"] .seg button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
 
 /* ================= 5. 青瓷 · 低饱和护眼 ================= */
 [data-theme="celadon"]{
