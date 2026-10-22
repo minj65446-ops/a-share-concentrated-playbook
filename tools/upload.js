@@ -41,6 +41,7 @@ const FILES = [
   'learn.js',
   'cards.js',
   'srs.js',
+  'craft.js',
   'themes.css',
   'themes.html',
   'playbook.html',
