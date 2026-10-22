@@ -47,6 +47,7 @@ const FILES = [
   'playbook.html',
   'README.md',
   'docs/DESIGN.md',
+  'docs/CONTEST.md',
   'miniprogram-uni/App.vue',
   'miniprogram-uni/main.js',
   'miniprogram-uni/manifest.json',
