@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>界面风格 · 5 套可选</title>
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="themes.css">
+<style>
+  body{background:#fff;color:#111}
+  .wrap{max-width:1500px;margin:0 auto;padding:28px 18px 60px}
+  .hd{margin-bottom:22px}
+  .hd h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
+  .hd p{font-size:13px;color:#666;margin-top:8px;line-height:1.75}
+  .hd .tip{font-size:12px;color:#8a5a00;background:#fff8e6;border:1px solid #f0e2c0;border-radius:10px;padding:9px 12px;margin-top:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+  .cell{border:1px solid #e3e6ea;border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+  .cell .bar{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid #eef0f3}
+  .cell .bar .t{font-size:13.5px;font-weight:800}
+  .cell .bar .t small{font-weight:500;color:#8b939d;margin-left:6px;font-size:11px}
+  .cell .bar .use{font-size:11.5px;font-weight:700;color:#20456e;border:1px solid #cfd8e2;background:#eef3f9;border-radius:99px;padding:5px 12px}
+  .cell .bar .use:hover{background:#20456e;color:#fff;border-color:#20456e}
+  .stage{height:560px;overflow:hidden;position:relative;background:#fff}
+  .stage .dev{transform:scale(.78);transform-origin:top center;width:128.2%;margin-left:-14.1%}
+  .stage .tabbar{position:absolute!important;bottom:0;left:0;transform:none;width:100%}
+  .stage .device{min-height:560px;box-shadow:none}
+  .stage .view{padding-bottom:70px}
+  .stage .sec-title{margin-top:16px}
+  @media(max-width:520px){
+    .grid{grid-template-columns:1fr}
+    .stage .dev{transform:scale(.62);width:161%;margin-left:-30.5%}
+    .stage{height:430px}
+    .stage .device{min-height:430px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1>界面风格 · 5 套</h1>
+    <p>五套风格共用同一套内容与交互，只换配色、圆角和字重。选一套点「用这套」即可，随时能在「我的 → 界面风格」里改回来。</p>
+    <div class="tip">涨=红、跌=绿的 A 股约定在五套里都保持不变，深色主题下做了亮度补偿。</div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script src="theme.js"></script>
+<script>
+(function(){
+  var DEMO =
+    '<header class="topbar">' +
+      '<div class="brand"><div class="mark">A</div><div><div class="nm">交易学院</div><div class="sub">A-Share Academy</div></div></div>' +
+      '<div class="chip-streak">连续 <b>7</b> 天</div>' +
+    '</header>' +
+    '<div class="hero">' +
+      '<div class="kicker">From Zero to System</div>' +
+      '<h1>从小白到有系统<br>中间只差五段路</h1>' +
+      '<p>先知道股票是什么，再学怎么算亏多少，最后找到适合你的那一派。</p>' +
+      '<div class="row"><button class="btn btn-primary">开始训练</button><button class="btn btn-ghost">继续上次</button></div>' +
+    '</div>' +
+    '<div class="rankcard">' +
+      '<div class="top">' +
+        '<div style="min-width:0">' +
+          '<span class="lv">LV 2 / 5</span>' +
+          '<div class="nm">筑基</div>' +
+          '<div class="en">Foundation</div>' +
+          '<div class="sub">先学会算亏多少，再谈赚多少</div>' +
+        '</div>' +
+        '<div class="pct">48%<span>本段进度</span></div>' +
+      '</div>' +
+      '<div class="rankbar"><i style="width:48%"></i></div>' +
+      '<div class="goal">毕业标准：启蒙 25 条读完 + 完成 3 门课</div>' +
+      '<div class="after"><b>毕业后：</b>可以去训练场认形态了</div>' +
+    '</div>' +
+    '<div class="sec-title"><h2>Lv1 启蒙</h2><span>12 / 25</span></div>' +
+    '<div class="path">' +
+      '<div class="basic read"><div class="no">✓</div><div style="min-width:0"><h3>股票到底是什么</h3><div class="one">买的是公司所有权的一部分，不是筹码</div></div><div class="tick">✓</div></div>' +
+      '<div class="basic"><div class="no">02</div><div style="min-width:0"><h3>价格是谁定的</h3><div class="one">盘口上最后一笔成交说了算</div></div><div class="tick"></div></div>' +
+      '<div class="basic"><div class="no">03</div><div style="min-width:0"><h3>T+1 与涨跌停</h3><div class="one">当天买的当天不能卖</div></div><div class="tick"></div></div>' +
+    '</div>' +
+    '<div class="sec-title"><h2>课程</h2><span>2 / 8 完成</span></div>' +
+    '<div class="course"><div class="no">01</div><div><h3>核心 + 卫星</h3><div class="sub">把钱分成压舱石和机会仓</div>' +
+      '<div class="meta"><span class="pill">入门</span><span class="pill">8 分钟</span><span class="pill down">风险 中</span></div></div></div>' +
+    '<div class="course locked"><div class="no">04</div><div><h3>止损三锚</h3><div class="sub">用结构定止损，不用感觉</div>' +
+      '<div class="meta"><span class="pill">进阶</span><span class="pill">12 分钟</span><span class="pill up">风险 高</span></div></div></div>' +
+    '<div class="sec-title"><h2>常见死法</h2><span>16 个场景</span></div>' +
+    '<div class="card" style="padding:14px">' +
+      '<div style="font-size:13px;font-weight:800;margin-bottom:10px">跌破止损不卖，等回本</div>' +
+      '<div class="split"><div class="do"><b>该做</b>破位当天出，亏损是成本</div><div class="dont"><b>你以为</b>再等等就回本了</div></div>' +
+    '</div>' +
+    '<nav class="tabbar">' +
+      '<button class="on"><span>学院</span></button><button><span>训练</span></button><button><span>图谱</span></button><button><span>老师</span></button><button><span>我的</span></button>' +
+    '</nav>';
+
+  var grid = document.getElementById('grid');
+  var cur = null;
+  try { cur = localStorage.getItem('ta_theme'); if (cur) cur = JSON.parse(cur); } catch (e) { cur = null }
+
+  grid.innerHTML = THEMES.list.map(function (t) {
+    return '<div class="cell">' +
+      '<div class="bar"><span class="t">' + t.name + '<small>' + t.desc + '</small></span>' +
+      '<button class="use" data-k="' + t.k + '">' + (cur === t.k ? '当前' : '用这套') + '</button></div>' +
+      '<div class="stage" data-theme="' + (t.k === 'light' ? '' : t.k) + '">' +
+        '<div class="device"><div class="dev view on">' + DEMO + '</div></div>' +
+      '</div></div>';
+  }).join('');
+
+  Array.prototype.forEach.call(grid.querySelectorAll('.use'), function (b) {
+    b.addEventListener('click', function () {
+      var k = b.getAttribute('data-k');
+      try { localStorage.setItem('ta_theme', JSON.stringify(k)); } catch (e) {}
+      location.href = 'index.html?theme=' + k;
+    });
+  });
+})();
+</script>
+</body>
+</html>
