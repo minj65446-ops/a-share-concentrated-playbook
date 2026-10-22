@@ -421,7 +421,7 @@ export default {
 .cfb .fb1 { font-size: 26rpx; font-weight: 800; margin-bottom: 8rpx; }
 .cfb .fb2 { font-size: 23rpx; line-height: 1.8; color: var(--ink-2); }
 .trap {
-  margin-top: 14rpx; padding-top: 14rpx; border-top: 1rpx dashed var(--line);
+  margin-top: 14rpx; padding-top: 14rpx; border-top: 1rpx solid var(--line);
   font-size: 22rpx; line-height: 1.75; color: var(--ink-2);
 }
 .trap .b { font-weight: 800; color: var(--gold-ink); }
