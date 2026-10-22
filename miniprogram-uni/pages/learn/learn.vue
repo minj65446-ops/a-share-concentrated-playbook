@@ -589,8 +589,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/* 终端底噪：28px 间距的 1px 竖线，只有 5% 白。
+   和 Web 端同一招 —— 让这块渐变从「banner」变成「行情画布」。 */
 .hero {
-  background: linear-gradient(150deg, var(--brand) 0%, var(--hero-mid) 58%, var(--hero-end) 100%);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .05) 0 1rpx, transparent 1rpx 56rpx),
+    linear-gradient(150deg, var(--brand) 0%, var(--hero-mid) 58%, var(--hero-end) 100%);
   border-radius: var(--r-lg);
   padding: 40rpx;
   color: #fff;
