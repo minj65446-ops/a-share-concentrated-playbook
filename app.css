@@ -31,6 +31,21 @@
   --shadow:0 2px 10px rgba(28,40,54,.05);
   --shadow-l:0 12px 32px rgba(28,40,54,.08);
   --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+
+  /* ---- 动效：一套 easing + 三档时长，别处不许再写裸数值 ----
+     参考 Fey / Auros：交互反馈 200ms 左右，进场 300ms 上下，
+     曲线统一用 cubic-bezier(.25,.1,.25,1)（标准 ease，收尾干净）。 */
+  --ease:cubic-bezier(.25,.1,.25,1);
+  --t-fast:160ms;
+  --t:240ms;
+  --t-slow:320ms;
+
+  /* ---- 层次：卡片不再靠阴影，靠「底色差 + hairline」----
+   内层再分三级：page(--bg) → card(--card) → inset(--panel-2)。
+   边框只用 1px，颜色越靠内层越淡，视觉上才有"嵌进去"的感觉。 */
+  --inset:var(--panel-2);
+  --inset-line:var(--line-2);
+  --hair:1px solid var(--line);
   --ok-line:#d5ece3;
   --ok-ink:#155a40;
   --ok-ink-2:#186349;
@@ -64,9 +79,15 @@ body{
   font-family:var(--font);
   font-size:14px;line-height:1.6;
   -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
 }
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 input{font:inherit}
+
+/* 数字一律等宽对齐 —— 计数、XP、百分比跳动时不会左右晃。
+   这一条是"高级感"最便宜的来源：不稳的数字看起来很廉价。 */
+body{font-variant-numeric:tabular-nums}
+.mono,.qzn,.pct,.xp,.v,.pct span,.rankcard .pct,.lvcard .xp{font-variant-numeric:tabular-nums}
 
 /* ---------- 设备容器 ---------- */
 .device{
@@ -115,10 +136,43 @@ main{padding:16px 16px 96px}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* ---------- 通用 ---------- */
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-s)}
-.sec-title{display:flex;align-items:baseline;justify-content:space-between;margin:22px 2px 10px}
-.sec-title h2{font-size:16px;font-weight:800;letter-spacing:-.3px}
-.sec-title span{font-size:11.5px;color:var(--muted)}
+/* 所有可点元素共用一条过渡曲线。之前各写各的（.12s / .14s / .2s），
+   点起来手感不统一 —— 统一之后不用再逐个调。 */
+button,.course,.basic,.death,.tch,.ckopt,.seed,.quiz-opt,.rk,.badge{
+  transition:transform var(--t-fast) var(--ease),
+             background var(--t-fast) var(--ease),
+             border-color var(--t-fast) var(--ease),
+             box-shadow var(--t) var(--ease);
+}
+/* 卡片：底色做一层极淡的竖向往下渐变，模拟受光。
+   纯色块在浅色界面里会"发死"，加 1% 的差就有厚度了。 */
+.card{
+  background:linear-gradient(180deg,var(--card),var(--card-2));
+  border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-s);
+}
+/* 分区标题：留白从 22px 提到 30px，标题字重从 800 降到 700。
+   到处 800 反而没有重点 —— 真正的层次是「少数地方重、多数地方轻」。 */
+.sec-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:30px 2px 12px}
+.sec-title h2{font-size:15px;font-weight:700;letter-spacing:-.2px;line-height:1.3}
+/* 右侧那个计数/说明：本来和标题一样重，抢戏。
+   换成 mono + 宽字距的小标签，一眼能看出「这是附注，不是标题」。 */
+.sec-title span{
+  font:600 10px/1.4 var(--mono);letter-spacing:.06em;
+  color:var(--muted);flex:none;text-align:right;
+}
+/* 说明段落：贴边的长文不要塞进卡片里 —— 卡片一多，"什么都是卡片"就等于没有卡片。
+   直接排在底上，用左竖线表示「这段话是解释，不用点」。 */
+.prose{
+  padding-left:12px;border-left:2px solid var(--line);
+  font-size:12px;line-height:1.8;color:var(--ink-2);
+}
+.prose .pt + .pt{margin-top:9px}
+.prose b{color:var(--ink);font-weight:700}
+.intro-note{
+  font-size:11.5px;color:var(--muted);line-height:1.7;
+  margin:0 2px 10px;padding-left:10px;border-left:2px solid var(--line-2);
+}
+.intro-note b{color:var(--ink-2);font-weight:700}
 .pill{
   display:inline-flex;align-items:center;gap:4px;
   font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:99px;
@@ -133,26 +187,50 @@ main{padding:16px 16px 96px}
 .hero{
   background:linear-gradient(150deg,var(--brand) 0%,var(--hero-mid) 58%,var(--hero-end) 100%);
   border-radius:var(--r-lg);padding:20px;color:#fff;position:relative;overflow:hidden;
-  box-shadow:var(--hero-shadow);
+  /* 第二层是 inset 顶边高光：渐变块加这一条，立刻从"色块"变成"有厚度的面"。
+     这是玻璃态/液态玻璃里唯一值得抄的一招 —— 只有 1px，成本极低。 */
+  box-shadow:var(--hero-shadow),inset 0 1px 0 rgba(255,255,255,.20);
 }
+/* 双光晕：一个右上、一个左下，比单个更像真的受光 */
 .hero::after{
   content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;
   background:radial-gradient(circle,rgba(255,255,255,.16),transparent 70%);
 }
+.hero::before{
+  content:"";position:absolute;left:-60px;bottom:-70px;width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%);
+  pointer-events:none;
+}
 /* opacity 从 .7 提到 .82：底色变浅后，.7 的白字对比度掉到 3:1 以下 */
 .hero .kicker{font:600 10px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;opacity:.82;margin-bottom:10px}
-.hero h1{font-size:21px;line-height:1.35;font-weight:800;letter-spacing:-.4px}
-.hero p{font-size:12.5px;opacity:.78;margin-top:8px;line-height:1.65;max-width:300px}
+.hero h1{font-size:23px;line-height:1.3;font-weight:800;letter-spacing:-.6px}
+.hero p{font-size:12.5px;font-weight:400;opacity:.84;margin-top:9px;line-height:1.7;max-width:300px}
 .hero .row{display:flex;gap:8px;margin-top:16px;position:relative;z-index:2}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
   font-size:13px;font-weight:700;padding:10px 16px;border-radius:var(--r-sm);
   background:var(--bg-2);color:var(--ink);border:1px solid var(--line);
-  transition:transform .12s,opacity .12s;
+  transition:transform var(--t-fast) var(--ease),opacity var(--t-fast) var(--ease);
 }
 .btn:active{transform:scale(.97)}
-.btn-primary{background:var(--hero-btn-bg);color:var(--hero-btn-ink);border-color:var(--hero-btn-bg)}
-.btn-ghost{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.24)}
+/* 主按钮同样吃顶边高光：跟 hero 是同一块面，缺了这一条会显得比背景平 */
+.btn-primary{
+  background:var(--hero-btn-bg);color:var(--hero-btn-ink);border-color:var(--hero-btn-bg);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+}
+/* 描边和底色都用文字色调出来，不写死白。
+   原因：mono 主题的 hero 是纯黑，写死 rgba(255,255,255,.12) 的底几乎看不见，
+   而写死 .24 的白边又会让它看起来像一颗白按钮 —— 换成「文字色的 8% 底 + 26% 边」，
+   在任何底色上都保持「这是 hero 里的次要按钮」。 */
+.btn-ghost{
+  color:#fff;
+  background:color-mix(in srgb,currentColor 8%,transparent);
+  border-color:color-mix(in srgb,currentColor 26%,transparent);
+}
+/* color-mix 不支持的浏览器（老 Safari < 16.2）回落到原来的写死值 */
+@supports not (background:color-mix(in srgb,red 8%,transparent)){
+  .btn-ghost{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.26)}
+}
 .btn-block{width:100%}
 .btn-sm{font-size:12px;padding:7px 12px}
 
@@ -162,7 +240,7 @@ main{padding:16px 16px 96px}
   display:grid;grid-template-columns:42px 1fr 46px;gap:12px;align-items:center;
   background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:14px;margin-bottom:10px;box-shadow:var(--shadow-s);
-  transition:transform .14s,box-shadow .14s,border-color .14s;
+  transition:transform var(--t-fast) var(--ease),background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),box-shadow var(--t) var(--ease);
 }
 .course{cursor:pointer}
 .course:active{transform:scale(.985);border-color:var(--brand-line-2)}
@@ -187,7 +265,7 @@ main{padding:16px 16px 96px}
 .tcard{
   background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:14px;box-shadow:var(--shadow-s);text-align:left;
-  transition:transform .12s;
+  transition:transform var(--t-fast) var(--ease);
 }
 .tcard:active{transform:scale(.97)}
 .tcard .ic{
@@ -207,13 +285,15 @@ main{padding:16px 16px 96px}
 .opts{display:flex;flex-direction:column;gap:7px;margin-top:12px}
 .opt{
   display:flex;gap:10px;align-items:center;text-align:left;
-  border:1px solid var(--line);background:var(--card);border-radius:var(--r-sm);
-  padding:10px 12px;font-size:12.5px;transition:.14s;
+  border:1px solid var(--line);background:var(--inset);border-radius:10px;
+  padding:11px 12px;font-size:12.5px;
+  transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),
+             transform var(--t-fast) var(--ease);
 }
 .opt:active{transform:scale(.99)}
 .opt .k{
-  width:22px;height:22px;border-radius:6px;flex:0 0 auto;display:grid;place-items:center;
-  font:700 11px/1 var(--mono);background:var(--bg-2);color:var(--ink-2);
+  width:22px;height:22px;border-radius:7px;flex:0 0 auto;display:grid;place-items:center;
+  font:700 11px/1 var(--mono);background:var(--card);border:1px solid var(--line);color:var(--ink-2);
 }
 .opt.right{border-color:var(--down);background:var(--down-soft)}
 .opt.right .k{background:var(--down);color:#fff}
@@ -228,16 +308,28 @@ main{padding:16px 16px 96px}
 .explain b{color:var(--brand-2)}
 
 /* ---------- 情绪周期 ---------- */
-.seg{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:4px;margin-bottom:12px}
-.seg button{flex:1;font-size:12px;font-weight:700;padding:8px 0;border-radius:99px;color:var(--muted);transition:.16s}
-.seg button.on{background:var(--brand);color:#fff;box-shadow:var(--shadow)}
+/* 分段控件：槽用 --inset 凹陷，选中的那格用 --card 浮起来 + hairline。
+   比「整条白底 + 实心蓝块」轻，也不抢下面内容的注意力。 */
+.seg{
+  display:flex;gap:4px;margin-bottom:12px;padding:4px;border-radius:99px;
+  background:var(--inset);border:1px solid var(--inset-line);
+}
+.seg button{
+  flex:1;font-size:11.5px;font-weight:700;padding:8px 0;border-radius:99px;
+  color:var(--muted);border:1px solid transparent;
+  transition:color var(--t-fast) var(--ease),background var(--t-fast) var(--ease),
+             border-color var(--t-fast) var(--ease),box-shadow var(--t) var(--ease);
+}
+.seg button.on{
+  background:var(--card);color:var(--ink);border-color:var(--line);box-shadow:var(--shadow-s);
+}
 .cycle{padding:16px}
 .cycle .stage{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
 .cycle .stage h3{font-size:16px;font-weight:800}
 .cycle .stage .pos{font:800 20px/1 var(--mono);color:var(--brand-2)}
 .cycle .desc{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.65}
 .bar{height:8px;border-radius:99px;background:var(--line-2);overflow:hidden;margin-bottom:16px}
-.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-2),var(--up));transition:width .4s}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-2),var(--up));transition:width var(--t-slow) var(--ease)}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .split .box{border-radius:var(--r-sm);padding:11px 12px;font-size:11.5px;line-height:1.6}
 .split .do{background:var(--down-soft);border:1px solid var(--ok-line);color:var(--ok-ink-2)}
@@ -264,10 +356,36 @@ main{padding:16px 16px 96px}
 .mx .item span:last-child{font-family:var(--mono);color:var(--brand-2);font-weight:700}
 
 /* ---------- 我的 ---------- */
-.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.stat3 .s{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;text-align:center}
-.stat3 .v{font:800 19px/1.2 var(--mono);color:var(--brand-2)}
-.stat3 .k{font-size:10.5px;color:var(--muted);margin-top:3px}
+/* Bento：主指标跨两列、副指标各占一列。
+   三等分只是"三等分"，大小不一才叫 bento —— 关键是要有主次。 */
+.stat3{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat3 .s{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px 13px;display:flex;flex-direction:column;justify-content:center;
+  min-height:74px;
+}
+/* 主格跨两列：底色换成 brand-soft 只是"换个色块"，还是平的。
+   真正的 bento 感靠三件事一起：跨列（形状不同）、更大的数字（权重不同）、
+   顶部一条 2px 的 brand 短线（给它一个"这是头版"的锚点）。 */
+.stat3 .s.lead{
+  grid-column:span 2;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,var(--brand-soft),var(--card));
+  border-color:var(--brand-line);
+  padding:16px 17px;min-height:92px;
+}
+/* 顶部锚点用 inset 阴影画，而不是绝对定位的伪元素：
+   伪元素会被父级的 border-radius 裁成「压在边框上的一小截」，
+   inset 阴影是长在盒子里的，圆角怎么变都贴着内缘。 */
+.stat3 .s.lead::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:inset 0 2px 0 -1px var(--brand-2);
+}
+.stat3 .v{font:800 19px/1.15 var(--mono);color:var(--ink);letter-spacing:-.5px}
+.stat3 .s.lead .v{font:800 30px/1.05 var(--mono);color:var(--brand-2);letter-spacing:-1.2px}
+.stat3 .v.na{color:var(--muted)}
+/* 空态用正文字号的中文，不用 30px 的数字位 —— 那一格本来就是留给数字的 */
+.stat3 .s.lead .v.na{font:700 15px/1.3 var(--font);letter-spacing:-.2px}
+.stat3 .k{font-size:10.5px;font-weight:600;color:var(--muted);margin-top:5px;line-height:1.4}
 .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .badge{
   aspect-ratio:1;border-radius:var(--r);background:var(--card);border:1px solid var(--line);
@@ -286,7 +404,7 @@ main{padding:16px 16px 96px}
 .rankcard{
   margin-top:14px;padding:16px;border-radius:var(--r-lg);
   background:linear-gradient(150deg,var(--brand) 0%,var(--hero-mid) 60%,var(--hero-end) 100%);
-  color:#fff;box-shadow:var(--hero-shadow);
+  color:#fff;box-shadow:var(--hero-shadow),inset 0 1px 0 rgba(255,255,255,.18);
 }
 .rankcard .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .rankcard .lv{
@@ -301,7 +419,7 @@ main{padding:16px 16px 96px}
 .rankcard .pct{font:800 26px/1 var(--mono);text-align:right}
 .rankcard .pct span{font-size:11px;font-weight:600;opacity:.7;display:block;margin-top:3px;letter-spacing:.04em}
 .rankbar{height:6px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:14px}
-.rankbar i{display:block;height:100%;border-radius:99px;background:#fff;transition:width .5s}
+.rankbar i{display:block;height:100%;border-radius:99px;background:#fff;transition:width var(--t-slow) var(--ease)}
 .rankcard .after{
   font-size:11px;line-height:1.7;margin-top:12px;padding:9px 11px;border-radius:var(--r-sm);
   background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);
@@ -313,7 +431,7 @@ main{padding:16px 16px 96px}
   display:flex;gap:11px;align-items:flex-start;
   background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:12px;box-shadow:var(--shadow-s);cursor:pointer;
-  transition:border-color .14s,transform .14s;
+  transition:transform var(--t-fast) var(--ease),background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),box-shadow var(--t) var(--ease);
 }
 .rk:active{transform:scale(.985)}
 .rk.passed{border-color:var(--ok-line);background:linear-gradient(180deg,var(--card),var(--down-soft))}
@@ -339,7 +457,7 @@ main{padding:16px 16px 96px}
   display:grid;grid-template-columns:38px 1fr 34px;gap:11px;align-items:center;
   background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:12px;margin-bottom:8px;box-shadow:var(--shadow-s);cursor:pointer;
-  transition:transform .14s,border-color .14s;
+  transition:transform var(--t-fast) var(--ease),background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),box-shadow var(--t) var(--ease);
 }
 .basic:active{transform:scale(.985)}
 .basic.read{border-color:var(--ok-line);background:linear-gradient(180deg,var(--card),var(--down-soft))}
@@ -369,7 +487,7 @@ main{padding:16px 16px 96px}
   display:grid;grid-template-columns:38px 1fr;gap:11px;align-items:start;
   background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:12px;margin-bottom:8px;box-shadow:var(--shadow-s);cursor:pointer;
-  transition:transform .14s,border-color .14s;
+  transition:transform var(--t-fast) var(--ease),background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),box-shadow var(--t) var(--ease);
 }
 .death:active{transform:scale(.985)}
 .death .no{
@@ -403,10 +521,15 @@ main{padding:16px 16px 96px}
 /* ---------- 自测卡 ---------- */
 .quiz-q{padding:2px 0}
 .quiz-q .qt{font-size:13.5px;font-weight:750;line-height:1.5;margin-bottom:10px}
+/* 选项三兄弟（.opt K线 / .quiz-opt 自测 / .ckopt 场景）统一到同一套尺寸、
+   同一套底色（--inset，嵌在 --card 里）和同一条过渡曲线。
+   底下一个 --card 上再放 --card 的选项，等于没选项。 */
 .quiz-opt{
   display:block;width:100%;text-align:left;border:1px solid var(--line);
-  background:var(--card);border-radius:var(--r-sm);padding:10px 12px;
-  font-size:12.5px;margin-bottom:7px;transition:.14s;
+  background:var(--inset);border-radius:10px;padding:11px 12px;
+  font-size:12.5px;margin-bottom:7px;
+  transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),
+             transform var(--t-fast) var(--ease);
 }
 .quiz-opt:active{transform:scale(.99)}
 .quiz-opt.on{border-color:var(--brand-2);background:var(--brand-soft)}
@@ -416,7 +539,7 @@ main{padding:16px 16px 96px}
 .quiz-opt.warn .nt{display:block;color:var(--bad-ink-2)}
 .qbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .qbar .track{flex:1;height:5px;border-radius:99px;background:var(--line-2);overflow:hidden}
-.qbar .track i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .3s}
+.qbar .track i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width var(--t-slow) var(--ease)}
 .qbar .txt{font:700 10.5px/1 var(--mono);color:var(--muted)}
 
 .quiz-res{text-align:center;padding:6px 0}
@@ -439,7 +562,7 @@ main{padding:16px 16px 96px}
 .pan{
   position:relative;z-index:2;text-align:left;cursor:pointer;
   background:var(--card);border:1px solid var(--line);border-radius:var(--r);
-  padding:11px 12px;transition:transform .14s,border-color .14s,box-shadow .14s;
+  padding:11px 12px;transition:transform var(--t-fast) var(--ease),background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),box-shadow var(--t) var(--ease);
 }
 .pan:active{transform:scale(.975)}
 .pan.on{border-color:var(--brand-2);box-shadow:var(--focus-ring)}
@@ -468,7 +591,7 @@ main{padding:16px 16px 96px}
   background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:12px;box-shadow:var(--shadow-s);cursor:pointer;text-align:left;
   display:flex;flex-direction:column;gap:8px;
-  transition:transform .14s,box-shadow .14s;
+  transition:transform var(--t-fast) var(--ease),background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),box-shadow var(--t) var(--ease);
 }
 .tch:active{transform:scale(.98);box-shadow:var(--shadow)}
 .tch .head{display:flex;gap:9px;align-items:flex-start}
@@ -588,25 +711,33 @@ main{padding:16px 16px 96px}
   display:grid;grid-template-columns:repeat(6,1fr);
   padding:8px 0 max(8px,env(safe-area-inset-bottom));
 }
+/* 选中的 tab 给一块 --brand-soft 的底，而不是只换个颜色。
+   6 个图标挤在 390px 里，只靠颜色区分「哪个是当前页」太弱；
+   有底之后扫一眼就知道在哪，这也是 iOS 原生分段控件的做法。 */
 .tabbar button{
   display:flex;flex-direction:column;align-items:center;gap:3px;
-  font-size:10px;font-weight:600;color:var(--muted);padding:2px 0;
+  font-size:10px;font-weight:600;color:var(--muted);
+  padding:5px 0;margin:0 3px;border-radius:12px;
+  transition:color var(--t-fast) var(--ease),background var(--t-fast) var(--ease);
 }
-.tabbar .ic{width:22px;height:22px;stroke-width:1.7;opacity:.45;transition:.16s}
-.tabbar button.on{color:var(--brand)}
-.tabbar button.on .ic{opacity:1;transform:translateY(-1px)}
+.tabbar .ic{
+  width:22px;height:22px;stroke-width:1.7;opacity:.45;
+  transition:opacity var(--t-fast) var(--ease),stroke-width var(--t-fast) var(--ease);
+}
+.tabbar button.on{color:var(--brand);font-weight:700;background:var(--brand-soft)}
+.tabbar button.on .ic{opacity:1;stroke-width:2.1}
 
 /* ---------- 抽屉 ---------- */
 .mask{
   position:fixed;inset:0;background:var(--mask);z-index:60;
-  opacity:0;pointer-events:none;transition:opacity .22s;
+  opacity:0;pointer-events:none;transition:opacity var(--t) var(--ease);
 }
 .mask.on{opacity:1;pointer-events:auto}
 .sheet{
   position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);
   width:min(520px,100%);max-height:86vh;overflow-y:auto;z-index:61;
   background:var(--card);border-radius:22px 22px 0 0;
-  transition:transform .28s cubic-bezier(.32,.72,0,1);
+  transition:transform var(--t-slow) cubic-bezier(.32,.72,0,1);
   padding:8px 18px 26px;
 }
 .sheet.on{transform:translate(-50%,0)}
@@ -650,22 +781,42 @@ main{padding:16px 16px 96px}
 .todaycard .sub{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
 .todaycard .goal{display:flex;align-items:center;gap:8px;margin-top:2px}
 .todaycard .goal .track{flex:1;height:6px;border-radius:99px;background:var(--line-2);overflow:hidden}
-.todaycard .goal .track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-2),var(--down));transition:width .45s}
+.todaycard .goal .track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-2),var(--down));transition:width var(--t-slow) var(--ease)}
 .todaycard .goal .pct{font:700 10.5px/1 var(--mono);color:var(--brand-2);min-width:32px;text-align:right}
-.todaycard .acts{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+/* 按钮型 mini（补签卡 / 四个入口）：统一 36px 高、9px 圆角、居中 */
 .todaycard .mini{
-  font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;
+  font-size:11.5px;font-weight:700;padding:9px 12px;border-radius:9px;min-height:36px;
   background:var(--bg-2);color:var(--ink-2);border:1px solid var(--line);
-  display:inline-flex;align-items:center;gap:4px;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
 }
 .todaycard .mini.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 .todaycard .mini.ghost{background:transparent;color:var(--muted)}
 .todaycard .mini:active{transform:scale(.97)}
+/* 目标清单：原来四个 chip 直接散在卡里，跟下面的按钮长得一样，分不清哪个能点。
+   改成嵌一层 --inset 底色的面板，chip 用 --card 浮在上面 —— 嵌套关系一出来，
+   「这是状态」和「这是按钮」就不用靠猜了。 */
+.todaycard .goals{
+  display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;
+  padding:10px 11px;border-radius:10px;
+  background:var(--inset);border:1px solid var(--inset-line);
+}
+.todaycard .goals .mini{
+  font-size:10.5px;font-weight:600;padding:5px 9px;border-radius:7px;min-height:0;
+  justify-content:flex-start;line-height:1.4;
+  background:var(--card);color:var(--ink-2);border-color:var(--line);
+}
+.todaycard .goals .mini.done{
+  background:transparent;border-color:transparent;color:var(--muted);
+  text-decoration:line-through;
+}
+.todaycard .goals .mini .mk{font-family:var(--mono);font-style:normal;font-size:9.5px;opacity:.65}
+/* 四个入口：wrap 会随字数换行、长短不齐；2×2 网格一眼扫完，也更像入口而非正文 */
+.todaycard .acts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px}
 
 /* ---------- 启蒙进度条 + 分组筛选 ---------- */
 .grpbar{margin:0 2px 10px}
 .grpbar-track{height:5px;border-radius:99px;background:var(--line-2);overflow:hidden}
-.grpbar-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-2),var(--gold));transition:width .4s}
+.grpbar-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-2),var(--gold));transition:width var(--t-slow) var(--ease)}
 .grpchips{display:flex;gap:5px;margin-top:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .grpchips::-webkit-scrollbar{display:none}
 .grpchips button{
@@ -686,12 +837,12 @@ main{padding:16px 16px 96px}
 .quiztop h3{font-size:15px;font-weight:800;letter-spacing:-.2px;line-height:1.35}
 .quiztop .qzright{text-align:right;flex:none}
 .quiztop .qzn{
-  font:800 24px/1 var(--mono);color:var(--brand-2);transition:color .2s;
+  font:800 24px/1 var(--mono);color:var(--brand-2);transition:color var(--t-fast) var(--ease);
 }
 .quiztop .qzn.hot{color:var(--up)}
 .quiztop .qzl{font-size:9.5px;color:var(--muted);margin-top:3px;letter-spacing:.06em}
 .qprog{height:5px;border-radius:99px;background:var(--line-2);overflow:hidden;margin:12px 0 14px}
-.qprog i{display:block;height:100%;border-radius:99px;background:var(--brand-2);transition:width .3s}
+.qprog i{display:block;height:100%;border-radius:99px;background:var(--brand-2);transition:width var(--t-slow) var(--ease)}
 
 /* 下一题 / 退出：「退出」不能跟着被挤压换行，两个字竖排很难看 */
 .qznav{display:flex;gap:8px;margin-top:14px}
@@ -709,7 +860,7 @@ main{padding:16px 16px 96px}
   display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;
   border:1px solid var(--line);background:var(--card);border-radius:var(--r-sm);
   padding:11px 12px;font-size:12.5px;line-height:1.55;margin-top:8px;
-  transition:transform .12s,border-color .16s,background .16s;
+  transition:transform var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease);
 }
 .copt:active{transform:scale(.99)}
 .copt .k{
@@ -765,7 +916,7 @@ main{padding:16px 16px 96px}
 .mastrow:last-child{border-bottom:none}
 .mastrow .nm{font-size:11.5px;color:var(--ink-2);width:64px;flex:none}
 .mastrow .track{flex:1;height:5px;border-radius:99px;background:var(--line-2);overflow:hidden}
-.mastrow .track i{display:block;height:100%;border-radius:99px;background:var(--brand-2);transition:width .4s}
+.mastrow .track i{display:block;height:100%;border-radius:99px;background:var(--brand-2);transition:width var(--t-slow) var(--ease)}
 .mastrow .track i.low{background:var(--gold)}
 .mastrow .n{font:700 10px/1 var(--mono);color:var(--muted);width:34px;text-align:right;flex:none}
 
@@ -773,7 +924,7 @@ main{padding:16px 16px 96px}
 .lvcard{
   margin-top:4px;padding:16px;color:#fff;border:none;
   background:linear-gradient(150deg,var(--brand) 0%,var(--hero-mid) 60%,var(--hero-end) 100%);
-  box-shadow:var(--hero-shadow);
+  box-shadow:var(--hero-shadow),inset 0 1px 0 rgba(255,255,255,.18);
 }
 .lvcard .l1{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .lvcard .lv{
@@ -784,7 +935,7 @@ main{padding:16px 16px 96px}
 .lvcard .xp{font:800 22px/1 var(--mono);text-align:right}
 .lvcard .xp span{font-size:10px;font-weight:600;opacity:.65;display:block;margin-top:4px;letter-spacing:.04em}
 .lvcard .bar{height:7px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:12px}
-.lvcard .bar i{display:block;height:100%;border-radius:99px;background:#fff;transition:width .5s}
+.lvcard .bar i{display:block;height:100%;border-radius:99px;background:#fff;transition:width var(--t-slow) var(--ease)}
 .lvcard .foot{display:flex;justify-content:space-between;font-size:10.5px;opacity:.7;margin-top:7px}
 
 /* ---------- 我的：本周 ---------- */
@@ -813,7 +964,7 @@ main{padding:16px 16px 96px}
 .iobox{
   width:100%;height:0;margin-top:0;padding:0;border:none;opacity:0;
   font-family:var(--mono);font-size:10px;line-height:1.5;resize:vertical;
-  background:var(--bg-2);border-radius:8px;transition:.2s;
+  background:var(--inset);border-radius:10px;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease);
 }
 .iobox.on{height:96px;padding:9px 10px;border:1px solid var(--line);opacity:1;margin-top:10px}
 .iohint{font-size:10.5px;color:var(--down);margin-top:7px;min-height:14px;line-height:1.5}
@@ -825,7 +976,7 @@ main{padding:16px 16px 96px}
   max-width:min(420px,86vw);z-index:80;
   background:var(--brand);color:#fff;font-size:12px;line-height:1.55;font-weight:600;
   padding:10px 14px;border-radius:10px;box-shadow:var(--shadow-l);
-  opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;text-align:center;
+  opacity:0;transition:opacity var(--t) var(--ease),transform var(--t) var(--ease);pointer-events:none;text-align:center;
 }
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
@@ -871,7 +1022,7 @@ main{padding:16px 16px 96px}
   width:100%;font:inherit;font-size:12px;line-height:1.6;color:var(--ink);
   padding:9px 11px;border-radius:var(--r-sm);resize:vertical;min-height:46px;
   background:var(--bg-2);border:1px solid var(--line);
-  transition:border-color .2s,background .2s;
+  transition:border-color var(--t) var(--ease),background var(--t) var(--ease);
 }
 .slot .sin:focus{outline:none;background:var(--card);border-color:var(--brand-2);box-shadow:var(--focus-ring)}
 .slot .sw{font-size:10px;line-height:1.6;color:var(--muted);margin-top:6px;opacity:.8}
@@ -881,7 +1032,7 @@ main{padding:16px 16px 96px}
 .seed{
   font-size:11px;line-height:1.45;text-align:left;padding:7px 10px;border-radius:8px;
   background:var(--bg-2);border:1px solid var(--line);color:var(--ink-2);
-  transition:border-color .18s,background .18s;
+  transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease);
 }
 .seed:active{transform:scale(.985);background:var(--brand-soft);border-color:var(--brand-line)}
 
@@ -898,10 +1049,12 @@ main{padding:16px 16px 96px}
 }
 .ckopt{
   display:block;width:100%;text-align:left;font-size:11.5px;line-height:1.6;
-  padding:9px 11px;border-radius:8px;margin-top:6px;
-  background:var(--bg-2);border:1px solid var(--line);color:var(--ink-2);
-  transition:.18s;
+  padding:10px 12px;border-radius:10px;margin-top:6px;
+  background:var(--inset);border:1px solid var(--line);color:var(--ink-2);
+  transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),
+             transform var(--t-fast) var(--ease),color var(--t-fast) var(--ease);
 }
+.ckopt:active{transform:scale(.99)}
 .ckopt.picked{background:var(--down-soft);border-color:var(--ok-line);color:var(--ok-ink-2);font-weight:600}
 .ckopt.picked.bad{background:var(--up-soft);border-color:var(--bad-line);color:var(--bad-ink-2)}
 
@@ -930,7 +1083,7 @@ main{padding:16px 16px 96px}
   display:flex;align-items:center;gap:11px;width:100%;text-align:left;
   margin-top:12px;padding:13px 14px;border-radius:var(--r);
   background:var(--card);border:1px dashed var(--brand-line-2);
-  transition:border-color .18s,background .18s;
+  transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease);
 }
 .craftlink:active{background:var(--brand-soft)}
 .craftlink .ci{
