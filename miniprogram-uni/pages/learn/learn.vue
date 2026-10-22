@@ -24,8 +24,8 @@
         </view>
       </view>
       <view class="track"><view class="fi" :style="{ width: goalPct + '%' }"></view></view>
-      <view class="acts">
-        <view class="mini" v-for="g in goals" :key="g.t" :class="{ ghost: g.ok }">
+      <view class="goals">
+        <view class="mini" v-for="g in goals" :key="g.t" :class="{ done: g.ok }">
           {{ g.ok ? '✓' : '○' }} {{ g.t }}
         </view>
       </view>
@@ -633,12 +633,35 @@ export default {
   margin: 22rpx 0 18rpx; overflow: hidden;
 }
 .track .fi { height: 100%; background: var(--brand); border-radius: 6rpx; }
+/* 脚本入口按钮（Web 端是 .todaycard .acts 的 2×2 网格） */
 .acts { display: flex; flex-wrap: wrap; gap: 12rpx; }
 .acts .mini {
-  font-size: 21rpx; padding: 8rpx 16rpx; border-radius: 40rpx;
-  background: var(--bg-2); color: var(--ink-2);
+  flex: 1 1 44%; justify-content: center;
+  font-size: 23rpx; font-weight: 700; line-height: 1.4;
+  padding: 18rpx 16rpx; border-radius: 16rpx;
+  background: var(--bg-2); color: var(--ink-2); border: 1rpx solid var(--line);
 }
-.acts .mini.ghost { background: transparent; color: var(--ink-3); }
+.acts .mini.primary {
+  background: var(--brand); color: #fff; border-color: var(--brand);
+}
+
+/* 目标清单：嵌一层 --bg-2 的底，chip 用 --card 浮在上面。
+   Web 端同款（app.css 的 .todaycard .goals）—— 状态和按钮分开，
+   否则四个 chip 和下面四个入口长得一样，分不清哪个能点。 */
+.goals {
+  display: flex; flex-wrap: wrap; gap: 12rpx;
+  padding: 20rpx 22rpx; border-radius: 20rpx;
+  background: var(--bg-2); border: 1rpx solid var(--line-2);
+}
+.goals .mini {
+  font-size: 21rpx; font-weight: 600; line-height: 1.4;
+  padding: 10rpx 18rpx; border-radius: 14rpx;
+  background: var(--card); color: var(--ink-2); border: 1rpx solid var(--line);
+}
+.goals .mini.done {
+  background: transparent; border-color: transparent; color: var(--ink-3);
+  text-decoration: line-through;
+}
 .lvline { display: flex; align-items: center; gap: 14rpx; margin-top: 22rpx; }
 .lvt { font-size: 20rpx; font-weight: 800; color: var(--brand); letter-spacing: 1rpx; }
 .lvtrack {
