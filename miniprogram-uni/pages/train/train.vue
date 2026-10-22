@@ -5,6 +5,65 @@
       <view class="s">{{ accText }}</view>
     </view>
 
+    <!-- 答题卡：一次十题（v8）。K 线考认形态，这里考记没记住 -->
+    <view class="quizcard">
+      <view class="qzhead">
+        <view class="qt">{{ qzTitle }}</view>
+        <text class="pill brand" v-if="qz.mode === 'run'">{{ qz.i + 1 }}/{{ qz.qs.length }} · 连对 {{ qz.combo }}</text>
+      </view>
+      <view class="qzprog" v-if="qz.mode === 'run'">
+        <view class="fi" :style="{ width: (qz.i / qz.qs.length * 100) + '%' }"></view>
+      </view>
+
+      <!-- 待开始 -->
+      <block v-if="qz.mode === 'idle'">
+        <view class="qzdesc">十题一组，答错的会自动回到下一组。题不算难，但多数人会在同一处记反——所以每道题都写了「容易记反的那一点」。</view>
+        <view class="qzrow">
+          <view class="btn primary" @click="startCards">开始今天的 10 题</view>
+        </view>
+        <view class="qzrow" v-if="weakCount > 0">
+          <view class="btn ghost" @click="startCards(true)">只练错题（{{ weakCount }}）</view>
+        </view>
+        <view class="qzmeta">已掌握 {{ mast.solid }} / {{ CARDS.size }} 张 · 生疏 {{ mast.weak }} 张</view>
+      </block>
+
+      <!-- 答题中 -->
+      <block v-if="qz.mode === 'run' && qzQ">
+        <view class="qtag">
+          <text class="pill">{{ qzQ.g }}</text>
+          <text class="pill">{{ qzQ.tag }}</text>
+          <text class="pill up" v-if="qzQ.weak">上次答错</text>
+        </view>
+        <view class="qqt">{{ qzQ.q }}</view>
+
+        <view class="copt" v-for="(o, i) in qzQ.opts" :key="i"
+              :class="coptClass(i)" @click="pickOpt(i)">
+          <view class="kb">{{ LETTERS[i] }}</view>
+          <view class="ot">{{ o }}</view>
+        </view>
+
+        <view class="cfb" v-if="qz.done" :class="qzRight ? 'ok' : 'no'">
+          <view class="fb1">{{ qzRight ? '对。' : '不对。' }}</view>
+          <view class="fb2">{{ qzQ.why }}</view>
+          <view class="trap"><text class="b">容易记反：</text>{{ qzQ.trap }}</view>
+          <view class="btn primary mt" @click="nextCard">{{ qz.i === qz.qs.length - 1 ? '看本组结果' : '下一题' }}</view>
+        </view>
+        <view class="qzquit" v-if="!qz.done" @click="quitCards">先不做了</view>
+      </block>
+
+      <!-- 结算 -->
+      <block v-if="qz.mode === 'done'">
+        <view class="qzstat">{{ qz.right }} / {{ qz.qs.length }}</view>
+        <view class="qzstatl">本组正确率 {{ Math.round(qz.right / qz.qs.length * 100) }}%{{ qz.combo >= 3 ? ' · 连对 ' + qz.combo : '' }}</view>
+        <view class="qzrow">
+          <view class="btn primary" @click="startCards(false)">再来一组</view>
+        </view>
+        <view class="qzrow" v-if="weakCount > 0">
+          <view class="btn ghost" @click="startCards(true)">只练错题（{{ weakCount }}）</view>
+        </view>
+      </block>
+    </view>
+
     <view class="grid">
       <view class="tcard" v-for="t in tools" :key="t.k" @click="onTool(t)">
         <view class="ic">{{ t.s }}</view>
@@ -44,6 +103,23 @@
 <script>
 import { buildCase, size } from '../../common/cases.js'
 import { canvas as canvasColors } from '../../common/theme.js'
+import { list as CARDS, size as CARD_SIZE } from '../../common/cards.js'
+import {
+  SESSION, LETTERS, toQuestion, buildSession, weakIds
+} from '../../common/srs.js'
+import {
+  store, readProf, addXp, touch, markCard, cardStat, mastery, levelOf
+} from '../../common/learn.js'
+
+/* 经验值口径与 Web 端一致（learn.js 里那份 XP 表），
+   这里只取用得到的几项，避免把整张表抄一遍又漂移 */
+const XP_CARD = 15
+const XP_SESSION = 50
+
+const dayKey = () => {
+  const d = new Date()
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()
+}
 
 export default {
   data() {
@@ -57,7 +133,15 @@ export default {
       ],
       idx: 0, qa: {}, answered: false, lastOK: false, pick: '',
       total: size,
-      streak: 0, stats: { total: 0, right: 0 }
+      streak: 0, stats: { total: 0, right: 0 },
+
+      /* ---- 答题卡 ---- */
+      CARDS, LETTERS,
+      /* QZ 只放内存：一组三分钟，关掉就重来。
+         半场回来人已经不记得第几题，续着答反而更乱。 */
+      qz: { mode: 'idle', qs: [], i: 0, combo: 0, right: 0, pick: -1, done: false, weakOnly: false },
+      weakCount: 0,
+      mast: { solid: 0, weak: 0, pct: 0 }
     }
   },
   computed: {
@@ -66,6 +150,17 @@ export default {
     accText() {
       const s = this.stats
       return s.total ? '正确率 ' + Math.round(s.right / s.total * 100) + '%（' + s.right + '/' + s.total + '）' : '正确率 —'
+    },
+    qzQ() {
+      return this.qz.qs[this.qz.i] || null
+    },
+    qzRight() {
+      return !!(this.qzQ && this.qz.pick === this.qzQ.ans)
+    },
+    qzTitle() {
+      if (this.qz.mode === 'run') return this.qz.weakOnly ? '错题重练' : '概念卡'
+      if (this.qz.mode === 'done') return '这一组做完了'
+      return '概念卡 · 一次十题'
     }
   },
   onLoad() {
@@ -73,14 +168,81 @@ export default {
     if (s) this.stats = { total: s.total || 0, right: s.right || 0 }
     this.streak = (uni.getStorageSync('ta_kline') || {}).streak || 0
     this.load(0)
+    this.syncCards()
   },
   onReady() { this.$nextTick(() => this.draw()) },
   onShow() {
     let v = uni.getStorageSync('ta_theme') || 'light'
     if (v.charAt(0) === '"') { try { v = JSON.parse(v) } catch (e) { v = 'light' } }
     this.theme = v
+    this.syncCards()
   },
   methods: {
+    /* ---- 答题卡 ---- */
+    syncCards() {
+      const ids = weakIds(CARDS, id => cardStat(store, id))
+      this.weakCount = ids.length
+      this.mast = mastery(store, CARD_SIZE)
+    },
+    startCards(weakOnly) {
+      /* 第三个参数是「只从这些 id 里抽」，传 weakIds 的结果而不是 true */
+      const only = weakOnly ? weakIds(CARDS, id => cardStat(store, id)) : null
+      const qs = buildSession(CARDS, id => cardStat(store, id), SESSION, only)
+      if (!qs.length) {
+        uni.showToast({ title: '还没有错题，先去答一组', icon: 'none' })
+        return
+      }
+      this.qz = { mode: 'run', qs, i: 0, combo: 0, right: 0, pick: -1, done: false, weakOnly: !!weakOnly }
+    },
+    coptClass(i) {
+      if (!this.qz.done || !this.qzQ) return ''
+      if (this.LETTERS[i] === this.qzQ.ans) return 'right'
+      if (i === this.qz.pick) return 'wrong'
+      return ''
+    },
+    pickOpt(i) {
+      if (this.qz.done || !this.qzQ) return
+      const q = this.qzQ
+      const ok = this.LETTERS[i] === q.ans
+      this.qz.pick = i
+      this.qz.done = true
+
+      if (ok) { this.qz.right++; this.qz.combo++ } else { this.qz.combo = 0 }
+
+      /* 掌握度：答对两次算掌握，答错一次掉回生疏 —— 规则在 learn.js 里，这里只调用 */
+      markCard(store, q.id, ok)
+      /* 今天的「答 1 张概念卡」用得是这个计数 */
+      const tc = store.get('ta_today_c', { d: '', n: 0 })
+      const t = dayKey()
+      store.set('ta_today_c', { d: t, n: (tc.d === t ? tc.n : 0) + 1 })
+
+      if (ok) addXp(store, XP_CARD, '答对概念卡')
+      else touch(store)
+    },
+    nextCard() {
+      if (this.qz.i === this.qz.qs.length - 1) {
+        /* 清完一组给一次结算奖励，奖励「做完」而不是「做对」 */
+        addXp(store, XP_SESSION, '清完一组')
+        const cs = store.get('ta_cardstat', { total: 0, right: 0, combo: 0, bestCombo: 0, sessions: 0 })
+        cs.total += this.qz.qs.length
+        cs.right += this.qz.right
+        cs.bestCombo = Math.max(cs.bestCombo || 0, this.qz.combo)
+        cs.sessions = (cs.sessions || 0) + 1
+        store.set('ta_cardstat', cs)
+        this.qz.mode = 'done'
+        this.qz.done = true
+        this.syncCards()
+        return
+      }
+      this.qz.i++
+      this.qz.pick = -1
+      this.qz.done = false
+    },
+    quitCards() {
+      this.qz = { mode: 'idle', qs: [], i: 0, combo: 0, right: 0, pick: -1, done: false, weakOnly: false }
+      this.syncCards()
+    },
+
     load(i) {
       this.idx = i
       this.qa = buildCase(i)
@@ -217,6 +379,57 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/* 答题卡 */
+.quizcard {
+  background: var(--card); border: 1rpx solid var(--line);
+  border-radius: var(--r-lg); padding: 30rpx; margin-bottom: 24rpx;
+  box-shadow: var(--shadow-sm);
+}
+.qzhead { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+.qt { font-size: 30rpx; font-weight: 800; letter-spacing: -.4rpx; }
+.qzprog { height: 8rpx; background: var(--bg-2); border-radius: 5rpx; margin-top: 18rpx; overflow: hidden; }
+.qzprog .fi { height: 100%; background: var(--brand); border-radius: 5rpx; }
+.qzdesc { font-size: 23rpx; color: var(--ink-2); line-height: 1.75; margin-top: 18rpx; }
+.qzrow { margin-top: 18rpx; }
+.qzrow .btn { width: 100%; }
+.qzmeta { font-size: 21rpx; color: var(--muted); margin-top: 16rpx; text-align: center; }
+
+.qtag { display: flex; gap: 10rpx; margin-top: 20rpx; flex-wrap: wrap; }
+.qqt { font-size: 30rpx; font-weight: 750; line-height: 1.55; margin-top: 18rpx; letter-spacing: -.3rpx; }
+.copt {
+  display: flex; align-items: center; gap: 18rpx;
+  border: 1rpx solid var(--line); border-radius: var(--r-sm);
+  padding: 22rpx; margin-top: 14rpx; background: var(--card);
+}
+.copt .kb {
+  width: 44rpx; height: 44rpx; border-radius: 12rpx; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22rpx; font-weight: 700; background: var(--bg-2); color: var(--ink-2);
+}
+.copt .ot { font-size: 25rpx; line-height: 1.55; }
+.copt.right { border-color: var(--down); background: var(--down-soft); }
+.copt.right .kb { background: var(--down); color: #fff; }
+.copt.wrong { border-color: var(--up); background: var(--up-soft); }
+.copt.wrong .kb { background: var(--up); color: #fff; }
+
+.cfb {
+  margin-top: 24rpx; padding: 24rpx; border-radius: var(--r-sm);
+  border: 1rpx solid var(--brand-line); background: var(--brand-soft);
+}
+.cfb.ok { border-color: var(--ok-line); background: var(--down-soft); }
+.cfb.no { border-color: var(--up); background: var(--up-soft); }
+.cfb .fb1 { font-size: 26rpx; font-weight: 800; margin-bottom: 8rpx; }
+.cfb .fb2 { font-size: 23rpx; line-height: 1.8; color: var(--ink-2); }
+.trap {
+  margin-top: 14rpx; padding-top: 14rpx; border-top: 1rpx dashed var(--line);
+  font-size: 22rpx; line-height: 1.75; color: var(--ink-2);
+}
+.trap .b { font-weight: 800; color: var(--gold-ink); }
+.qzquit { text-align: center; font-size: 22rpx; color: var(--muted); margin-top: 22rpx; }
+
+.qzstat { font-size: 56rpx; font-weight: 800; text-align: center; margin-top: 24rpx; color: var(--brand); letter-spacing: -2rpx; }
+.qzstatl { font-size: 23rpx; color: var(--ink-2); text-align: center; margin-top: 6rpx; }
+
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }
 .tcard {
   background: #fff; border: 1px solid var(--line); border-radius: var(--r); padding: 26rpx;
