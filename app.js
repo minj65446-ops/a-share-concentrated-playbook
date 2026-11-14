@@ -56,6 +56,11 @@
     }
     const cx = $('#chipXp');
     if(cx) cx.title = '本段经验 ' + lv.into + ' / ' + lv.need;
+    /* 桌面右栏 + Hero 报价条（同一个数字三处引用，只在这里写一次） */
+    const rx = $('#railXp'); if(rx) rx.textContent = p.xp;
+    const rsk = $('#railStreak'); if(rsk) rsk.innerHTML = (p.streak || 0) + '<small>天</small>';
+    const hsk = $('#hStreak'); if(hsk) hsk.innerHTML = (p.streak || 0) + '<small>天</small>';
+    const hxp = $('#hXp'); if(hxp) hxp.textContent = L.todayXp(store);
   }
 
   /* ---------- 主题 ---------- */
@@ -171,25 +176,45 @@
       why:'事件驱动的关键不是「事件好不好」，而是「市场预期在哪、赔率够不够」。必须在事前算清兑现与落空两个方向的空间，并且提前定好退出时点。',
       points:['事件必须可验证、有明确时间窗口（财报日、政策生效日）','事前估算赔率 ≥ 2:1，否则不做','同时持有不超过 3 只，且事件类型不重复'],
       bad:'事件已经公告后才买入——你赚的不是信息差，是别人的出货量。落空后改成「长期看好」，是小亏变大亏的标准路径。',
-      link:'playbook.html#playbook' }
+      link:'playbook.html#playbook' },
+
+    { id:'09', title:'真实仓位：相关性算进集中度', sub:'三只同板块的票，不是三份仓位，是一份三倍仓位',
+      level:'进阶', min:12, risk:'中',
+      why:'「单票不超过 25%」只能约束名义仓位，管不住真实风险。同板块、同风格、同一个驱动逻辑的票会一起涨一起跌——你以为持有了三只，实际只押了一个判断，而且把它的后果放大了三倍。集中系统的第一道闸门不是选股，是算清「这些仓位是不是同一个赌注」。',
+      points:['同板块持仓合并计算：把三只 20% 的同一行业票，按 60% 的单一敞口来管','区分驱动：政策、业绩、资金风格——驱动相同的票，只能留最强的那一只','最坏情况测算：假设板块整体回撤 20%，组合会亏多少？超过总资金 8% 就减'],
+      bad:'用「我买了 5 只」来安慰自己分散了，而 5 只都在同一个赛道里。真正分散的是驱动，不是代码。',
+      link:'playbook.html#calc' },
+
+    { id:'10', title:'复盘：把交易变成样本', sub:'只记结果的复盘不算复盘，只记了一串心情',
+      level:'进阶', min:10, risk:'低',
+      why:'一笔交易能提供的全部信息，是「当时的理由」和「后来的事实」之间的差。只记盈亏，你得到的是一串结果；把买入理由、止损位、仓位依据一起记下来，你得到的才是可以反复检验的样本。二十笔之内谈胜率是噪声，谈纪律分才有意义。',
+      points:['四个字段必记：买入理由、止损位、仓位依据、实际结果','先看纪律分（计划执行率），再看盈亏比，最后才看胜率','同一类错误连续出现三次，就写进自己的「不作清单」，而不是「下次注意」'],
+      bad:'赚钱时认为方法对，亏钱时认为运气差。结果偏好会让最坏的习惯被奖励，然后在一次大行情里一次性清算。',
+      link:'playbook.html#exec' }
   ];
 
   /* ================= 路由 ================= */
-  const VIEWS = ['learn', 'train', 'map', 'teacher', 'craft', 'me'];
+  const VIEWS = ['learn', 'train', 'journal', 'map', 'teacher', 'craft', 'me'];
 
   function go(v){
     if(VIEWS.indexOf(v) < 0) v = 'learn';
     $$('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
-    $$('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    $$('#tabbar button, #deskNav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
     window.scrollTo(0, 0);
     store.set('ta_tab', v);
     if(v === 'train'){ setTimeout(drawK, 30); renderPane(); }
     if(v === 'me') renderMe();
     if(v === 'teacher') renderTeachers();
     if(v === 'craft') renderCraft();
+    if(v === 'journal' && window.JOURNAL) window.JOURNAL.mount();
     if(v === 'learn'){ renderRank(); renderBasics(); renderDeaths(); renderQuizCard(); renderToday(); renderDeck(); }
   }
   $('#tabbar').addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    go(b.dataset.v);
+  });
+  const deskNav = $('#deskNav');
+  if(deskNav) deskNav.addEventListener('click', e => {
     const b = e.target.closest('button'); if(!b) return;
     go(b.dataset.v);
   });
@@ -1336,6 +1361,9 @@
     const brk = L ? L.broken(store) : false;
     const g = goalItems(), gd = goalDone();
     const total = g.length;
+    /* Hero 报价条 / 右栏的今日达标率 */
+    const hg = $('#hGoal'); if(hg) hg.innerHTML = gd + '<small>/' + total + '</small>';
+    const rg = $('#railGoal'); if(rg) rg.innerHTML = gd + '<small>/' + total + '</small>';
 
     box.className = 'card todaycard' + (acts ? ' on' : '');
     box.innerHTML = `

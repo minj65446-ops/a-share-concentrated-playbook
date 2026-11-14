@@ -12,3 +12,7 @@ desktop.ini
 *.log
 node_modules/
 .workbuddy/
+
+# 构建与分享产物（.trae-html-share-packages 为发布打出的 zip）
+.trae-html-share-packages/
+.screenshots/
