@@ -40,6 +40,14 @@
         "navigationBarBackgroundColor": "#16283f",
         "navigationBarTextStyle": "white"
       }
+    },
+    {
+      "path": "pages/journal/journal",
+      "style": {
+        "navigationBarTitleText": "复盘台",
+        "navigationBarBackgroundColor": "#16283f",
+        "navigationBarTextStyle": "white"
+      }
     }
   ],
   "globalStyle": {

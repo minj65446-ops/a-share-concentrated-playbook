@@ -129,7 +129,8 @@ export default {
         { k: 'k', s: 'K', t: 'K线读图', d: '在图上找买卖点' },
         { k: 'c', s: '仓', t: '仓位计算', d: '先算能亏多少' },
         { k: 's', s: '盘', t: '模拟盘', d: '用虚拟账户试错' },
-        { k: 'm', s: '期', t: '情绪周期', d: '几成仓看阶段' }
+        { k: 'm', s: '期', t: '情绪周期', d: '几成仓看阶段' },
+        { k: 'j', s: '复', t: '复盘台', d: '每笔都记账' }
       ],
       idx: 0, qa: {}, answered: false, lastOK: false, pick: '',
       total: size,
@@ -372,6 +373,7 @@ export default {
     },
     onTool(t) {
       if (t.k === 'm') return uni.switchTab({ url: '/pages/map/map' })
+      if (t.k === 'j') return uni.navigateTo({ url: '/pages/journal/journal' })
       uni.showToast({ title: t.t + '：Web 端已实现', icon: 'none' })
     }
   }
